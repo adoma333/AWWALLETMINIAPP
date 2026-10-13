@@ -1,0 +1,4 @@
+-r requirements.txt
+pytest>=8
+ruff>=0.5
+python-bitcointx>=1.1  # independent BTC signature verification in tests

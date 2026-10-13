@@ -1,0 +1,16 @@
+# secrets & runtime data — never commit
+backend/.env
+data/
+*.db
+*.db-*
+*.enc
+*.pem
+*.key
+# build & deps
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
