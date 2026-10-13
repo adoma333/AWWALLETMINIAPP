@@ -1,0 +1,23 @@
+[Unit]
+Description=AW Wallet worker (deposits, withdrawals, prices, bot queue)
+After=network-online.target aw-wallet.service
+Wants=network-online.target
+
+[Service]
+User=awwallet
+Group=awwallet
+WorkingDirectory=/opt/aw-wallet/backend
+ExecStart=/opt/aw-wallet/.venv/bin/python -m aw.worker
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/aw-wallet/data
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

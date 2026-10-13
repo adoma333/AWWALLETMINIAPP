@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# AW Wallet management command (installed to /usr/local/bin by setup.sh)
+set -euo pipefail
+APP_DIR="/opt/aw-wallet"
+APP_USER="awwallet"
+PY="$APP_DIR/.venv/bin/python"
+cli() { sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR/backend' && '$PY' -m aw.cli $*"; }
+[ "$(id -u)" -eq 0 ] || exec sudo "$0" "$@"
+
+case "${1:-help}" in
+  status)   systemctl --no-pager status aw-wallet aw-wallet-worker | grep -E "●|Active:" ;;
+  logs)     journalctl -u aw-wallet -u aw-wallet-worker -n "${2:-200}" -f ;;
+  restart)  systemctl restart aw-wallet aw-wallet-worker && echo "restarted" ;;
+  stop)     systemctl stop aw-wallet aw-wallet-worker ;;
+  start)    systemctl start aw-wallet aw-wallet-worker ;;
+  update)   bash "$APP_DIR/deploy/update.sh" ;;
+  doctor)   bash "$APP_DIR/deploy/doctor.sh" ;;
+  backup)
+    f="$APP_DIR/data/backups/aw-$(date +%Y%m%d-%H%M%S).db"
+    cli backup "$f" && gzip -f "$f" && echo "→ $f.gz"
+    find "$APP_DIR/data/backups" -name 'aw-*.db.gz' -mtime +14 -delete ;;
+  hot-wallets|ledger-audit|init-wallet|seed-catalog) cli "$1" ;;
+  import-wallet) sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR/backend' && '$PY' -m aw.cli import-wallet" ;;
+  add-admin) [ $# -eq 3 ] || { echo "usage: aw-wallet add-admin <telegram_id> <admin|finance|support|viewer>"; exit 1; }; cli add-admin "$2" "$3" ;;
+  env)      ${EDITOR:-nano} "$APP_DIR/backend/.env" && systemctl restart aw-wallet aw-wallet-worker ;;
+  *) cat <<USAGE
+aw-wallet <command>
+  status | logs [n] | restart | start | stop
+  update          pull the latest code, rebuild, restart
+  doctor          check services, HTTPS, webhook, worker, wallet
+  backup          database backup to data/backups (daily via cron, 14 days kept)
+  hot-wallets     show treasury addresses to fund
+  ledger-audit    verify every balance against the journal
+  add-admin <id> <role>
+  init-wallet | import-wallet
+  env             edit configuration and restart
+USAGE
+  ;;
+esac

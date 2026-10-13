@@ -1,0 +1,22 @@
+[Unit]
+Description=AW Wallet API (FastAPI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=awwallet
+Group=awwallet
+WorkingDirectory=/opt/aw-wallet/backend
+ExecStart=/opt/aw-wallet/.venv/bin/uvicorn aw.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips=127.0.0.1 --no-server-header
+Restart=always
+RestartSec=3
+# hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/aw-wallet/data
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
