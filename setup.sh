@@ -94,6 +94,11 @@ if [ "${NODE_MAJOR:-0}" -lt 18 ]; then
 fi
 ok "System packages ready (python $(python3 -V | cut -d' ' -f2), node $(node -v))"
 
+# the API listens on 127.0.0.1:8000 — make sure another app on this server is not already using it
+if ss -ltnp 2>/dev/null | grep -q '127.0.0.1:8000\|0.0.0.0:8000\|\[::\]:8000\|\*:8000' && ! systemctl is-active -q aw-wallet; then
+  die "Port 8000 is already used by another program on this server: $(ss -ltnp | grep ':8000' | head -1). Stop it or move it, then re-run."
+fi
+
 # validate the token now so typos fail fast
 BOT_JSON="$(curl -fsS "https://api.telegram.org/bot${BOT_TOKEN}/getMe" || true)"
 BOT_USERNAME="$(echo "$BOT_JSON" | sed -nE 's/.*"username":"([^"]+)".*/\1/p')"
@@ -206,7 +211,7 @@ systemctl enable -q aw-wallet aw-wallet-worker
 say "Configuring nginx for $DOMAIN…"
 sed "s#__DOMAIN__#$DOMAIN#g; s#__APP_DIR__#$APP_DIR#g" "$APP_DIR/deploy/nginx.conf" > /etc/nginx/sites-available/aw-wallet.conf
 ln -sf /etc/nginx/sites-available/aw-wallet.conf /etc/nginx/sites-enabled/aw-wallet.conf
-rm -f /etc/nginx/sites-enabled/default
+# other sites on this server (including nginx's default site) are left untouched
 chmod o+x "$APP_DIR" "$APP_DIR/frontend" 2>/dev/null || true
 chmod -R o+rX "$APP_DIR/frontend/dist"
 nginx -t >/dev/null 2>&1 || { nginx -t; die "nginx configuration test failed"; }
