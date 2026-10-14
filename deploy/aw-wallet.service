@@ -7,7 +7,7 @@ Wants=network-online.target
 User=awwallet
 Group=awwallet
 WorkingDirectory=/opt/aw-wallet/backend
-ExecStart=/opt/aw-wallet/.venv/bin/uvicorn aw.main:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips=127.0.0.1 --no-server-header
+ExecStart=/opt/aw-wallet/.venv/bin/uvicorn aw.main:app --host 127.0.0.1 --port __PORT__ --proxy-headers --forwarded-allow-ips=127.0.0.1 --no-server-header
 Restart=always
 RestartSec=3
 # hardening

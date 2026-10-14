@@ -99,10 +99,16 @@ if [ "${NODE_MAJOR:-0}" -lt 18 ]; then
 fi
 ok "System packages ready (python $(python3 -V | cut -d' ' -f2), node $(node -v))"
 
-# the API listens on 127.0.0.1:8000 — make sure another app on this server is not already using it
-if ss -ltnp 2>/dev/null | grep -q '127.0.0.1:8000\|0.0.0.0:8000\|\[::\]:8000\|\*:8000' && ! systemctl is-active -q aw-wallet; then
-  die "Port 8000 is already used by another program on this server: $(ss -ltnp | grep ':8000' | head -1). Stop it or move it, then re-run."
+# the API gets its own local port (default 8710); never collide with other apps on this server
+port_busy() { ss -ltnH "( sport = :$1 )" 2>/dev/null | grep -q .; }
+AW_PORT="${AW_PORT:-$(env_get AW_PORT)}"
+if [ -z "$AW_PORT" ]; then
+  AW_PORT=8710
+  while port_busy "$AW_PORT"; do AW_PORT=$((AW_PORT + 1)); done
+elif port_busy "$AW_PORT" && ! systemctl is-active -q aw-wallet; then
+  die "Port $AW_PORT is used by another program: $(ss -ltnpH "( sport = :$AW_PORT )" | head -1). Set AW_PORT=<free port> and re-run."
 fi
+ok "API port: $AW_PORT"
 
 # validate the token now so typos fail fast
 BOT_JSON="$(curl -fsS "https://api.telegram.org/bot${BOT_TOKEN}/getMe" || true)"
@@ -148,6 +154,7 @@ ADMIN_CHANNEL_ID=
 ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY
 AI_MODEL=claude-opus-5-5
 AW_DATA_DIR=$APP_DIR/data
+AW_PORT=$AW_PORT
 # Optional private RPC endpoints / API keys (public endpoints are used when empty)
 RPC_ETH=
 RPC_BSC=
@@ -161,6 +168,7 @@ TONCENTER_API_KEY=
 EOF
   umask 022
 fi
+grep -q "^AW_PORT=" "$ENV_FILE" || echo "AW_PORT=$AW_PORT" >> "$ENV_FILE"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 chmod 600 "$ENV_FILE"
 chmod 700 "$APP_DIR/data" "$APP_DIR/data/keys"
@@ -201,7 +209,7 @@ ok "Frontend built"
 say "Installing services…"
 install -m 644 "$APP_DIR/deploy/aw-wallet.service" /etc/systemd/system/aw-wallet.service
 install -m 644 "$APP_DIR/deploy/aw-wallet-worker.service" /etc/systemd/system/aw-wallet-worker.service
-sed -i "s#/opt/aw-wallet#$APP_DIR#g; s#User=awwallet#User=$APP_USER#; s#Group=awwallet#Group=$APP_USER#" \
+sed -i "s#/opt/aw-wallet#$APP_DIR#g; s#User=awwallet#User=$APP_USER#; s#Group=awwallet#Group=$APP_USER#; s#__PORT__#$AW_PORT#g" \
   /etc/systemd/system/aw-wallet.service /etc/systemd/system/aw-wallet-worker.service
 install -m 755 "$APP_DIR/deploy/aw-wallet" /usr/local/bin/aw-wallet
 sed -i "s#^APP_DIR=.*#APP_DIR=\"$APP_DIR\"#" /usr/local/bin/aw-wallet
@@ -214,7 +222,7 @@ systemctl enable -q aw-wallet aw-wallet-worker
 
 # ─────────────────────────── nginx + HTTPS ───────────────────────────
 say "Configuring nginx for $DOMAIN…"
-sed "s#__DOMAIN__#$DOMAIN#g; s#__APP_DIR__#$APP_DIR#g" "$APP_DIR/deploy/nginx.conf" > /etc/nginx/sites-available/aw-wallet.conf
+sed "s#__DOMAIN__#$DOMAIN#g; s#__APP_DIR__#$APP_DIR#g; s#__PORT__#$AW_PORT#g" "$APP_DIR/deploy/nginx.conf" > /etc/nginx/sites-available/aw-wallet.conf
 ln -sf /etc/nginx/sites-available/aw-wallet.conf /etc/nginx/sites-enabled/aw-wallet.conf
 # other sites on this server (including nginx's default site) are left untouched
 chmod o+x "$APP_DIR" "$APP_DIR/frontend" 2>/dev/null || true
@@ -239,8 +247,8 @@ fi
 # ─────────────────────────── start ───────────────────────────
 say "Starting AW Wallet…"
 systemctl restart aw-wallet aw-wallet-worker
-for _ in $(seq 1 40); do curl -fsS -o /dev/null http://127.0.0.1:8000/api/health 2>/dev/null && break; sleep 1; done
-curl -fsS -o /dev/null http://127.0.0.1:8000/api/health 2>/dev/null && ok "API is up" || warn "API not answering yet — see: aw-wallet logs"
+for _ in $(seq 1 40); do curl -fsS -o /dev/null http://127.0.0.1:$AW_PORT/api/health 2>/dev/null && break; sleep 1; done
+curl -fsS -o /dev/null http://127.0.0.1:$AW_PORT/api/health 2>/dev/null && ok "API is up" || warn "API not answering yet — see: aw-wallet logs"
 
 echo
 echo -e "${O}═══════════════════════════════════════════════════════════════${N}"

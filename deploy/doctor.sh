@@ -6,7 +6,8 @@ g() { grep -E "^$1=" "$ENV" | head -1 | cut -d= -f2- | sed 's/[[:space:]]*#.*$//
 pass() { echo -e "\e[32m✓\e[0m $*"; }
 fail() { echo -e "\e[31m✗\e[0m $*"; }
 for s in aw-wallet aw-wallet-worker nginx; do systemctl is-active -q "$s" && pass "$s running" || fail "$s not running (journalctl -u $s -n 50)"; done
-curl -fsS -o /dev/null http://127.0.0.1:8000/api/health && pass "API answers locally" || fail "API not answering on 127.0.0.1:8000"
+PORT="$(g AW_PORT)"; PORT="${PORT:-8710}"
+curl -fsS -o /dev/null "http://127.0.0.1:$PORT/api/health" && pass "API answers locally (port $PORT)" || fail "API not answering on 127.0.0.1:$PORT"
 URL="$(g WEBAPP_URL)"
 curl -fsS -o /dev/null "$URL/api/health" && pass "public HTTPS ok ($URL)" || fail "$URL/api/health not reachable — DNS / certificate?"
 TOKEN="$(g BOT_TOKEN)"
