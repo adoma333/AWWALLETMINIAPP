@@ -9,6 +9,9 @@ import { go } from '../router';
 import { useApp } from '../store';
 import { haptic, shareUrl } from '../telegram';
 
+// "TRC20 · BEP20 · ERC20 +3" — reads better than a count and needs no plural forms
+const netList = (ns) => ns.slice(0, 3).map((n) => n.short || n.name).join(' · ') + (ns.length > 3 ? ` +${ns.length - 3}` : '');
+
 export default function Deposit({ query }) {
   const { t } = useI18n();
   const { wallet, config } = useApp();
@@ -23,7 +26,7 @@ export default function Deposit({ query }) {
     return (
       <Page title={t('deposit_title')}>
         <p className="lead">{t('choose_asset')}</p>
-        <div className="list">{list.map((x) => <AssetRow key={x.id} a={x} sub={`${x.networks.filter((n) => n.deposit).length} ${t('networks_label').toLowerCase()}`} onClick={() => go(`/deposit?asset=${x.id}`, true)} right={<Icon name="chevron" size={18} className="flip-rtl" />} />)}</div>
+        <div className="list">{list.map((x) => <AssetRow key={x.id} a={x} sub={netList(x.networks.filter((n) => n.deposit))} onClick={() => go(`/deposit?asset=${x.id}`, true)} right={<Icon name="chevron" size={18} className="flip-rtl" />} />)}</div>
       </Page>
     );
   }

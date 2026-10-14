@@ -25,11 +25,7 @@ DEFAULTS: dict = {
             "ai": True, "referral": True, "rewards": True, "ton_connect": True, "kyc": True,
         },
         # home-screen trust badges (fully editable: text per language, icon key, colour)
-        "badges": [
-            {"key": "free_transfers", "enabled": True, "icon": "bolt", "text": T(en="Free instant transfers", ar="تحويل فوري مجاني")},
-            {"key": "all_networks", "enabled": True, "icon": "globe", "text": T(en="10 networks", ar="10 شبكات")},
-            {"key": "secure", "enabled": True, "icon": "shield", "text": T(en="Bank-grade security", ar="حماية بمستوى البنوك")},
-        ],
+        "badges": [],    # optional home badges: [{key, enabled, icon, text{en, ar, …}}] — managed in the admin panel
         "banners": [],   # [{id, image, title{}, body{}, link, enabled, until}]
         "announcement": None,  # {text{}, level, until}
     },

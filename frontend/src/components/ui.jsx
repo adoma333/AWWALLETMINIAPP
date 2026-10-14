@@ -241,7 +241,7 @@ export function Countdown({ until, onEnd, render }) {
 }
 
 export function Spark({ points, w = 120, h = 36, up }) {
-  if (!points || points.length < 2) return <svg width={w} height={h} />;
+  if (!points || points.length < 2) return null;
   const ys = points.map((p) => Number(p[1]));
   const min = Math.min(...ys);
   const max = Math.max(...ys);

@@ -7,8 +7,7 @@ import { amt, fiat, pct, priceFmt } from '../format';
 import { useI18n } from '../i18n';
 import { go } from '../router';
 import { useApp } from '../store';
-import { haptic, scanQr } from '../telegram';
-import { parseScan } from '../util';
+import { haptic } from '../telegram';
 
 function useHidden() {
   const [h, setH] = useState(() => { try { return localStorage.getItem('aw_hide') === '1'; } catch { return false; } });
@@ -33,28 +32,12 @@ export default function Home() {
   const changePct = total - change > 0 ? (change / (total - change)) * 100 : 0;
   const score = (me?.pin_set ? 1 : 0) + (me?.kyc_level >= 1 ? 1 : 0) + (me?.bio_enabled || me?.settings?.whitelist_only ? 1 : 0);
 
-  const scan = async () => {
-    const v = await scanQr('AW WALLET');
-    const r = parseScan(v);
-    if (!r) return;
-    haptic.success();
-    if (r.route) go(r.route);
-    else go(`/withdraw?address=${encodeURIComponent(r.address)}${r.network ? `&network=${r.network}` : ''}${r.family ? `&family=${r.family}` : ''}${r.memo ? `&memo=${encodeURIComponent(r.memo)}` : ''}`);
-  };
-
   const actions = [
-    { k: 'deposit', icon: 'arrowDown', label: t('action_deposit'), to: '/deposit', on: f.deposit !== false },
+    { k: 'deposit', icon: 'arrowDown', label: t('action_deposit'), to: '/deposit', on: f.deposit !== false, main: true },
     { k: 'send', icon: 'send', label: t('action_send'), to: '/send', on: f.transfer !== false || f.withdraw !== false },
     { k: 'swap', icon: 'swap', label: t('action_swap'), to: '/swap', on: f.swap !== false },
     { k: 'withdraw', icon: 'arrowUp', label: t('action_withdraw'), to: '/withdraw', on: f.withdraw !== false },
   ];
-  const actions2 = [
-    { k: 'gift', icon: 'gift', label: t('action_gift'), to: '/gift/new', on: f.gifts !== false },
-    { k: 'p2p', icon: 'handshake', label: t('action_p2p'), to: '/p2p', on: f.p2p !== false },
-    { k: 'scan', icon: 'scan', label: t('action_scan'), fn: scan, on: true },
-    { k: 'history', icon: 'history', label: t('history'), to: '/history', on: true },
-  ];
-
   return (
     <main className="page home">
       <header className="home-top">
@@ -64,7 +47,7 @@ export default function Home() {
         </button>
         <img src={logo} alt="AW WALLET" className="home-logo" />
         <div className="top-icons">
-          <button type="button" className="icon-btn" onClick={() => go('/support')} aria-label={t('support')}><Icon name="headset" /></button>
+          <button type="button" className="icon-btn" onClick={() => go('/history')} aria-label={t('history')}><Icon name="history" /></button>
           <button type="button" className="icon-btn" onClick={() => go('/notifications')} aria-label={t('notifications')}>
             <Icon name="bell" />{me.unread > 0 && <span className="dot" />}
           </button>
@@ -88,20 +71,12 @@ export default function Home() {
         ) : <><Skeleton h={40} w="60%" /><Skeleton h={14} w="35%" style={{ marginTop: 10 }} /></>}
         <div className="actions">
           {actions.filter((a) => a.on).map((a) => (
-            <button key={a.k} type="button" className="act" onClick={() => { haptic.tap(); a.fn ? a.fn() : go(a.to); }}>
-              <span className="act-ic"><Icon name={a.icon} size={22} /></span><span>{a.label}</span>
+            <button key={a.k} type="button" className={`act ${a.main ? 'main' : ''}`} onClick={() => { haptic.tap(); go(a.to); }}>
+              <span className="act-ic"><Icon name={a.icon} size={24} /></span><span>{a.label}</span>
             </button>
           ))}
         </div>
       </section>
-
-      <div className="actions mini">
-        {actions2.filter((a) => a.on).map((a) => (
-          <button key={a.k} type="button" className="act" onClick={() => { haptic.tap(); a.fn ? a.fn() : go(a.to); }}>
-            <span className="act-ic"><Icon name={a.icon} size={20} /></span><span>{a.label}</span>
-          </button>
-        ))}
-      </div>
 
       {config?.badges?.length > 0 && (
         <div className="trust-row">
