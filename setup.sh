@@ -100,13 +100,13 @@ fi
 ok "System packages ready (python $(python3 -V | cut -d' ' -f2), node $(node -v))"
 
 # the API gets its own local port (default 8710); never collide with other apps on this server
-port_busy() { ss -ltnH "( sport = :$1 )" 2>/dev/null | grep -q .; }
+port_busy() { (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null; }
 AW_PORT="${AW_PORT:-$(env_get AW_PORT)}"
 if [ -z "$AW_PORT" ]; then
   AW_PORT=8710
   while port_busy "$AW_PORT"; do AW_PORT=$((AW_PORT + 1)); done
 elif port_busy "$AW_PORT" && ! systemctl is-active -q aw-wallet; then
-  die "Port $AW_PORT is used by another program: $(ss -ltnpH "( sport = :$AW_PORT )" | head -1). Set AW_PORT=<free port> and re-run."
+  die "Port $AW_PORT is used by another program on this server. Set AW_PORT=<free port> and re-run."
 fi
 ok "API port: $AW_PORT"
 
