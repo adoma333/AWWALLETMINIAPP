@@ -130,10 +130,16 @@ fi
 mkdir -p "$APP_DIR/data/keys" "$APP_DIR/data/uploads" "$APP_DIR/data/backups"
 git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
 
-say "Installing Python dependencies…"
-[ -d "$APP_DIR/.venv" ] || python3 -m venv "$APP_DIR/.venv"
-"$APP_DIR/.venv/bin/pip" install -q --upgrade pip wheel
-"$APP_DIR/.venv/bin/pip" install -q -r "$APP_DIR/backend/requirements.txt"
+say "Installing Python 3.12 for AW Wallet (separate from the system Python) and dependencies…"
+# a private, pinned interpreter: the system Python may be too new/old for crypto libraries (e.g. 3.14)
+export UV_INSTALL_DIR=/usr/local/bin UV_PYTHON_INSTALL_DIR="$APP_DIR/.python" UV_NO_MODIFY_PATH=1
+command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1 || die "Could not install uv (Python manager)."
+UV="$(command -v uv || echo /usr/local/bin/uv)"
+if [ -x "$APP_DIR/.venv/bin/python" ] && ! "$APP_DIR/.venv/bin/python" -c 'import sys; sys.exit(sys.version_info[:2] != (3, 12))' 2>/dev/null; then
+  rm -rf "$APP_DIR/.venv"   # created by an older run with another Python version
+fi
+[ -x "$APP_DIR/.venv/bin/python" ] || "$UV" venv -q --seed --python 3.12 "$APP_DIR/.venv" || die "Could not create the Python 3.12 environment."
+"$UV" pip install -q --python "$APP_DIR/.venv/bin/python" -r "$APP_DIR/backend/requirements.txt" || die "Python dependencies failed to install (see the lines above)."
 ok "Backend dependencies installed"
 
 # ─────────────────────────── configuration ───────────────────────────

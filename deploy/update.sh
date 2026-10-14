@@ -9,7 +9,7 @@ echo "▸ updating $BRANCH"
 git -C "$APP_DIR" fetch -q origin "$BRANCH"
 git -C "$APP_DIR" reset -q --hard "origin/$BRANCH"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
-"$APP_DIR/.venv/bin/pip" install -q -r "$APP_DIR/backend/requirements.txt"
+UV_PYTHON_INSTALL_DIR="$APP_DIR/.python" uv pip install -q --python "$APP_DIR/.venv/bin/python" -r "$APP_DIR/backend/requirements.txt"
 sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR/frontend' && (npm ci --no-audit --no-fund --loglevel=error || npm install --no-audit --no-fund --loglevel=error) && npm run -s build" >/dev/null
 chmod -R o+rX "$APP_DIR/frontend/dist"
 install -m 755 "$APP_DIR/deploy/aw-wallet" /usr/local/bin/aw-wallet
