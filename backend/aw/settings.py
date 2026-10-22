@@ -69,7 +69,6 @@ DEFAULTS: dict = {
         "price_mode": "best_for_platform",    # median | best_for_platform | best_for_user
         "inventory_guard": True,              # block swaps that would exceed hot-wallet inventory
         "max_net_exposure_usd": {},           # {asset: usd} optional caps
-        "providers": {"changenow": {"enabled": False, "api_key": ""}, "simpleswap": {"enabled": False, "api_key": ""}},
     },
     "transfers": {
         "fee_pct": "0", "fee_fixed_usd": "0",
@@ -127,8 +126,12 @@ DEFAULTS: dict = {
     "ai": {
         "enabled": True,
         "name": "Zohra AI",
-        "model": "",                 # empty = AI_MODEL from .env
+        "provider": "auto",          # auto (Claude first) | claude | gemini — the other one takes over on failure
+        "model": "",                 # Claude model; empty = AI_MODEL from .env
         "effort": "medium",
+        "gemini_model": "gemini-flash-latest",
+        "anthropic_api_key": "",     # stored encrypted; empty = ANTHROPIC_API_KEY from .env
+        "gemini_api_key": "",        # stored encrypted (Google AI Studio key); empty = GEMINI_API_KEY from .env
         "daily_messages": 60,
         "extra_instructions": "",
         "known_issues": [],          # [{title{}, answer{}}] surfaced as instant suggestions

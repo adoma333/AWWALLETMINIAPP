@@ -102,6 +102,7 @@ function Value({ path, k, value, onChange }) {
   if (typeof value === 'number') return <Input type="number" value={value} onChange={(v) => onChange(v === '' ? 0 : Number(v))} />;
   if (typeof value === 'string') {
     if (['image', 'logo_url', 'icon_url'].includes(k)) return <ImageInput value={value} onChange={onChange} />;
+    if (/api_key$|secret$/.test(k)) return <Input type="password" value={value} onChange={onChange} placeholder="not set — paste a key" />;
     if (k === 'extra_instructions') return <textarea className="inp" rows={4} value={value} onChange={(e) => onChange(e.target.value)} />;
     return <Input value={value} onChange={onChange} />;
   }

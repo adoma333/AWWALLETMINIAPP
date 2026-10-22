@@ -1,14 +1,19 @@
 """Zohra AI — the in-app support assistant, tickets with human hand-off, forms, and dispute summaries.
 
-The assistant runs on Claude with read-only tools scoped to the asking user (balances, transactions, deposit info,
-on-chain tx checker, withdrawal status, fees, P2P orders) plus `create_ticket` to escalate to a human. It can never
-move money. Without an API key, a deterministic FAQ engine answers the common questions and offers escalation.
+The assistant runs on Claude or Gemini (keys set in the admin panel or .env; when both exist the other one takes over on
+failure) with read-only tools scoped to the asking user (balances, transactions, deposit info, on-chain tx checker,
+withdrawal status, fees, P2P orders) plus `create_ticket` to escalate to a human. It can never move money. Without any
+key, a deterministic FAQ engine answers the common questions and offers escalation.
 """
 import json
 import logging
+import os
 import re
 
+import httpx
+
 from . import catalog, config, db, deposits, fees, guard, ledger, p2p, settings, users
+from .security import unseal
 from .money import AppError, s
 from .notify import admin_alert, notify
 
@@ -16,12 +21,13 @@ log = logging.getLogger("aw.support")
 
 SYSTEM = """You are {name}, the support assistant inside ZOHRA WALLET — a custodial multi-network crypto wallet that runs as a Telegram Mini App.
 
-What ZOHRA WALLET offers: deposits and withdrawals on TRON (TRC20), TON, BNB Smart Chain (BEP20), Ethereum (ERC20), Solana, Polygon, Arbitrum One, Base, Bitcoin and Avalanche C-Chain; one deposit address shared by all EVM networks; TON deposits use the hot-wallet address plus the user's personal numeric memo (a deposit without the right memo cannot be matched automatically and must be assigned by staff); instant free internal transfers by @username or Telegram contact; gift links that can be locked to one person; instant swaps at a firm quoted rate (the platform margin is built into the rate); a P2P marketplace with escrow, payment windows and appeals; referral commissions; fee-free reward vouchers; VIP fee tiers by 30-day volume; a 6-digit PIN for sensitive actions; phone verification for higher limits; TON Connect.
+What ZOHRA WALLET offers: deposits and withdrawals on {networks}; one deposit address shared by all EVM networks; every user has a personal TON address (no memo needed; only very old deposits used a memo); internal transfers by @username or Telegram contact; gift links that can be locked to one person; instant swaps at a firm quoted rate (the platform margin is built into the rate); a P2P marketplace with escrow, payment windows and appeals; referral commissions; fee-free reward vouchers; VIP fee tiers by 30-day volume; a 6-digit PIN for sensitive actions; phone verification for higher limits; TON Connect.
 
 How you work:
 - Use the tools to look at this user's real data before answering anything about their money. Never guess balances, statuses or fees.
-- For "my deposit hasn't arrived": ask for (or find) the network and transaction hash, then call check_deposit_tx. Explain confirmations, minimum deposit, wrong network, and missing TON memo cases precisely.
-- You cannot move funds, reverse transactions, change limits or unlock accounts. When staff action is needed (missing memo, wrong network, stuck withdrawal, account restriction, P2P dispute, bug), call create_ticket with a precise summary, then tell the user a human will reply here and in the bot chat.
+- For "my deposit hasn't arrived": ask for (or find) the network and transaction hash, then call check_deposit_tx. Explain confirmations, minimum deposit and wrong-network cases precisely.
+- Swaps are priced by ZOHRA WALLET itself. Never name or recommend any exchange, broker or other platform.
+- You cannot move funds, reverse transactions, change limits or unlock accounts. When staff action is needed (wrong network, stuck withdrawal, account restriction, P2P dispute, bug), call create_ticket with a precise summary, then tell the user a human will reply here and in the bot chat.
 - Never ask for or accept a PIN, seed phrase, private key or verification code. If a user shares one, tell them to change it.
 - Be warm, short and concrete. Use numbered steps for instructions. Reply in the user's language: {lang_name}.
 {extra}"""
@@ -37,8 +43,8 @@ TOOLS = [
                                                        "limit": {"type": "integer"}}, "additionalProperties": False}},
     {"name": "get_transaction", "description": "One transaction by its AW reference (e.g. AW7K2M9QX or WD...).",
      "input_schema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"], "additionalProperties": False}},
-    {"name": "get_deposit_info", "description": "Deposit address/memo, minimum deposit and confirmations for an asset on a network.",
-     "input_schema": {"type": "object", "properties": {"network": {"type": "string", "description": "tron, ton, bsc, eth, sol, polygon, arbitrum, base, btc, avax"},
+    {"name": "get_deposit_info", "description": "Deposit address, minimum deposit and confirmations for an asset on a network.",
+     "input_schema": {"type": "object", "properties": {"network": {"type": "string", "description": "Network id, e.g. tron, ton, bsc, eth, sol, polygon, arbitrum, base, btc, avax, optimism"},
                                                        "asset": {"type": "string"}}, "required": ["network"], "additionalProperties": False}},
     {"name": "check_deposit_tx", "description": "Look up a transaction hash on-chain and credit it if it is a valid deposit to this user.",
      "input_schema": {"type": "object", "properties": {"network": {"type": "string"}, "txid": {"type": "string"}}, "required": ["network", "txid"], "additionalProperties": False}},
@@ -116,10 +122,30 @@ def _tool(user: dict, name: str, args: dict) -> dict:
     return {"error": "unknown tool"}
 
 
-def _client():
+def keys_for(cfg: dict | None = None) -> dict:
+    """API keys: the admin panel (stored encrypted) wins over .env."""
+    cfg = cfg if cfg is not None else settings.get("ai")
+    return {"claude": unseal(cfg.get("anthropic_api_key") or "") or config.ANTHROPIC_API_KEY,
+            "gemini": unseal(cfg.get("gemini_api_key") or "") or os.getenv("GEMINI_API_KEY", "")}
+
+
+def providers(cfg: dict | None = None) -> list[str]:
+    """Providers to try, in order (only those with a key)."""
+    cfg = cfg if cfg is not None else settings.get("ai")
+    k = keys_for(cfg)
+    first = cfg.get("provider") or "auto"
+    order = ["gemini", "claude"] if first == "gemini" else ["claude", "gemini"]
+    return [p for p in order if k[p]]
+
+
+def available() -> bool:
+    return bool(providers())
+
+
+def _client(key: str | None = None):
     import anthropic
 
-    return anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY, max_retries=2, timeout=90)
+    return anthropic.Anthropic(api_key=key or keys_for()["claude"], max_retries=2, timeout=90)
 
 
 def chat(user: dict, text: str) -> dict:
@@ -132,14 +158,15 @@ def chat(user: dict, text: str) -> dict:
     if db.val("SELECT COUNT(*) FROM ai_messages WHERE user_id=? AND role='user' AND created_at>?", (user["id"], today), 0) >= int(cfg.get("daily_messages", 60)):
         raise AppError("ai_daily_limit")
     db.insert("ai_messages", {"user_id": user["id"], "role": "user", "content": json.dumps(text), "created_at": db.now()})
-    if not config.ANTHROPIC_API_KEY:
-        reply, actions = _faq(user, text)
-    else:
+    reply, actions = None, []
+    for prov in providers(cfg):
         try:
-            reply, actions = _claude(user, cfg)
+            reply, actions = (_gemini if prov == "gemini" else _claude)(user, cfg)
+            break
         except Exception as e:
-            log.warning("AI failed: %s", e)
-            reply, actions = _faq(user, text)
+            log.warning("AI (%s) failed: %s", prov, str(e)[:300])
+    if reply is None:
+        reply, actions = _faq(user, text)
     db.insert("ai_messages", {"user_id": user["id"], "role": "assistant", "content": json.dumps(reply), "created_at": db.now()})
     return {"reply": reply, "actions": actions, "suggestions": suggestions(user)}
 
@@ -158,11 +185,26 @@ def _history(user_id: int, limit: int = 16) -> list[dict]:
     return msgs
 
 
-def _claude(user: dict, cfg: dict) -> tuple[str, list]:
-    client = _client()
+def _system(user: dict, cfg: dict) -> str:
     lang = user.get("lang") or "en"
-    system = SYSTEM.format(name=cfg.get("name", "Zohra AI"), lang_name=LANG_NAMES.get(lang, "English"),
-                           extra=("\nTeam instructions:\n" + cfg["extra_instructions"]) if cfg.get("extra_instructions") else "")
+    nets = ", ".join(f"{n['name']} ({n['short']})" if n["short"] and n["short"] != n["name"] else n["name"]
+                     for n in db.q("SELECT name, short FROM networks WHERE enabled=1 ORDER BY sort"))
+    return SYSTEM.format(name=cfg.get("name", "Zohra AI"), lang_name=LANG_NAMES.get(lang, "English"), networks=nets,
+                         extra=("\nTeam instructions:\n" + cfg["extra_instructions"]) if cfg.get("extra_instructions") else "")
+
+
+def _run_tool(user: dict, name: str, args: dict, actions: list) -> dict:
+    out = _tool(user, name, args)
+    if name == "create_ticket":
+        actions.append({"type": "ticket", "id": out.get("ticket_id")})
+    if name == "check_deposit_tx":
+        actions.append({"type": "deposit_check", "status": out.get("status")})
+    return out
+
+
+def _claude(user: dict, cfg: dict) -> tuple[str, list]:
+    client = _client(keys_for(cfg)["claude"])
+    system = _system(user, cfg)
     messages = _history(user["id"])
     actions: list = []
     model = cfg.get("model") or config.AI_MODEL
@@ -188,16 +230,112 @@ def _claude(user: dict, cfg: dict) -> tuple[str, list]:
             if b.type != "tool_use":
                 continue
             try:
-                out = _tool(user, b.name, dict(b.input or {}))
-                if b.name == "create_ticket":
-                    actions.append({"type": "ticket", "id": out.get("ticket_id")})
-                if b.name == "check_deposit_tx":
-                    actions.append({"type": "deposit_check", "status": out.get("status")})
+                out = _run_tool(user, b.name, dict(b.input or {}), actions)
                 results.append({"type": "tool_result", "tool_use_id": b.id, "content": json.dumps(out, default=str)[:12000]})
             except Exception as e:
                 results.append({"type": "tool_result", "tool_use_id": b.id, "content": f"error: {e}", "is_error": True})
         messages.append({"role": "user", "content": results})
     return "…", actions
+
+
+# ───────────── Gemini (Google AI Studio key) ─────────────
+GEMINI_API = "https://generativelanguage.googleapis.com/v1beta"
+GEMINI_MODEL = "gemini-flash-latest"            # follows the newest Flash model
+GEMINI_FALLBACK = ["gemini-flash-lite-latest"]  # tried when the main model is busy
+
+
+def _gemini_schema(sc: dict) -> dict:
+    """JSON schema → the OpenAPI subset Gemini accepts (no additionalProperties)."""
+    out = {k: v for k, v in sc.items() if k not in ("additionalProperties",)}
+    if "properties" in out:
+        out["properties"] = {k: _gemini_schema(v) for k, v in out["properties"].items()}
+        if not out["properties"]:
+            out.pop("properties")
+    return out
+
+
+def _gemini_post(model: str, key: str, body: dict) -> dict:
+    r = httpx.post(f"{GEMINI_API}/models/{model}:generateContent", json=body, headers={"x-goog-api-key": key}, timeout=60)
+    if r.status_code >= 400:
+        try:
+            msg = (r.json().get("error") or {}).get("message") or r.text
+        except ValueError:
+            msg = r.text
+        raise RuntimeError(f"gemini {model} HTTP {r.status_code}: {' '.join(str(msg).split())[:200]}")
+    return r.json()
+
+
+GEMINI = {"post": _gemini_post}  # replaced in tests
+
+
+def _gemini_call(cfg: dict, body: dict) -> dict:
+    key = keys_for(cfg)["gemini"]
+    primary = cfg.get("gemini_model") or GEMINI_MODEL
+    errors = []
+    for m in [primary] + [x for x in GEMINI_FALLBACK if x != primary]:
+        try:
+            data = GEMINI["post"](m, key, body)
+        except (httpx.HTTPError, RuntimeError, ValueError) as e:
+            errors.append(str(e)[:160])
+            continue
+        cands = data.get("candidates") or []
+        if cands and (cands[0].get("content") or {}).get("parts"):
+            return cands[0]["content"]
+        errors.append(f"{m}: empty ({(cands[0].get('finishReason') if cands else '') or (data.get('promptFeedback') or {}).get('blockReason')})")
+    raise RuntimeError(" | ".join(errors)[:500])
+
+
+def _gemini(user: dict, cfg: dict) -> tuple[str, list]:
+    contents = [{"role": "model" if m["role"] == "assistant" else "user", "parts": [{"text": m["content"]}]} for m in _history(user["id"])]
+    body = {"systemInstruction": {"parts": [{"text": _system(user, cfg)}]},
+            "tools": [{"functionDeclarations": [{"name": t["name"], "description": t["description"],
+                                                 **({"parameters": _gemini_schema(t["input_schema"])} if t["input_schema"].get("properties") else {})}
+                                                for t in TOOLS]}],
+            "toolConfig": {"functionCallingConfig": {"mode": "AUTO"}},
+            "generationConfig": {"temperature": 0.35, "maxOutputTokens": 2048}}
+    actions: list = []
+    for _ in range(6):
+        content = _gemini_call(cfg, {**body, "contents": contents})
+        parts = content.get("parts") or []
+        calls = [p["functionCall"] for p in parts if p.get("functionCall")]
+        if not calls:
+            text = "\n".join(p["text"] for p in parts if p.get("text") and not p.get("thought")).strip()
+            return text or "…", actions
+        contents.append({"role": "model", "parts": parts})
+        replies = []
+        for c in calls:
+            try:
+                out = _run_tool(user, c.get("name", ""), dict(c.get("args") or {}), actions)
+            except Exception as e:
+                out = {"error": str(e)[:300]}
+            raw = json.dumps(out, default=str)
+            resp = json.loads(raw) if len(raw) <= 12000 and isinstance(out, dict) else {"result": raw[:12000]}
+            replies.append({"functionResponse": {"name": c.get("name", ""), "response": resp}})
+        contents.append({"role": "user", "parts": replies})
+    return "…", actions
+
+
+def complete(prompt: str, max_tokens: int = 3000) -> str | None:
+    """One plain completion (no tools) on the first provider that answers. None when AI is unavailable."""
+    cfg = settings.get("ai")
+    for prov in providers(cfg):
+        try:
+            if prov == "claude":
+                resp = _client(keys_for(cfg)["claude"]).beta.messages.create(
+                    model=cfg.get("model") or config.AI_MODEL, max_tokens=max_tokens, messages=[{"role": "user", "content": prompt}],
+                    output_config={"effort": "medium"}, betas=["server-side-fallback-2026-07-01"], fallbacks="default")
+                if resp.stop_reason == "refusal":
+                    continue
+                text = "\n".join(b.text for b in resp.content if b.type == "text").strip()
+            else:
+                content = _gemini_call(cfg, {"contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                                             "generationConfig": {"temperature": 0.3, "maxOutputTokens": max_tokens}})
+                text = "\n".join(p["text"] for p in content.get("parts") or [] if p.get("text") and not p.get("thought")).strip()
+            if text:
+                return text
+        except Exception as e:
+            log.warning("AI completion (%s) failed: %s", prov, str(e)[:300])
+    return None
 
 
 # ───────────── deterministic fallback (no API key / outage) ─────────────
@@ -341,7 +479,7 @@ def submit_form(user: dict, kind: str, data: dict) -> dict:
 
 # ───────────── dispute assistant for arbiters ─────────────
 def summarize_dispute(order_id: str) -> str | None:
-    if not config.ANTHROPIC_API_KEY:
+    if not available():
         return None
     o = db.one("SELECT * FROM p2p_orders WHERE id=?", (order_id,))
     if not o:
@@ -355,15 +493,8 @@ def summarize_dispute(order_id: str) -> str | None:
               f"{(d or {}).get('reason')} — {(d or {}).get('details')}\n\nChat transcript:\n{transcript}\n\n"
               "Write a neutral brief for the human arbiter: timeline, each side's claims, evidence present or missing, red flags, "
               "and what proof to request from each party. Do not decide the case.")
-    try:
-        resp = _client().beta.messages.create(model=settings.get("ai").get("model") or config.AI_MODEL, max_tokens=3000,
-                                              messages=[{"role": "user", "content": prompt}], output_config={"effort": "medium"},
-                                              betas=["server-side-fallback-2026-07-01"], fallbacks="default")
-        if resp.stop_reason == "refusal":
-            return None
-        text = "\n".join(b.text for b in resp.content if b.type == "text").strip()
-    except Exception as e:
-        log.warning("dispute summary failed: %s", e)
+    text = complete(prompt)
+    if not text:
         return None
     db.x("UPDATE p2p_disputes SET ai_summary=? WHERE order_id=?", (text[:6000], order_id))
     return text

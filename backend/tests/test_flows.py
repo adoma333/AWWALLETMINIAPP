@@ -1,4 +1,5 @@
 """End-to-end money flows through the HTTP API (chain I/O mocked at the adapter boundary)."""
+import json
 from decimal import Decimal
 
 import pytest
@@ -527,3 +528,40 @@ def test_coin_metadata_sync_follows_official_names_but_keeps_admin_edits(client,
     assert catalog.asset("TON")["name"] == "Toncoin"
     snap = client.get("/api/prices").json()
     assert "p" in snap and "at" in snap
+
+
+def test_gemini_assistant_uses_tools_and_admin_keys_stay_secret(api, client, monkeypatch):
+    from aw import settings, support
+
+    h = {"Authorization": "Bearer " + admin_auth.session_for(999)["token"]}
+    monkeypatch.setattr(support.config, "ANTHROPIC_API_KEY", "")
+    assert client.put("/api/admin/settings/ai", json={"value": {"provider": "gemini", "gemini_api_key": "AIzaTestKey_1234567890abcd"}},
+                      headers=h).status_code == 200
+    stored = settings.get("ai")["gemini_api_key"]
+    assert stored.startswith("enc:") and "AIza" not in stored
+    shown = client.get("/api/admin/settings", headers=h).json()["settings"]["ai"]["gemini_api_key"]
+    assert shown == "•••abcd"
+    # sending the masked value back keeps the stored key
+    client.put("/api/admin/settings/ai", json={"value": {"provider": "gemini", "gemini_api_key": shown}}, headers=h)
+    assert support.keys_for()["gemini"] == "AIzaTestKey_1234567890abcd"
+    assert client.put("/api/admin/settings/ai", json={"value": {"gemini_api_key": "bad key with spaces"}}, headers=h).status_code == 400
+
+    a = api(820)
+    fund(820, "USDT", "42")
+    calls = []
+
+    def post(model, key, body):
+        calls.append(model)
+        if model == "gemini-flash-latest":
+            raise RuntimeError("HTTP 503 busy")  # the fallback model answers
+        assert key == "AIzaTestKey_1234567890abcd"
+        assert all("additionalProperties" not in json.dumps(f) for f in body["tools"][0]["functionDeclarations"])
+        last = body["contents"][-1]["parts"][0]
+        if "functionResponse" in last:
+            assert last["functionResponse"]["response"]["balances"]["USDT"]["available"] == "42"
+            return {"candidates": [{"content": {"role": "model", "parts": [{"text": "You have 42 USDT."}]}}]}
+        return {"candidates": [{"content": {"role": "model", "parts": [{"functionCall": {"name": "get_account_overview", "args": {}}}]}}]}
+
+    monkeypatch.setitem(support.GEMINI, "post", post)
+    r = a.ok("post", "/api/ai/chat", {"text": "What is my balance?"})
+    assert r["reply"] == "You have 42 USDT." and "gemini-flash-lite-latest" in calls

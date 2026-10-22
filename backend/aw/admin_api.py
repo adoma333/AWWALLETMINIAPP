@@ -1,5 +1,6 @@
 """Admin panel API — every control in one place. All writes are audited."""
 import os
+import re
 from decimal import Decimal
 
 from fastapi import APIRouter, Body, Header, Request
@@ -7,6 +8,7 @@ from fastapi import APIRouter, Body, Header, Request
 from . import (admin_auth, catalog, config, db, deposits, files, fees, guard, keys, ledger, p2p, prices, referral, settings, support,
                tg, treasury, users, withdrawals)
 from .money import AppError, D, s
+from .security import seal, unseal
 from .notify import notify
 
 router = APIRouter(prefix="/api/admin")
@@ -514,11 +516,37 @@ def get_settings(authorization: str = Header(default="")):
     out = settings.all_settings()
     for k in [k for k in out if k not in settings.DEFAULTS]:
         out.pop(k)
-    prov = out.get("swap", {}).get("providers", {})
-    for p in prov.values():  # never echo secrets
-        if p.get("api_key"):
-            p["api_key"] = "•••" + p["api_key"][-4:]
+    for parent, field in _secret_slots(out):  # never echo secrets
+        if parent.get(field):
+            parent[field] = "•••" + unseal(parent[field])[-4:]
     return {"settings": out, "defaults": settings.DEFAULTS}
+
+
+SECRET_FIELDS = {"ai": ("anthropic_api_key", "gemini_api_key"), "auth": ("google_client_secret",)}
+
+
+def _slot_path(tree: dict, target: dict, path: tuple = ()) -> tuple:
+    for k, v in tree.items():
+        if v is target:
+            return path + (k,)
+        if isinstance(v, dict):
+            found = _slot_path(v, target, path + (k,))
+            if found:
+                return found
+    return ()
+
+
+def _secret_slots(tree: dict):
+    """(dict, key) pairs holding secrets: fixed fields per section plus swap provider api keys."""
+    for sec, fields in SECRET_FIELDS.items():
+        node = tree.get(sec)
+        if isinstance(node, dict):
+            for f in fields:
+                if f in node:
+                    yield node, f
+    for p in ((tree.get("swap") or {}).get("providers") or {}).values():
+        if isinstance(p, dict) and "api_key" in p:
+            yield p, "api_key"
 
 
 @router.put("/settings/{section}")
@@ -529,11 +557,20 @@ def put_settings(section: str, request: Request, body: dict = Body(...), authori
     value = body.get("value")
     if not isinstance(value, dict):
         raise AppError("bad_request")
-    if section == "swap":  # keep stored secrets when the panel sends the masked value back
-        cur = settings.get("swap").get("providers", {})
-        for k, p in (value.get("providers") or {}).items():
-            if str(p.get("api_key", "")).startswith("•••"):
-                p["api_key"] = cur.get(k, {}).get("api_key", "")
+    cur = {section: settings.get(section)}
+    new = {section: value}
+    stored = {id(p): (p, f) for p, f in _secret_slots(cur)}
+    old_by_path = {}
+    for p, f in stored.values():
+        old_by_path[_slot_path(cur, p) + (f,)] = p.get(f, "")
+    for p, f in _secret_slots(new):
+        v = str(p.get(f) or "").strip()
+        if v.startswith("•••"):  # the panel sent the masked value back: keep what is stored
+            p[f] = old_by_path.get(_slot_path(new, p) + (f,), "")
+        elif v:
+            if len(v) > 400 or not re.fullmatch(r"[A-Za-z0-9._:\-]+", v):
+                raise AppError("bad_request")
+            p[f] = seal(v)
     settings.put(section, value)
     admin_auth.audit(a, "settings.update", section, {"keys": list(value)}, _ip(request))
     if section == "bot":  # push the new bot name / descriptions to Telegram right away
@@ -878,7 +915,7 @@ def system(authorization: str = Header(default="")):
     _admin(authorization, "view")
     size = os.path.getsize(config.DB_PATH) if config.DB_PATH.exists() else 0
     return {
-        "db_bytes": size, "wallet_ready": keys.has_master(), "ai": bool(config.ANTHROPIC_API_KEY), "bot": config.BOT_USERNAME,
+        "db_bytes": size, "wallet_ready": keys.has_master(), "ai": support.providers(), "bot": config.BOT_USERNAME,
         "webapp": config.WEBAPP_URL, "worker_heartbeat": int(db.val("SELECT value FROM scan_state WHERE key='worker:heartbeat'", (), 0) or 0),
         "outbox": {r["status"]: r["n"] for r in db.q("SELECT status, COUNT(*) AS n FROM outbox GROUP BY status")},
         "scan_state": db.q("SELECT key, value, updated_at FROM scan_state WHERE key NOT LIKE 'holdings:%' AND key NOT LIKE 'tron:ts:%' AND key NOT LIKE 'sol:sig:%' AND key NOT LIKE 'ton:lt:%' AND key NOT LIKE 'ton:jlt:%' AND key NOT LIKE 'ton:sweep:%' ORDER BY key LIMIT 200"),

@@ -10,7 +10,7 @@
 #  master wallet and starts the bot. Safe to run again: it updates the code and keeps your settings.
 #
 #  Every answer can be preset as an environment variable to run unattended:
-#    BOT_TOKEN ADMIN_IDS DOMAIN EMAIL ANTHROPIC_API_KEY WALLET_MODE(generate|import|skip) AW_BRANCH
+#    BOT_TOKEN ADMIN_IDS DOMAIN EMAIL GEMINI_API_KEY ANTHROPIC_API_KEY WALLET_MODE(generate|import|skip) AW_BRANCH
 # ═══════════════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
@@ -38,8 +38,8 @@ env_get() { [ -f "$ENV_FILE" ] && grep -E "^$1=" "$ENV_FILE" | head -1 | cut -d=
 
 cat <<'BANNER'
 
-     ▄▀█ █░█░█   █░█░█ ▄▀█ █░░ █░░ █▀▀ ▀█▀
-     █▀█ ▀▄▀▄▀   ▀▄▀▄▀ █▀█ █▄▄ █▄▄ ██▄ ░█░     installer
+     ▀█ █▀█ █░█ █▀█ ▄▀█   █░█░█ ▄▀█ █░░ █░░ █▀▀ ▀█▀
+     █▄ █▄█ █▀█ █▀▄ █▀█   ▀▄▀▄▀ █▀█ █▄▄ █▄▄ ██▄ ░█░     installer
 
 BANNER
 
@@ -55,6 +55,7 @@ if [ -f "$ENV_FILE" ]; then
   ADMIN_IDS="${ADMIN_IDS:-$(env_get ADMIN_IDS)}"
   DOMAIN="${DOMAIN:-$(env_get WEBAPP_URL | sed -E 's#^https?://##; s#/.*$##')}"
   ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY-$(env_get ANTHROPIC_API_KEY)}"
+  GEMINI_API_KEY="${GEMINI_API_KEY-$(env_get GEMINI_API_KEY)}"
   WALLET_MODE="${WALLET_MODE:-skip}"
   EMAIL="${EMAIL:-skip}"
 else
@@ -72,7 +73,9 @@ else
   ask DOMAIN "Domain" "$AUTO_DOMAIN"
   echo -e "  ${D}4. E-mail for the free HTTPS certificate (Let's Encrypt).${N}"
   ask EMAIL "E-mail"
-  echo -e "  ${D}5. Optional: Anthropic API key — powers the Zohra AI assistant (press Enter to skip; FAQ mode is used).${N}"
+  echo -e "  ${D}5. Optional AI keys for the Zohra AI assistant — press Enter to skip (FAQ mode is used; keys can also be added later in the admin panel).${N}"
+  echo -e "  ${D}   Gemini: free key from aistudio.google.com/apikey · Claude: console.anthropic.com${N}"
+  ask GEMINI_API_KEY "Gemini API key" "" secret
   ask ANTHROPIC_API_KEY "Anthropic API key" "" secret
   echo -e "  ${D}6. Master wallet: [1] generate a new 24-word seed (recommended)  [2] import an existing seed${N}"
   [ -n "${WALLET_MODE:-}" ] || ask WALLET_CHOICE "Choose 1 or 2" "1"
@@ -158,6 +161,7 @@ SECRETS_KEY=$(openssl rand -hex 32)
 ADMIN_IDS=$ADMIN_IDS
 ADMIN_CHANNEL_ID=
 ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY
+GEMINI_API_KEY=$GEMINI_API_KEY
 AI_MODEL=claude-opus-5-5
 AW_DATA_DIR=$APP_DIR/data
 AW_PORT=$AW_PORT

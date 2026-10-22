@@ -715,7 +715,7 @@ def ai_chat(body: dict = Body(...), u: dict = Depends(current_user)):
 @app.get("/api/ai/history")
 def ai_history(u: dict = Depends(current_user)):
     return {"items": support.history(u), "suggestions": support.suggestions(u), "name": settings.get("ai").get("name", "Zohra AI"),
-            "ai": bool(config.ANTHROPIC_API_KEY)}
+            "ai": support.available()}
 
 
 @app.delete("/api/ai/history")

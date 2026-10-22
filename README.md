@@ -18,7 +18,7 @@ The installer asks for:
 2. your Telegram ID (admin);
 3. the domain;
 4. an e-mail for HTTPS;
-5. an optional Anthropic API key for Zohra AI;
+5. optional Gemini and/or Anthropic API keys for Zohra AI;
 6. whether to create a new master wallet or import one.
 
 It then installs everything (Python, Node, nginx, a Let's Encrypt certificate, and systemd services), builds the app and starts the bot. Run it again at any time to update. Your settings and wallet are kept.
@@ -92,7 +92,7 @@ A database backup runs every day at 03:17 and is kept for 14 days. **To restore 
 - Welcome and first-transaction vouchers, daily check-in streaks, missions.
 
 **Zohra AI**
-- Built on Claude.
+- Runs on Gemini (free AI Studio key) or Claude; keys go in .env or Admin → Settings → ai, stored encrypted, and one provider takes over if the other fails.
 - Reads the user's own balances, deposits and withdrawals in real time.
 - Guides step by step and shows suggestion chips.
 - Includes a "suggest a payment method" form.
