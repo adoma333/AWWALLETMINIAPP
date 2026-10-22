@@ -37,6 +37,12 @@ def save(data: str, folder: str, allow_svg: bool = False, allow_pdf: bool = Fals
         raw = base64.b64decode(raw_b64, validate=False)
     except Exception:
         raise AppError("bad_file")
+    return save_bytes(raw, folder, allow_svg, allow_pdf)
+
+
+def save_bytes(raw: bytes, folder: str, allow_svg: bool = False, allow_pdf: bool = False) -> str:
+    if folder not in FOLDERS:
+        raise AppError("bad_request")
     if not raw or len(raw) > MAX_BYTES:
         raise AppError("file_too_large")
     kind = _kind(raw)

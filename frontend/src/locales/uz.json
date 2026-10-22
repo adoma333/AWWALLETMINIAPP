@@ -45,7 +45,6 @@
   "maintenance_title": "Zohra Wallet yangilanmoqda",
   "update_ready": "Yangi versiya tayyor",
   "update_now": "Yangilash",
-
   "status_pending": "Kutilmoqda",
   "status_processing": "Bajarilmoqda",
   "status_completed": "Bajarildi",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "Operator kutilmoqda",
   "status_answered": "Javob berilgan",
   "status_open": "Ochiq",
-
   "tx_deposit": "Depozit",
   "tx_withdraw": "Yechib olish",
   "tx_send": "Yuborildi",
@@ -82,13 +80,11 @@
   "tx_referral": "Referal mukofoti",
   "tx_reward": "Mukofot",
   "tx_adjust": "Tuzatish",
-
   "nav_home": "Hamyon",
   "nav_swap": "Almashtirish",
   "nav_p2p": "P2P",
   "nav_rewards": "Mukofotlar",
   "nav_profile": "Profil",
-
   "total_balance": "Umumiy balans",
   "hide_balance": "Balansni yashirish",
   "today_change": "bugun",
@@ -114,14 +110,12 @@
   "price_updated": "Narxlar yangilandi {time}",
   "notifications": "Bildirishnomalar",
   "no_notifications": "Yangi bildirishnoma yoʻq",
-
   "price": "Narx",
   "change_24h": "24s",
   "networks_label": "Tarmoqlar",
   "recent_activity": "Soʻnggi faollik",
   "no_activity": "Hozircha faollik yoʻq",
   "in_orders": "Buyurtmalarda",
-
   "deposit_title": "Toʻldirish",
   "choose_asset": "Tanga tanlang",
   "choose_network": "Tarmoq tanlang",
@@ -153,7 +147,6 @@
   "connected_wallet": "Ulangan: {address}",
   "amount_to_deposit": "Toʻldirish miqdori",
   "deposit_sent": "Hamyoningizdan yuborildi. Bir necha soniyada shu yerda paydo boʻladi.",
-
   "send_title": "Yuborish",
   "send_to_user": "Zohra Wallet foydalanuvchisiga",
   "send_to_user_sub": "@username orqali — tezkor va bepul",
@@ -171,7 +164,6 @@
   "send_now": "Hozir yuborish",
   "sent_success": "{name} ga yuborildi",
   "instant_free": "Tezkor · Bepul",
-
   "pick_contact_title": "Kontakt tanlang",
   "pick_contact_sub": "Bot chatida Telegram kontakt tanlagichini ochamiz. Odamni tanlang va bu yerga qayting.",
   "open_picker": "Kontakt tanlagichni ochish",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} Zohra Wallet dan foydalanadi — oʻtkazma tezkor va bepul.",
   "picked_not_registered": "{name} da hali Zohra Wallet yoʻq. Faqat u ola oladigan sovgʻa yuboring.",
   "send_as_gift": "Shaxsiy sovgʻa sifatida yuborish",
-
   "withdraw_title": "Yechib olish",
   "recipient_address": "Qabul qiluvchi manzili",
   "paste": "Joylashtirish",
@@ -195,7 +186,6 @@
   "fee_free_badge": "Komissiyasiz (mukofot)",
   "eta": "Taxminiy vaqt",
   "check_address_note": "Manzil va tarmoqni qayta tekshiring. Blokcheyn oʻtkazmalarini qaytarib boʻlmaydi.",
-
   "swap_title": "Almashtirish",
   "from": "Dan",
   "to": "Ga",
@@ -207,7 +197,6 @@
   "swap_now": "Hozir almashtirish",
   "swap_success": "Almashtirish yakunlandi",
   "enter_amount": "Miqdorni kiriting",
-
   "gift_title": "Sovgʻa",
   "gift_who": "Kim ola oladi?",
   "lock_user": "Bir kishi",
@@ -243,13 +232,11 @@
   "expires_in": "Muddati: {when}",
   "claimed_of": "{total} tadan {n} tasi olindi",
   "choose_recipient": "Qabul qiluvchini tanlang",
-
   "history_title": "Tarix",
   "filter_in": "Kirim",
   "filter_out": "Chiqim",
   "filter_swaps": "Almashtirishlar",
   "no_history": "Tranzaksiyalaringiz shu yerda koʻrinadi",
-
   "tx_details": "Tranzaksiya",
   "reference": "Raqam",
   "tx_hash_label": "Blokcheyn xeshi",
@@ -261,7 +248,6 @@
   "to_label": "Kimga",
   "cancel_request": "Soʻrovni bekor qilish",
   "confirmations_progress": "{n}/{need} tasdiq",
-
   "p2p_title": "P2P",
   "buy": "Sotib olish",
   "sell": "Sotish",
@@ -348,7 +334,6 @@
   "field_papara_no": "Papara raqami",
   "field_upi_id": "UPI ID",
   "field_pix_key": "PIX kaliti",
-
   "referral_title": "Doʻstlarni taklif qilish",
   "referral_hero": "Doʻstlaringiz komissiyasining {pct}% ini oling",
   "referral_hero_sub": "Qoʻshilganidan keyin {days} kun davomida · {asset} da toʻlanadi",
@@ -368,7 +353,6 @@
   "ref_step3": "Ular toʻlagan har bir komissiyadan ulush olasiz",
   "leaderboard": "Oyning eng yaxshi taklif qiluvchilari",
   "invite_text": "Zohra Wallet ga qoʻshiling — Telegram ichidagi kripto hamyon, bepul tezkor oʻtkazmalar bilan 🚀",
-
   "rewards_title": "Mukofotlar",
   "daily_checkin": "Kundalik belgilanish",
   "checkin_now": "Belgilanish",
@@ -391,7 +375,6 @@
   "kind_gift": "sovgʻalar",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "P2P eʼlonlar",
-
   "support_title": "Yordam",
   "ai_intro": "Salom! Men {name}. Depozitlaringiz, yechib olishlaringiz va komissiyalaringizni real vaqtda tekshirib, sizni bosqichma-bosqich yoʻnaltira olaman.",
   "ask_placeholder": "Savolingizni yozing…",
@@ -421,7 +404,6 @@
   "clear_chat": "Chatni tozalash",
   "ticket_opened": "#{id} murojaat ochildi — operator shu yerda va bot chatida javob beradi.",
   "rate_support": "Bu javobni baholang",
-
   "profile_title": "Profil",
   "language": "Til",
   "currency": "Koʻrsatish valyutasi",
@@ -487,7 +469,6 @@
   "doc_passport": "Pasport",
   "doc_id": "ID karta",
   "doc_license": "Haydovchilik guvohnomasi",
-
   "outside_title": "Zohra Wallet Telegramda yashaydi",
   "outside_sub": "Barcha tarmoqlar, bepul tezkor oʻtkazmalar, almashtirish va P2P bilan kripto hamyoningiz — bevosita Telegramda.",
   "open_in_telegram": "Telegramda ochish",
@@ -495,7 +476,6 @@
   "perk1": "10 tarmoq, bitta hamyon",
   "perk2": "Bepul tezkor oʻtkazmalar",
   "perk3": "PIN va eskrou himoyasi",
-
   "welcome_title": "Xush kelibsiz, {name}",
   "ob1_title": "Barcha tarmoqlar. Bitta hamyon.",
   "ob1_sub": "TRON, TON, BNB Chain, Ethereum, Solana, Polygon, Arbitrum, Base, Bitcoin va Avalanche.",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN, eskrou, manzillar oq roʻyxati va 24/7 monitoring mablagʻlaringizni xavfsiz saqlaydi.",
   "get_started": "Boshlash",
   "later": "Keyinroq",
-
   "err_auth_required": "Zohra Wallet ni Telegram orqali oching.",
   "err_auth_invalid": "Seansni tekshirib boʻlmadi. Ilovani bot orqali qayta oching.",
   "err_auth_expired": "Seans muddati tugadi. Ilovani bot orqali qayta oching.",
@@ -599,5 +578,13 @@
   "err_user_not_found": "Foydalanuvchi topilmadi.",
   "err_bad_phone": "Telefon raqami yaroqsiz.",
   "err_phone_used": "Bu telefon boshqa hisobga bogʻlangan.",
-  "err_deposit_unassignable": "Bu depozitni avtomatik biriktirib boʻlmaydi."
+  "err_deposit_unassignable": "Bu depozitni avtomatik biriktirib boʻlmaydi.",
+  "market_stats": "Bozor",
+  "market_rank": "O‘rin",
+  "market_cap": "Bozor qiymati",
+  "volume_24h": "24 soatlik hajm",
+  "high_24h": "24 soat eng yuqori",
+  "low_24h": "24 soat eng past",
+  "all_time_high": "Tarixiy maksimum",
+  "circulating_supply": "Muomaladagi miqdor"
 }

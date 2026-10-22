@@ -45,7 +45,6 @@
   "maintenance_title": "Zohra Wallet 正在升级",
   "update_ready": "新版本已就绪",
   "update_now": "更新",
-
   "status_pending": "待处理",
   "status_processing": "处理中",
   "status_completed": "已完成",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "等待客服",
   "status_answered": "已回复",
   "status_open": "待处理",
-
   "tx_deposit": "充值",
   "tx_withdraw": "提现",
   "tx_send": "转出",
@@ -82,13 +80,11 @@
   "tx_referral": "邀请奖励",
   "tx_reward": "奖励",
   "tx_adjust": "调账",
-
   "nav_home": "钱包",
   "nav_swap": "兑换",
   "nav_p2p": "P2P",
   "nav_rewards": "奖励",
   "nav_profile": "我的",
-
   "total_balance": "总余额",
   "hide_balance": "隐藏余额",
   "today_change": "今日",
@@ -114,14 +110,12 @@
   "price_updated": "价格更新于 {time}",
   "notifications": "通知",
   "no_notifications": "暂无新通知",
-
   "price": "价格",
   "change_24h": "24小时",
   "networks_label": "网络",
   "recent_activity": "最近动态",
   "no_activity": "暂无动态",
   "in_orders": "订单中",
-
   "deposit_title": "充值",
   "choose_asset": "选择币种",
   "choose_network": "选择网络",
@@ -153,7 +147,6 @@
   "connected_wallet": "已连接：{address}",
   "amount_to_deposit": "充值金额",
   "deposit_sent": "已从您的钱包发出，几秒后将显示在这里。",
-
   "send_title": "转账",
   "send_to_user": "转给 Zohra Wallet 用户",
   "send_to_user_sub": "通过 @用户名——即时且免费",
@@ -171,7 +164,6 @@
   "send_now": "立即发送",
   "sent_success": "已发送给 {name}",
   "instant_free": "即时 · 免费",
-
   "pick_contact_title": "选择联系人",
   "pick_contact_sub": "我们将在机器人聊天中打开 Telegram 联系人选择器。选好联系人后返回这里。",
   "open_picker": "打开联系人选择器",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} 正在使用 Zohra Wallet——转账即时且免费。",
   "picked_not_registered": "{name} 还没有 Zohra Wallet。发送一个只有 TA 能领取的红包吧。",
   "send_as_gift": "作为专属红包发送",
-
   "withdraw_title": "提现",
   "recipient_address": "收款地址",
   "paste": "粘贴",
@@ -195,7 +186,6 @@
   "fee_free_badge": "免手续费（奖励）",
   "eta": "预计时间",
   "check_address_note": "请仔细核对地址和网络。区块链转账无法撤回。",
-
   "swap_title": "兑换",
   "from": "从",
   "to": "到",
@@ -207,7 +197,6 @@
   "swap_now": "立即兑换",
   "swap_success": "兑换完成",
   "enter_amount": "输入金额",
-
   "gift_title": "红包",
   "gift_who": "谁可以领取？",
   "lock_user": "指定一人",
@@ -243,13 +232,11 @@
   "expires_in": "{when}过期",
   "claimed_of": "已领取 {n}/{total}",
   "choose_recipient": "选择收款人",
-
   "history_title": "记录",
   "filter_in": "转入",
   "filter_out": "转出",
   "filter_swaps": "兑换",
   "no_history": "您的交易记录将显示在这里",
-
   "tx_details": "交易详情",
   "reference": "编号",
   "tx_hash_label": "区块链哈希",
@@ -261,7 +248,6 @@
   "to_label": "收款方",
   "cancel_request": "取消申请",
   "confirmations_progress": "{n}/{need} 个确认",
-
   "p2p_title": "P2P",
   "buy": "购买",
   "sell": "出售",
@@ -348,7 +334,6 @@
   "field_papara_no": "Papara 号码",
   "field_upi_id": "UPI ID",
   "field_pix_key": "PIX 密钥",
-
   "referral_title": "邀请好友",
   "referral_hero": "赚取好友手续费的 {pct}%",
   "referral_hero_sub": "好友加入后 {days} 天内 · 以 {asset} 发放",
@@ -368,7 +353,6 @@
   "ref_step3": "他们支付的每笔手续费您都能分成",
   "leaderboard": "本月邀请排行榜",
   "invite_text": "一起来用 Zohra Wallet——Telegram 内的加密钱包，免费即时转账 🚀",
-
   "rewards_title": "奖励",
   "daily_checkin": "每日签到",
   "checkin_now": "签到",
@@ -391,7 +375,6 @@
   "kind_gift": "红包",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "P2P 广告",
-
   "support_title": "客服",
   "ai_intro": "您好！我是 {name}。我可以实时查询您的充值、提现和手续费，并一步步为您指引。",
   "ask_placeholder": "描述您的问题…",
@@ -421,7 +404,6 @@
   "clear_chat": "清空聊天",
   "ticket_opened": "工单 #{id} 已创建——客服会在这里和机器人聊天中回复您。",
   "rate_support": "为此回答评分",
-
   "profile_title": "我的",
   "language": "语言",
   "currency": "显示货币",
@@ -487,7 +469,6 @@
   "doc_passport": "护照",
   "doc_id": "身份证",
   "doc_license": "驾驶证",
-
   "outside_title": "Zohra Wallet 运行在 Telegram 中",
   "outside_sub": "支持所有网络、免费即时转账、兑换和 P2P 的加密钱包——就在 Telegram 里。",
   "open_in_telegram": "在 Telegram 中打开",
@@ -495,7 +476,6 @@
   "perk1": "10 个网络，一个钱包",
   "perk2": "免费即时转账",
   "perk3": "PIN 与托管保护",
-
   "welcome_title": "欢迎，{name}",
   "ob1_title": "所有网络，一个钱包。",
   "ob1_sub": "TRON、TON、BNB Chain、Ethereum、Solana、Polygon、Arbitrum、Base、Bitcoin 和 Avalanche。",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN、托管、地址白名单和 7×24 小时监控，全面守护您的资金。",
   "get_started": "开始使用",
   "later": "稍后",
-
   "err_auth_required": "请从 Telegram 打开 Zohra Wallet。",
   "err_auth_invalid": "会话验证失败，请从机器人重新打开应用。",
   "err_auth_expired": "会话已过期，请从机器人重新打开应用。",
@@ -599,5 +578,13 @@
   "err_user_not_found": "未找到用户。",
   "err_bad_phone": "手机号无效。",
   "err_phone_used": "该手机号已绑定其他账户。",
-  "err_deposit_unassignable": "该充值无法自动分配。"
+  "err_deposit_unassignable": "该充值无法自动分配。",
+  "market_stats": "市场",
+  "market_rank": "排名",
+  "market_cap": "市值",
+  "volume_24h": "24小时成交量",
+  "high_24h": "24小时最高",
+  "low_24h": "24小时最低",
+  "all_time_high": "历史最高",
+  "circulating_supply": "流通量"
 }

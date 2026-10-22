@@ -10,6 +10,7 @@ import { go, match, useRoute } from './router';
 import { AppCtx } from './store';
 import { applyBrand } from './theme';
 import { hideSplash, splashProgress } from './splash';
+import { applyPrices, streamPrices } from './live';
 import TopBar, { PageLoading } from './components/TopBar';
 import { backButton, inTelegram, startParam, tg } from './telegram';
 import Home from './pages/Home';
@@ -131,7 +132,8 @@ export default function App() {
     const onVis = () => { if (document.visibilityState === 'visible') loadWallet(); };
     document.addEventListener('visibilitychange', onVis);
     const id = setInterval(() => { if (document.visibilityState === 'visible') loadWallet(); }, 30000);
-    return () => { document.removeEventListener('visibilitychange', onVis); clearInterval(id); };
+    const stop = inTelegram ? streamPrices((snap) => setWallet((w) => applyPrices(w, snap))) : () => {};
+    return () => { document.removeEventListener('visibilitychange', onVis); clearInterval(id); stop(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Telegram back button on every non-root screen

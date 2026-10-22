@@ -45,7 +45,6 @@
   "maintenance_title": "Zohra Wallet güncelleniyor",
   "update_ready": "Yeni sürüm hazır",
   "update_now": "Güncelle",
-
   "status_pending": "Bekliyor",
   "status_processing": "İşleniyor",
   "status_completed": "Tamamlandı",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "Temsilci bekleniyor",
   "status_answered": "Yanıtlandı",
   "status_open": "Açık",
-
   "tx_deposit": "Yatırma",
   "tx_withdraw": "Çekim",
   "tx_send": "Gönderildi",
@@ -82,13 +80,11 @@
   "tx_referral": "Referans ödülü",
   "tx_reward": "Ödül",
   "tx_adjust": "Düzeltme",
-
   "nav_home": "Cüzdan",
   "nav_swap": "Takas",
   "nav_p2p": "P2P",
   "nav_rewards": "Ödüller",
   "nav_profile": "Profil",
-
   "total_balance": "Toplam bakiye",
   "hide_balance": "Bakiyeyi gizle",
   "today_change": "bugün",
@@ -114,14 +110,12 @@
   "price_updated": "Fiyatlar güncellendi {time}",
   "notifications": "Bildirimler",
   "no_notifications": "Yeni bildirim yok",
-
   "price": "Fiyat",
   "change_24h": "24s",
   "networks_label": "Ağlar",
   "recent_activity": "Son işlemler",
   "no_activity": "Henüz işlem yok",
   "in_orders": "Emirlerde",
-
   "deposit_title": "Yatırma",
   "choose_asset": "Coin seç",
   "choose_network": "Ağ seç",
@@ -153,7 +147,6 @@
   "connected_wallet": "Bağlı: {address}",
   "amount_to_deposit": "Yatırılacak tutar",
   "deposit_sent": "Cüzdanından gönderildi. Birkaç saniye içinde burada görünecek.",
-
   "send_title": "Gönder",
   "send_to_user": "Zohra Wallet kullanıcısına",
   "send_to_user_sub": "@kullanıcıadı ile — anında ve ücretsiz",
@@ -171,7 +164,6 @@
   "send_now": "Şimdi gönder",
   "sent_success": "{name} kişisine gönderildi",
   "instant_free": "Anında · Ücretsiz",
-
   "pick_contact_title": "Kişi seç",
   "pick_contact_sub": "Bot sohbetinde Telegram'ın kişi seçicisini açacağız. Birini seç ve buraya geri dön.",
   "open_picker": "Kişi seçiciyi aç",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} Zohra Wallet kullanıyor — transfer anında ve ücretsiz.",
   "picked_not_registered": "{name} henüz Zohra Wallet kullanmıyor. Yalnızca onun alabileceği bir hediye gönder.",
   "send_as_gift": "Kişisel hediye olarak gönder",
-
   "withdraw_title": "Çekim",
   "recipient_address": "Alıcı adresi",
   "paste": "Yapıştır",
@@ -195,7 +186,6 @@
   "fee_free_badge": "Ücretsiz (ödül)",
   "eta": "Tahmini süre",
   "check_address_note": "Adresi ve ağı iki kez kontrol et. Blokzinciri transferleri geri alınamaz.",
-
   "swap_title": "Takas",
   "from": "Gönderilen",
   "to": "Alınan",
@@ -207,7 +197,6 @@
   "swap_now": "Şimdi takas et",
   "swap_success": "Takas tamamlandı",
   "enter_amount": "Tutar gir",
-
   "gift_title": "Hediye",
   "gift_who": "Kim alabilir?",
   "lock_user": "Tek kişi",
@@ -243,13 +232,11 @@
   "expires_in": "Bitiş {when}",
   "claimed_of": "{total} hediyeden {n} tanesi alındı",
   "choose_recipient": "Alıcı seç",
-
   "history_title": "Geçmiş",
   "filter_in": "Gelen",
   "filter_out": "Giden",
   "filter_swaps": "Takaslar",
   "no_history": "İşlemlerin burada görünecek",
-
   "tx_details": "İşlem",
   "reference": "Referans",
   "tx_hash_label": "Blokzinciri hash'i",
@@ -261,7 +248,6 @@
   "to_label": "Alıcı",
   "cancel_request": "Talebi iptal et",
   "confirmations_progress": "{n}/{need} onay",
-
   "p2p_title": "P2P",
   "buy": "Al",
   "sell": "Sat",
@@ -348,7 +334,6 @@
   "field_papara_no": "Papara numarası",
   "field_upi_id": "UPI ID",
   "field_pix_key": "PIX anahtarı",
-
   "referral_title": "Arkadaşlarını davet et",
   "referral_hero": "Arkadaşlarının ödediği ücretlerin %{pct}'ini kazan",
   "referral_hero_sub": "Katıldıktan sonra {days} gün boyunca · {asset} olarak ödenir",
@@ -368,7 +353,6 @@
   "ref_step3": "Ödedikleri her ücretten pay alırsın",
   "leaderboard": "Bu ayın en iyi davetçileri",
   "invite_text": "Zohra Wallet'a katıl — Telegram içinde ücretsiz anında transferli kripto cüzdan 🚀",
-
   "rewards_title": "Ödüller",
   "daily_checkin": "Günlük giriş",
   "checkin_now": "Giriş yap",
@@ -391,7 +375,6 @@
   "kind_gift": "hediyeler",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "P2P ilanları",
-
   "support_title": "Destek",
   "ai_intro": "Merhaba! Ben {name}. Yatırma, çekim ve ücretlerini anlık kontrol edip sana adım adım yardımcı olabilirim.",
   "ask_placeholder": "Sorunu yaz…",
@@ -421,7 +404,6 @@
   "clear_chat": "Sohbeti temizle",
   "ticket_opened": "#{id} numaralı talep açıldı — bir temsilci burada ve bot sohbetinde yanıt verecek.",
   "rate_support": "Bu yanıtı değerlendir",
-
   "profile_title": "Profil",
   "language": "Dil",
   "currency": "Görüntüleme para birimi",
@@ -487,7 +469,6 @@
   "doc_passport": "Pasaport",
   "doc_id": "Kimlik kartı",
   "doc_license": "Ehliyet",
-
   "outside_title": "Zohra Wallet Telegram'da çalışır",
   "outside_sub": "Tüm ağları, ücretsiz anında transferleri, takası ve P2P'yi içeren kripto cüzdanın — doğrudan Telegram içinde.",
   "open_in_telegram": "Telegram'da aç",
@@ -495,7 +476,6 @@
   "perk1": "10 ağ, tek cüzdan",
   "perk2": "Ücretsiz anında transferler",
   "perk3": "PIN ve emanet koruması",
-
   "welcome_title": "Hoş geldin, {name}",
   "ob1_title": "Tüm ağlar. Tek cüzdan.",
   "ob1_sub": "TRON, TON, BNB Chain, Ethereum, Solana, Polygon, Arbitrum, Base, Bitcoin ve Avalanche.",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN, emanet sistemi, adres beyaz listeleri ve 7/24 izleme fonlarını korur.",
   "get_started": "Başla",
   "later": "Sonra",
-
   "err_auth_required": "Lütfen Zohra Wallet'ı Telegram'dan aç.",
   "err_auth_invalid": "Oturum doğrulanamadı. Uygulamayı bottan yeniden aç.",
   "err_auth_expired": "Oturumun sona erdi. Uygulamayı bottan yeniden aç.",
@@ -599,5 +578,13 @@
   "err_user_not_found": "Kullanıcı bulunamadı.",
   "err_bad_phone": "Geçersiz telefon numarası.",
   "err_phone_used": "Bu numara başka bir hesaba bağlı.",
-  "err_deposit_unassignable": "Bu yatırma otomatik olarak eşleştirilemiyor."
+  "err_deposit_unassignable": "Bu yatırma otomatik olarak eşleştirilemiyor.",
+  "market_stats": "Piyasa",
+  "market_rank": "Sıra",
+  "market_cap": "Piyasa değeri",
+  "volume_24h": "24s hacim",
+  "high_24h": "24s en yüksek",
+  "low_24h": "24s en düşük",
+  "all_time_high": "Tüm zamanların zirvesi",
+  "circulating_supply": "Dolaşımdaki arz"
 }

@@ -45,7 +45,6 @@
   "maintenance_title": "Upgrading Zohra Wallet",
   "update_ready": "A new version is ready",
   "update_now": "Update",
-
   "status_pending": "Pending",
   "status_processing": "Processing",
   "status_completed": "Completed",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "Waiting for agent",
   "status_answered": "Answered",
   "status_open": "Open",
-
   "tx_deposit": "Deposit",
   "tx_withdraw": "Withdrawal",
   "tx_send": "Sent",
@@ -82,13 +80,11 @@
   "tx_referral": "Referral reward",
   "tx_reward": "Reward",
   "tx_adjust": "Adjustment",
-
   "nav_home": "Wallet",
   "nav_swap": "Swap",
   "nav_p2p": "P2P",
   "nav_rewards": "Rewards",
   "nav_profile": "Profile",
-
   "total_balance": "Total balance",
   "hide_balance": "Hide balance",
   "today_change": "today",
@@ -114,14 +110,12 @@
   "price_updated": "Prices updated {time}",
   "notifications": "Notifications",
   "no_notifications": "You're all caught up",
-
   "price": "Price",
   "change_24h": "24h",
   "networks_label": "Networks",
   "recent_activity": "Recent activity",
   "no_activity": "No activity yet",
   "in_orders": "In orders",
-
   "deposit_title": "Deposit",
   "choose_asset": "Choose a coin",
   "choose_network": "Choose a network",
@@ -153,7 +147,6 @@
   "connected_wallet": "Connected: {address}",
   "amount_to_deposit": "Amount to deposit",
   "deposit_sent": "Sent from your wallet. It will appear here in a few seconds.",
-
   "send_title": "Send",
   "send_to_user": "To an Zohra Wallet user",
   "send_to_user_sub": "By @username — instant and free",
@@ -171,7 +164,6 @@
   "send_now": "Send now",
   "sent_success": "Sent to {name}",
   "instant_free": "Instant · Free",
-
   "pick_contact_title": "Choose a contact",
   "pick_contact_sub": "We'll open Telegram's contact picker in the bot chat. Pick a person and come back here.",
   "open_picker": "Open contact picker",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} uses Zohra Wallet — the transfer is instant and free.",
   "picked_not_registered": "{name} doesn't have Zohra Wallet yet. Send a gift that only they can claim.",
   "send_as_gift": "Send as a personal gift",
-
   "withdraw_title": "Withdraw",
   "recipient_address": "Recipient address",
   "paste": "Paste",
@@ -195,7 +186,6 @@
   "fee_free_badge": "Fee-free (reward)",
   "eta": "Estimated time",
   "check_address_note": "Double-check the address and network. Blockchain transfers can't be reversed.",
-
   "swap_title": "Swap",
   "from": "From",
   "to": "To",
@@ -207,7 +197,6 @@
   "swap_now": "Swap now",
   "swap_success": "Swap complete",
   "enter_amount": "Enter an amount",
-
   "gift_title": "Gift",
   "gift_who": "Who can claim it?",
   "lock_user": "One person",
@@ -243,13 +232,11 @@
   "expires_in": "Expires {when}",
   "claimed_of": "{n} of {total} claimed",
   "choose_recipient": "Choose recipient",
-
   "history_title": "History",
   "filter_in": "In",
   "filter_out": "Out",
   "filter_swaps": "Swaps",
   "no_history": "Your transactions will appear here",
-
   "tx_details": "Transaction",
   "reference": "Reference",
   "tx_hash_label": "Blockchain hash",
@@ -261,7 +248,6 @@
   "to_label": "To",
   "cancel_request": "Cancel request",
   "confirmations_progress": "{n}/{need} confirmations",
-
   "p2p_title": "P2P",
   "buy": "Buy",
   "sell": "Sell",
@@ -348,7 +334,6 @@
   "field_papara_no": "Papara number",
   "field_upi_id": "UPI ID",
   "field_pix_key": "PIX key",
-
   "referral_title": "Invite friends",
   "referral_hero": "Earn {pct}% of the fees your friends pay",
   "referral_hero_sub": "For {days} days after they join · paid in {asset}",
@@ -368,7 +353,6 @@
   "ref_step3": "You earn a share of every fee they pay",
   "leaderboard": "Top inviters this month",
   "invite_text": "Join me on Zohra Wallet — a crypto wallet inside Telegram with free instant transfers 🚀",
-
   "rewards_title": "Rewards",
   "daily_checkin": "Daily check-in",
   "checkin_now": "Check in",
@@ -391,7 +375,6 @@
   "kind_gift": "gifts",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "P2P ads",
-
   "support_title": "Support",
   "ai_intro": "Hi! I'm {name}. I can check your deposits, withdrawals and fees in real time and guide you step by step.",
   "ask_placeholder": "Describe your question…",
@@ -421,7 +404,6 @@
   "clear_chat": "Clear chat",
   "ticket_opened": "Request #{id} opened — an agent will reply here and in the bot chat.",
   "rate_support": "Rate this answer",
-
   "profile_title": "Profile",
   "language": "Language",
   "currency": "Display currency",
@@ -487,7 +469,6 @@
   "doc_passport": "Passport",
   "doc_id": "ID card",
   "doc_license": "Driver's license",
-
   "outside_title": "Zohra Wallet lives in Telegram",
   "outside_sub": "Your crypto wallet with every network, free instant transfers, swaps and P2P — right inside Telegram.",
   "open_in_telegram": "Open in Telegram",
@@ -495,7 +476,6 @@
   "perk1": "10 networks, one wallet",
   "perk2": "Free instant transfers",
   "perk3": "PIN & escrow protection",
-
   "welcome_title": "Welcome, {name}",
   "ob1_title": "Every network. One wallet.",
   "ob1_sub": "TRON, TON, BNB Chain, Ethereum, Solana, Polygon, Arbitrum, Base, Bitcoin and Avalanche.",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN, escrow, address whitelists and 24/7 monitoring keep your funds safe.",
   "get_started": "Get started",
   "later": "Later",
-
   "err_auth_required": "Please open Zohra Wallet from Telegram.",
   "err_auth_invalid": "Session check failed. Reopen the app from the bot.",
   "err_auth_expired": "Your session expired. Reopen the app from the bot.",
@@ -599,5 +578,13 @@
   "err_user_not_found": "User not found.",
   "err_bad_phone": "Invalid phone number.",
   "err_phone_used": "This phone is linked to another account.",
-  "err_deposit_unassignable": "This deposit can't be assigned automatically."
+  "err_deposit_unassignable": "This deposit can't be assigned automatically.",
+  "market_stats": "Market",
+  "market_rank": "Rank",
+  "market_cap": "Market cap",
+  "volume_24h": "Volume 24h",
+  "high_24h": "24h high",
+  "low_24h": "24h low",
+  "all_time_high": "All-time high",
+  "circulating_supply": "Circulating supply"
 }

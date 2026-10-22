@@ -45,7 +45,6 @@
   "maintenance_title": "Zohra Wallet अपग्रेड हो रहा है",
   "update_ready": "नया वर्शन तैयार है",
   "update_now": "अपडेट करें",
-
   "status_pending": "लंबित",
   "status_processing": "प्रोसेस हो रहा है",
   "status_completed": "पूरा हुआ",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "एजेंट की प्रतीक्षा",
   "status_answered": "उत्तर दिया गया",
   "status_open": "खुला",
-
   "tx_deposit": "जमा",
   "tx_withdraw": "निकासी",
   "tx_send": "भेजा",
@@ -82,13 +80,11 @@
   "tx_referral": "रेफ़रल इनाम",
   "tx_reward": "इनाम",
   "tx_adjust": "समायोजन",
-
   "nav_home": "वॉलेट",
   "nav_swap": "स्वैप",
   "nav_p2p": "P2P",
   "nav_rewards": "इनाम",
   "nav_profile": "प्रोफ़ाइल",
-
   "total_balance": "कुल बैलेंस",
   "hide_balance": "बैलेंस छिपाएँ",
   "today_change": "आज",
@@ -114,14 +110,12 @@
   "price_updated": "कीमतें अपडेट हुईं {time}",
   "notifications": "सूचनाएँ",
   "no_notifications": "कोई नई सूचना नहीं",
-
   "price": "कीमत",
   "change_24h": "24घं",
   "networks_label": "नेटवर्क",
   "recent_activity": "हाल की गतिविधि",
   "no_activity": "अभी कोई गतिविधि नहीं",
   "in_orders": "ऑर्डर में",
-
   "deposit_title": "जमा करें",
   "choose_asset": "कॉइन चुनें",
   "choose_network": "नेटवर्क चुनें",
@@ -153,7 +147,6 @@
   "connected_wallet": "कनेक्टेड: {address}",
   "amount_to_deposit": "जमा राशि",
   "deposit_sent": "आपके वॉलेट से भेजा गया। कुछ सेकंड में यहाँ दिखेगा।",
-
   "send_title": "भेजें",
   "send_to_user": "Zohra Wallet यूज़र को",
   "send_to_user_sub": "@username से — तुरंत और मुफ़्त",
@@ -171,7 +164,6 @@
   "send_now": "अभी भेजें",
   "sent_success": "{name} को भेजा गया",
   "instant_free": "तुरंत · मुफ़्त",
-
   "pick_contact_title": "कॉन्टैक्ट चुनें",
   "pick_contact_sub": "हम बॉट चैट में Telegram का कॉन्टैक्ट पिकर खोलेंगे। किसी व्यक्ति को चुनें और यहाँ वापस आएँ।",
   "open_picker": "कॉन्टैक्ट पिकर खोलें",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} Zohra Wallet इस्तेमाल करते हैं — ट्रांसफ़र तुरंत और मुफ़्त है।",
   "picked_not_registered": "{name} के पास अभी Zohra Wallet नहीं है। ऐसा गिफ़्ट भेजें जिसे सिर्फ़ वही क्लेम कर सकें।",
   "send_as_gift": "निजी गिफ़्ट के रूप में भेजें",
-
   "withdraw_title": "निकालें",
   "recipient_address": "प्राप्तकर्ता का पता",
   "paste": "पेस्ट करें",
@@ -195,7 +186,6 @@
   "fee_free_badge": "बिना शुल्क (इनाम)",
   "eta": "अनुमानित समय",
   "check_address_note": "पता और नेटवर्क दोबारा जाँचें। ब्लॉकचेन ट्रांसफ़र वापस नहीं हो सकते।",
-
   "swap_title": "स्वैप",
   "from": "से",
   "to": "में",
@@ -207,7 +197,6 @@
   "swap_now": "अभी स्वैप करें",
   "swap_success": "स्वैप पूरा हुआ",
   "enter_amount": "राशि दर्ज करें",
-
   "gift_title": "गिफ़्ट",
   "gift_who": "इसे कौन क्लेम कर सकता है?",
   "lock_user": "एक व्यक्ति",
@@ -243,13 +232,11 @@
   "expires_in": "समाप्ति {when}",
   "claimed_of": "{total} में से {n} क्लेम हुए",
   "choose_recipient": "प्राप्तकर्ता चुनें",
-
   "history_title": "इतिहास",
   "filter_in": "आने वाले",
   "filter_out": "जाने वाले",
   "filter_swaps": "स्वैप",
   "no_history": "आपके ट्रांज़ैक्शन यहाँ दिखेंगे",
-
   "tx_details": "ट्रांज़ैक्शन",
   "reference": "संदर्भ",
   "tx_hash_label": "ब्लॉकचेन हैश",
@@ -261,7 +248,6 @@
   "to_label": "को",
   "cancel_request": "अनुरोध रद्द करें",
   "confirmations_progress": "{n}/{need} पुष्टियाँ",
-
   "p2p_title": "P2P",
   "buy": "खरीदें",
   "sell": "बेचें",
@@ -348,7 +334,6 @@
   "field_papara_no": "Papara नंबर",
   "field_upi_id": "UPI ID",
   "field_pix_key": "PIX की",
-
   "referral_title": "दोस्तों को बुलाएँ",
   "referral_hero": "दोस्तों के शुल्क का {pct}% कमाएँ",
   "referral_hero_sub": "जुड़ने के बाद {days} दिनों तक · {asset} में भुगतान",
@@ -368,7 +353,6 @@
   "ref_step3": "वे जो भी शुल्क देते हैं उसका हिस्सा आपको मिलता है",
   "leaderboard": "इस महीने के टॉप इनवाइटर",
   "invite_text": "Zohra Wallet पर मेरे साथ जुड़ें — Telegram के अंदर क्रिप्टो वॉलेट, मुफ़्त तुरंत ट्रांसफ़र के साथ 🚀",
-
   "rewards_title": "इनाम",
   "daily_checkin": "दैनिक चेक-इन",
   "checkin_now": "चेक-इन करें",
@@ -391,7 +375,6 @@
   "kind_gift": "गिफ़्ट",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "P2P विज्ञापन",
-
   "support_title": "सपोर्ट",
   "ai_intro": "नमस्ते! मैं {name} हूँ। मैं आपकी जमा, निकासी और शुल्क रियल टाइम में जाँच सकता हूँ और कदम-दर-कदम मार्गदर्शन कर सकता हूँ।",
   "ask_placeholder": "अपना सवाल बताएँ…",
@@ -421,7 +404,6 @@
   "clear_chat": "चैट साफ़ करें",
   "ticket_opened": "अनुरोध #{id} खोला गया — एजेंट यहाँ और बॉट चैट में जवाब देगा।",
   "rate_support": "इस जवाब को रेट करें",
-
   "profile_title": "प्रोफ़ाइल",
   "language": "भाषा",
   "currency": "प्रदर्शन मुद्रा",
@@ -487,7 +469,6 @@
   "doc_passport": "पासपोर्ट",
   "doc_id": "पहचान पत्र",
   "doc_license": "ड्राइविंग लाइसेंस",
-
   "outside_title": "Zohra Wallet Telegram में रहता है",
   "outside_sub": "हर नेटवर्क, मुफ़्त तुरंत ट्रांसफ़र, स्वैप और P2P वाला आपका क्रिप्टो वॉलेट — सीधे Telegram में।",
   "open_in_telegram": "Telegram में खोलें",
@@ -495,7 +476,6 @@
   "perk1": "10 नेटवर्क, एक वॉलेट",
   "perk2": "मुफ़्त तुरंत ट्रांसफ़र",
   "perk3": "PIN और एस्क्रो सुरक्षा",
-
   "welcome_title": "स्वागत है, {name}",
   "ob1_title": "हर नेटवर्क। एक वॉलेट।",
   "ob1_sub": "TRON, TON, BNB Chain, Ethereum, Solana, Polygon, Arbitrum, Base, Bitcoin और Avalanche।",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN, एस्क्रो, भरोसेमंद पतों की सूची और 24/7 निगरानी आपके फंड सुरक्षित रखते हैं।",
   "get_started": "शुरू करें",
   "later": "बाद में",
-
   "err_auth_required": "कृपया Zohra Wallet को Telegram से खोलें।",
   "err_auth_invalid": "सेशन जाँच विफल। बॉट से ऐप दोबारा खोलें।",
   "err_auth_expired": "आपका सेशन समाप्त हो गया। बॉट से ऐप दोबारा खोलें।",
@@ -599,5 +578,13 @@
   "err_user_not_found": "यूज़र नहीं मिला।",
   "err_bad_phone": "अमान्य फ़ोन नंबर।",
   "err_phone_used": "यह फ़ोन किसी दूसरे खाते से जुड़ा है।",
-  "err_deposit_unassignable": "यह जमा अपने आप असाइन नहीं हो सकती।"
+  "err_deposit_unassignable": "यह जमा अपने आप असाइन नहीं हो सकती।",
+  "market_stats": "बाज़ार",
+  "market_rank": "रैंक",
+  "market_cap": "मार्केट कैप",
+  "volume_24h": "वॉल्यूम 24घं",
+  "high_24h": "24घं उच्च",
+  "low_24h": "24घं निम्न",
+  "all_time_high": "सर्वकालिक उच्च",
+  "circulating_supply": "परिसंचारी आपूर्ति"
 }

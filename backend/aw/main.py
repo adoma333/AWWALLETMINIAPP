@@ -1,13 +1,15 @@
 """Zohra Wallet API (FastAPI). Users authenticate with Telegram initData on every request (header X-Init-Data)."""
+import asyncio
+import json
 import logging
 import time
 from contextlib import asynccontextmanager
 from decimal import Decimal
 
 from fastapi import Body, Depends, FastAPI, Header, Query, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
-from . import (admin_api, admin_auth, bot, catalog, config, db, deposits, fees, files, gifts, guard, ledger, p2p, prices, referral,
+from . import (admin_api, admin_auth, bot, catalog, coinmeta, config, db, deposits, fees, files, gifts, guard, ledger, p2p, prices, referral,
                rewards, settings, support, swap, transfers, ton_connect, users, withdrawals)
 from .money import AppError, D, s
 from .security import limiter, receipt_sig, verify_init_data
@@ -234,12 +236,51 @@ def wallet(u: dict = Depends(current_user)):
             "fx": prices.fx(), "updated_at": db.val("SELECT MAX(updated_at) FROM prices", (), 0)}
 
 
+# ───────────────────────── live prices ─────────────────────────
+_STREAMS = {"n": 0}
+MAX_STREAMS = 3000
+
+
+@app.get("/api/prices")
+def prices_now():
+    return prices.snapshot()
+
+
+@app.get("/api/prices/stream")
+async def prices_stream(request: Request):
+    """Server-sent events: the full ticker on connect, then every refresh. Closes after 30 min (the browser reconnects)."""
+    if _STREAMS["n"] >= MAX_STREAMS:
+        raise AppError("busy", 503)
+
+    async def gen():
+        _STREAMS["n"] += 1
+        try:
+            last, quiet, until = -1, 0, time.time() + 1800
+            yield "retry: 5000\n\n"
+            while time.time() < until and not await request.is_disconnected():
+                snap = prices.snapshot()
+                if snap["at"] != last:
+                    last, quiet = snap["at"], 0
+                    yield f"data: {json.dumps(snap, separators=(',', ':'))}\n\n"
+                else:
+                    quiet += 1
+                    if quiet % 8 == 0:
+                        yield ": ping\n\n"
+                await asyncio.sleep(2)
+        finally:
+            _STREAMS["n"] -= 1
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no", "Connection": "keep-alive"})
+
+
 @app.get("/api/assets/{asset}")
 def asset_detail(asset: str, u: dict = Depends(current_user)):
     a = next((x for x in _assets_out(u) if x["id"] == asset.upper()), None)
     if not a:
         raise AppError("not_found", 404)
     a["chart"] = prices.history(asset.upper(), 24 * 7)
+    a["market"] = coinmeta.market(asset.upper())
     a["txs"] = db.q("SELECT id,type,status,asset,amount,fee,asset2,amount2,network,counterparty,created_at FROM txs WHERE user_id=? "
                     "AND (asset=? OR asset2=?) ORDER BY created_at DESC LIMIT 20", (u["id"], asset.upper(), asset.upper()))
     return a

@@ -6,7 +6,7 @@ import signal
 import threading
 import time
 
-from . import catalog, db, deposits, gifts, keys, p2p, prices, tg, treasury, withdrawals
+from . import catalog, coinmeta, db, deposits, gifts, keys, p2p, prices, settings, tg, treasury, withdrawals
 from .chains.base import state_set
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -74,6 +74,13 @@ def _fx():
     prices.refresh_fx()
 
 
+def _coinmeta():
+    try:
+        coinmeta.sync()
+    except Exception as e:  # offline or rate-limited: try again tomorrow
+        log.warning("coin metadata sync failed: %s", e)
+
+
 def _heartbeat():
     state_set("worker:heartbeat", db.now())
 
@@ -85,7 +92,8 @@ def main():
     signal.signal(signal.SIGTERM, lambda *_: STOP.set())
     signal.signal(signal.SIGINT, lambda *_: STOP.set())
     loop("outbox", 1, tg.flush)
-    loop("prices", 60, prices.refresh)
+    loop("prices", max(5, int(settings.get("swap").get("refresh_sec", 15))), prices.refresh)
+    loop("coinmeta", 86400, _coinmeta, 90)
     loop("fx", 3600, _fx)
     loop("withdrawals", 20, _withdrawals, 5)
     loop("expiries", 30, _expiries, 10)

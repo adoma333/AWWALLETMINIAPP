@@ -45,7 +45,6 @@
   "maintenance_title": "نقوم بتحديث Zohra Wallet",
   "update_ready": "إصدار جديد جاهز",
   "update_now": "حدّث",
-
   "status_pending": "قيد الانتظار",
   "status_processing": "قيد المعالجة",
   "status_completed": "مكتملة",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "بانتظار الموظف",
   "status_answered": "تم الرد",
   "status_open": "مفتوح",
-
   "tx_deposit": "إيداع",
   "tx_withdraw": "سحب",
   "tx_send": "تحويل مُرسل",
@@ -82,13 +80,11 @@
   "tx_referral": "مكافأة إحالة",
   "tx_reward": "مكافأة",
   "tx_adjust": "تسوية",
-
   "nav_home": "المحفظة",
   "nav_swap": "تبديل",
   "nav_p2p": "P2P",
   "nav_rewards": "المكافآت",
   "nav_profile": "حسابي",
-
   "total_balance": "إجمالي الرصيد",
   "hide_balance": "إخفاء الرصيد",
   "today_change": "اليوم",
@@ -114,14 +110,12 @@
   "price_updated": "تم تحديث الأسعار {time}",
   "notifications": "الإشعارات",
   "no_notifications": "لا توجد إشعارات جديدة",
-
   "price": "السعر",
   "change_24h": "24 ساعة",
   "networks_label": "الشبكات",
   "recent_activity": "آخر العمليات",
   "no_activity": "لا توجد عمليات بعد",
   "in_orders": "محجوز في الطلبات",
-
   "deposit_title": "إيداع",
   "choose_asset": "اختر العملة",
   "choose_network": "اختر الشبكة",
@@ -153,7 +147,6 @@
   "connected_wallet": "المحفظة المرتبطة: {address}",
   "amount_to_deposit": "مبلغ الإيداع",
   "deposit_sent": "تم الإرسال من محفظتك. سيظهر هنا خلال ثوانٍ.",
-
   "send_title": "إرسال",
   "send_to_user": "إلى مستخدم Zohra Wallet",
   "send_to_user_sub": "عبر @اسم_المستخدم — فوري ومجاني",
@@ -171,7 +164,6 @@
   "send_now": "أرسل الآن",
   "sent_success": "تم الإرسال إلى {name}",
   "instant_free": "فوري · مجاني",
-
   "pick_contact_title": "اختر جهة اتصال",
   "pick_contact_sub": "سنفتح لك قائمة جهات الاتصال في محادثة البوت. اختر الشخص ثم عُد إلى هنا.",
   "open_picker": "فتح قائمة جهات الاتصال",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} يستخدم Zohra Wallet — التحويل فوري ومجاني.",
   "picked_not_registered": "{name} لا يملك Zohra Wallet بعد. أرسل له هدية لا يستطيع استلامها أحد غيره.",
   "send_as_gift": "أرسلها كهدية شخصية",
-
   "withdraw_title": "سحب",
   "recipient_address": "عنوان المستلم",
   "paste": "لصق",
@@ -195,7 +186,6 @@
   "fee_free_badge": "بدون رسوم (مكافأة)",
   "eta": "الوقت المتوقع",
   "check_address_note": "تأكد جيدًا من العنوان والشبكة. التحويلات على البلوكتشين لا يمكن التراجع عنها.",
-
   "swap_title": "تبديل",
   "from": "من",
   "to": "إلى",
@@ -207,7 +197,6 @@
   "swap_now": "بدّل الآن",
   "swap_success": "تم التبديل بنجاح",
   "enter_amount": "أدخل المبلغ",
-
   "gift_title": "هدية",
   "gift_who": "من يمكنه استلامها؟",
   "lock_user": "شخص واحد",
@@ -243,13 +232,11 @@
   "expires_in": "تنتهي {when}",
   "claimed_of": "تم استلام {n} من {total}",
   "choose_recipient": "اختر المستلم",
-
   "history_title": "السجل",
   "filter_in": "وارد",
   "filter_out": "صادر",
   "filter_swaps": "تبديل",
   "no_history": "ستظهر عملياتك هنا",
-
   "tx_details": "تفاصيل العملية",
   "reference": "رقم المرجع",
   "tx_hash_label": "رمز المعاملة على البلوكتشين",
@@ -261,7 +248,6 @@
   "to_label": "إلى",
   "cancel_request": "إلغاء الطلب",
   "confirmations_progress": "{n}/{need} تأكيدات",
-
   "p2p_title": "P2P",
   "buy": "شراء",
   "sell": "بيع",
@@ -348,7 +334,6 @@
   "field_papara_no": "رقم Papara",
   "field_upi_id": "معرّف UPI",
   "field_pix_key": "مفتاح PIX",
-
   "referral_title": "ادعُ أصدقاءك",
   "referral_hero": "اربح {pct}% من الرسوم التي يدفعها أصدقاؤك",
   "referral_hero_sub": "لمدة {days} يومًا من انضمامهم · تُدفع بعملة {asset}",
@@ -368,7 +353,6 @@
   "ref_step3": "تربح نسبة من كل رسوم يدفعونها",
   "leaderboard": "أفضل الداعين هذا الشهر",
   "invite_text": "انضم إليّ في Zohra Wallet — محفظة عملات رقمية داخل تلجرام مع تحويلات فورية مجانية 🚀",
-
   "rewards_title": "المكافآت",
   "daily_checkin": "تسجيل الحضور اليومي",
   "checkin_now": "سجّل حضورك",
@@ -391,7 +375,6 @@
   "kind_gift": "الهدايا",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "إعلانات P2P",
-
   "support_title": "الدعم",
   "ai_intro": "مرحبًا! أنا {name}. أستطيع التحقق من إيداعاتك وسحوباتك ورسومك لحظيًا وإرشادك خطوة بخطوة.",
   "ask_placeholder": "اكتب سؤالك…",
@@ -421,7 +404,6 @@
   "clear_chat": "مسح المحادثة",
   "ticket_opened": "تم فتح الطلب رقم {id} — سيرد عليك موظف هنا وفي محادثة البوت.",
   "rate_support": "قيّم هذا الرد",
-
   "profile_title": "الملف الشخصي",
   "language": "اللغة",
   "currency": "عملة العرض",
@@ -487,7 +469,6 @@
   "doc_passport": "جواز سفر",
   "doc_id": "بطاقة هوية",
   "doc_license": "رخصة قيادة",
-
   "outside_title": "Zohra Wallet تعمل داخل تلجرام",
   "outside_sub": "محفظتك للعملات الرقمية بكل الشبكات، تحويلات فورية مجانية، تبديل وP2P — داخل تلجرام مباشرة.",
   "open_in_telegram": "افتح في تلجرام",
@@ -495,7 +476,6 @@
   "perk1": "10 شبكات في محفظة واحدة",
   "perk2": "تحويلات فورية مجانية",
   "perk3": "حماية برمز PIN ونظام ضمان",
-
   "welcome_title": "أهلاً بك يا {name}",
   "ob1_title": "كل الشبكات. محفظة واحدة.",
   "ob1_sub": "TRON وTON وBNB Chain وEthereum وSolana وPolygon وArbitrum وBase وBitcoin وAvalanche.",
@@ -505,7 +485,6 @@
   "ob3_sub": "رمز PIN ونظام الضمان وقوائم العناوين الموثوقة ومراقبة على مدار الساعة تحمي أموالك.",
   "get_started": "ابدأ الآن",
   "later": "لاحقًا",
-
   "err_auth_required": "يرجى فتح Zohra Wallet من تلجرام.",
   "err_auth_invalid": "فشل التحقق من الجلسة. أعد فتح التطبيق من البوت.",
   "err_auth_expired": "انتهت الجلسة. أعد فتح التطبيق من البوت.",
@@ -599,5 +578,13 @@
   "err_user_not_found": "المستخدم غير موجود.",
   "err_bad_phone": "رقم الهاتف غير صالح.",
   "err_phone_used": "هذا الرقم مرتبط بحساب آخر.",
-  "err_deposit_unassignable": "لا يمكن إسناد هذا الإيداع تلقائيًا."
+  "err_deposit_unassignable": "لا يمكن إسناد هذا الإيداع تلقائيًا.",
+  "market_stats": "السوق",
+  "market_rank": "الترتيب",
+  "market_cap": "القيمة السوقية",
+  "volume_24h": "حجم التداول 24س",
+  "high_24h": "أعلى سعر 24س",
+  "low_24h": "أدنى سعر 24س",
+  "all_time_high": "أعلى سعر تاريخي",
+  "circulating_supply": "المعروض المتداول"
 }

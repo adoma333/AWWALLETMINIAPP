@@ -23,6 +23,17 @@ import uni from '../assets/coins/uni.svg';
 import usdc from '../assets/coins/usdc.svg';
 import usdt from '../assets/coins/usdt.svg';
 import xrp from '../assets/coins/xrp.svg';
+import cro from '../assets/coins/cro.svg';
+import cronos from '../assets/coins/cronos.svg';
+import gnosis from '../assets/coins/gnosis.svg';
+import linea from '../assets/coins/linea.svg';
+import mantle from '../assets/coins/mantle.svg';
+import mnt from '../assets/coins/mnt.svg';
+import op from '../assets/coins/op.svg';
+import optimism from '../assets/coins/optimism.svg';
+import scroll from '../assets/coins/scroll.svg';
+import sonic from '../assets/coins/sonic.svg';
+import unichain from '../assets/coins/unichain.svg';
 
 import {
   AddressBook, ArrowClockwise, ArrowDown, ArrowRight, ArrowSquareOut, ArrowUp, ArrowsLeftRight, Bank, Bell, BookOpen, Calculator, CalendarBlank,
@@ -60,8 +71,10 @@ export default function Icon({ name, size = 22, className = '', style, weight = 
 }
 
 const COINS = { USDT: usdt, USDC: usdc, BTC: btc, ETH: eth, TON: ton, BNB: bnb, SOL: sol, TRX: trx, POL: pol, AVAX: avax, ARB: arb, DAI: dai,
-  FDUSD: fdusd, DOGE: doge, XRP: xrp, LINK: link, UNI: uni, CAKE: cake, SHIB: shib, PEPE: pepe, NOT: notc, DOGS: dogs };
-const NETS = { tron: trx, ton, bsc: bnb, eth, sol, polygon: pol, arbitrum: arb, base, btc, avax };
+  FDUSD: fdusd, DOGE: doge, XRP: xrp, LINK: link, UNI: uni, CAKE: cake, SHIB: shib, PEPE: pepe, NOT: notc, DOGS: dogs,
+  OP: op, MNT: mnt, CRO: cro, S: sonic, XDAI: gnosis };
+const NETS = { tron: trx, ton, bsc: bnb, eth, sol, polygon: pol, arbitrum: arb, base, btc, avax,
+  optimism, linea, scroll, unichain, opbnb: bnb, mantle, gnosis, sonic, cronos };
 
 function Fallback({ label, size, color }) {
   return (

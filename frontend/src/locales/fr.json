@@ -45,7 +45,6 @@
   "maintenance_title": "Mise à jour d'Zohra Wallet",
   "update_ready": "Une nouvelle version est prête",
   "update_now": "Mettre à jour",
-
   "status_pending": "En attente",
   "status_processing": "En cours",
   "status_completed": "Terminé",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "En attente d'un agent",
   "status_answered": "Répondu",
   "status_open": "Ouvert",
-
   "tx_deposit": "Dépôt",
   "tx_withdraw": "Retrait",
   "tx_send": "Envoyé",
@@ -82,13 +80,11 @@
   "tx_referral": "Récompense de parrainage",
   "tx_reward": "Récompense",
   "tx_adjust": "Ajustement",
-
   "nav_home": "Portefeuille",
   "nav_swap": "Échanger",
   "nav_p2p": "P2P",
   "nav_rewards": "Récompenses",
   "nav_profile": "Profil",
-
   "total_balance": "Solde total",
   "hide_balance": "Masquer le solde",
   "today_change": "aujourd'hui",
@@ -114,14 +110,12 @@
   "price_updated": "Prix mis à jour {time}",
   "notifications": "Notifications",
   "no_notifications": "Aucune nouvelle notification",
-
   "price": "Prix",
   "change_24h": "24 h",
   "networks_label": "Réseaux",
   "recent_activity": "Activité récente",
   "no_activity": "Aucune activité pour le moment",
   "in_orders": "En ordres",
-
   "deposit_title": "Dépôt",
   "choose_asset": "Choisissez une crypto",
   "choose_network": "Choisissez un réseau",
@@ -153,7 +147,6 @@
   "connected_wallet": "Connecté : {address}",
   "amount_to_deposit": "Montant à déposer",
   "deposit_sent": "Envoyé depuis votre portefeuille. Il apparaîtra ici dans quelques secondes.",
-
   "send_title": "Envoyer",
   "send_to_user": "À un utilisateur Zohra Wallet",
   "send_to_user_sub": "Par @pseudo — instantané et gratuit",
@@ -171,7 +164,6 @@
   "send_now": "Envoyer",
   "sent_success": "Envoyé à {name}",
   "instant_free": "Instantané · Gratuit",
-
   "pick_contact_title": "Choisir un contact",
   "pick_contact_sub": "Nous ouvrons le sélecteur de contacts de Telegram dans la discussion avec le bot. Choisissez une personne puis revenez ici.",
   "open_picker": "Ouvrir le sélecteur",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} utilise Zohra Wallet — le transfert est instantané et gratuit.",
   "picked_not_registered": "{name} n'a pas encore Zohra Wallet. Envoyez un cadeau que lui seul pourra récupérer.",
   "send_as_gift": "Envoyer en cadeau personnel",
-
   "withdraw_title": "Retrait",
   "recipient_address": "Adresse du destinataire",
   "paste": "Coller",
@@ -195,7 +186,6 @@
   "fee_free_badge": "Sans frais (récompense)",
   "eta": "Délai estimé",
   "check_address_note": "Vérifiez bien l'adresse et le réseau. Les transferts blockchain sont irréversibles.",
-
   "swap_title": "Échanger",
   "from": "De",
   "to": "Vers",
@@ -207,7 +197,6 @@
   "swap_now": "Échanger",
   "swap_success": "Échange effectué",
   "enter_amount": "Saisissez un montant",
-
   "gift_title": "Cadeau",
   "gift_who": "Qui peut le récupérer ?",
   "lock_user": "Une personne",
@@ -243,13 +232,11 @@
   "expires_in": "Expire {when}",
   "claimed_of": "{n} sur {total} récupérés",
   "choose_recipient": "Choisir le destinataire",
-
   "history_title": "Historique",
   "filter_in": "Entrées",
   "filter_out": "Sorties",
   "filter_swaps": "Échanges",
   "no_history": "Vos transactions apparaîtront ici",
-
   "tx_details": "Transaction",
   "reference": "Référence",
   "tx_hash_label": "Hash blockchain",
@@ -261,7 +248,6 @@
   "to_label": "À",
   "cancel_request": "Annuler la demande",
   "confirmations_progress": "{n}/{need} confirmations",
-
   "p2p_title": "P2P",
   "buy": "Acheter",
   "sell": "Vendre",
@@ -348,7 +334,6 @@
   "field_papara_no": "Numéro Papara",
   "field_upi_id": "ID UPI",
   "field_pix_key": "Clé PIX",
-
   "referral_title": "Inviter des amis",
   "referral_hero": "Gagnez {pct} % des frais payés par vos amis",
   "referral_hero_sub": "Pendant {days} jours après leur inscription · payé en {asset}",
@@ -368,7 +353,6 @@
   "ref_step3": "Vous touchez une part de chaque frais qu'ils paient",
   "leaderboard": "Meilleurs parrains du mois",
   "invite_text": "Rejoins-moi sur Zohra Wallet — un portefeuille crypto dans Telegram avec des transferts instantanés gratuits 🚀",
-
   "rewards_title": "Récompenses",
   "daily_checkin": "Présence quotidienne",
   "checkin_now": "Valider",
@@ -391,7 +375,6 @@
   "kind_gift": "cadeaux",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "annonces P2P",
-
   "support_title": "Support",
   "ai_intro": "Bonjour ! Je suis {name}. Je peux vérifier vos dépôts, retraits et frais en temps réel et vous guider pas à pas.",
   "ask_placeholder": "Décrivez votre question…",
@@ -421,7 +404,6 @@
   "clear_chat": "Effacer la discussion",
   "ticket_opened": "Demande n°{id} ouverte — un conseiller répondra ici et dans la discussion avec le bot.",
   "rate_support": "Évaluez cette réponse",
-
   "profile_title": "Profil",
   "language": "Langue",
   "currency": "Devise d'affichage",
@@ -487,7 +469,6 @@
   "doc_passport": "Passeport",
   "doc_id": "Carte d'identité",
   "doc_license": "Permis de conduire",
-
   "outside_title": "Zohra Wallet fonctionne dans Telegram",
   "outside_sub": "Votre portefeuille crypto avec tous les réseaux, transferts instantanés gratuits, échanges et P2P — directement dans Telegram.",
   "open_in_telegram": "Ouvrir dans Telegram",
@@ -495,7 +476,6 @@
   "perk1": "10 réseaux, un seul portefeuille",
   "perk2": "Transferts instantanés gratuits",
   "perk3": "Protection par PIN et séquestre",
-
   "welcome_title": "Bienvenue, {name}",
   "ob1_title": "Tous les réseaux. Un portefeuille.",
   "ob1_sub": "TRON, TON, BNB Chain, Ethereum, Solana, Polygon, Arbitrum, Base, Bitcoin et Avalanche.",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN, séquestre, listes d'adresses de confiance et surveillance 24h/24 protègent vos fonds.",
   "get_started": "Commencer",
   "later": "Plus tard",
-
   "err_auth_required": "Veuillez ouvrir Zohra Wallet depuis Telegram.",
   "err_auth_invalid": "Échec de la vérification de session. Rouvrez l'application depuis le bot.",
   "err_auth_expired": "Votre session a expiré. Rouvrez l'application depuis le bot.",
@@ -599,5 +578,13 @@
   "err_user_not_found": "Utilisateur introuvable.",
   "err_bad_phone": "Numéro de téléphone invalide.",
   "err_phone_used": "Ce numéro est lié à un autre compte.",
-  "err_deposit_unassignable": "Ce dépôt ne peut pas être attribué automatiquement."
+  "err_deposit_unassignable": "Ce dépôt ne peut pas être attribué automatiquement.",
+  "market_stats": "Marché",
+  "market_rank": "Rang",
+  "market_cap": "Capitalisation",
+  "volume_24h": "Volume 24 h",
+  "high_24h": "Plus haut 24 h",
+  "low_24h": "Plus bas 24 h",
+  "all_time_high": "Plus haut historique",
+  "circulating_supply": "Offre en circulation"
 }

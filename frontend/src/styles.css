@@ -605,3 +605,14 @@ html[lang='ar'] .btn, html[lang='fa'] .btn { font-family: var(--font-body); font
   .bn-item span { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* live price tick */
+@keyframes tick-up { from { color: var(--ok); } }
+@keyframes tick-down { from { color: var(--danger); } }
+.tick-up { animation: tick-up 1.2s ease-out; }
+.tick-down { animation: tick-down 1.2s ease-out; }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line-dim); border-radius: var(--radius); overflow: hidden; }
+.stat-cell { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; background: var(--surface); }
+.stat-cell small { color: var(--ash); font-size: 12px; }
+.stat-cell b { font-weight: 600; font-size: 15px; }

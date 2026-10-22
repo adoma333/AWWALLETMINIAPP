@@ -496,3 +496,34 @@ def test_admin_verifies_network_tokens_on_chain(client, monkeypatch):
     assert r["fixed"] == 1 and catalog.asset_network("USDC", "optimism")["decimals"] == 6
     assert client.post("/api/admin/networks/optimism/verify", json={}, headers=h).json()["ok"]
     assert client.post("/api/admin/networks/tron/verify", json={}, headers=h).status_code == 400
+
+
+def test_coin_metadata_sync_follows_official_names_but_keeps_admin_edits(client, monkeypatch):
+    import base64 as b64
+
+    from aw import coinmeta
+
+    png = b64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
+    market = [{"id": "the-open-network", "name": "Gram", "image": "https://img.example/ton.png", "market_cap": 1.5e10, "market_cap_rank": 12},
+              {"id": "tether", "name": "Tether", "image": "https://img.example/usdt.png"}]
+    monkeypatch.setitem(coinmeta.HTTP, "get", lambda url, params=None: market)
+    monkeypatch.setitem(coinmeta.HTTP, "download", lambda url: png)
+    db.x("UPDATE assets SET name='My Tether' WHERE id='USDT'")  # an admin rename
+    r = coinmeta.sync()
+    assert "TON" in r["renamed"] and "USDT" not in r["renamed"] and r["logos"] == 2
+    assert catalog.asset("TON")["name"] == "Gram" and catalog.asset("USDT")["name"] == "My Tether"
+    assert coinmeta.market("TON")["market_cap_rank"] == 12
+    icon = db.one("SELECT path FROM icons WHERE key='asset:TON'")["path"]
+    assert icon.startswith("icons/") and icon.endswith(".png")
+    # an admin-uploaded logo is never replaced
+    db.x("UPDATE icons SET path='icons/" + "a" * 32 + ".png' WHERE key='asset:TON'")
+    market[0]["image"] = "https://img.example/ton-v2.png"
+    coinmeta.sync()
+    assert db.one("SELECT path FROM icons WHERE key='asset:TON'")["path"] == "icons/" + "a" * 32 + ".png"
+    # a later official rename still follows, an SVG/HTML "logo" is refused
+    market[0]["name"] = "Toncoin (ex-Gram)"
+    monkeypatch.setitem(coinmeta.HTTP, "download", lambda url: b"<html><script>x</script></html>")
+    coinmeta.sync()
+    assert catalog.asset("TON")["name"] == "Toncoin"
+    snap = client.get("/api/prices").json()
+    assert "p" in snap and "at" in snap

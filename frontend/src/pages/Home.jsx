@@ -137,7 +137,7 @@ export default function Home() {
               <CoinIcon asset={a.id} size={42} />
               <span className="ar-main">
                 <b>{a.id}{a.badges?.map((b) => <span key={b} className="mini-badge">{b}</span>)}</b>
-                <small dir="ltr">{priceFmt(a.usd)} <i className={ch >= 0 ? 'up' : 'down'}>{pct(ch)}</i></small>
+                <small dir="ltr"><span key={a.usd} className={a.tick ? `tick-${a.tick}` : undefined}>{priceFmt(a.usd)}</span> <i className={ch >= 0 ? 'up' : 'down'}>{pct(ch)}</i></small>
               </span>
               <span className="ar-right" dir="ltr">
                 <b>{hidden ? '•••' : amt(bal, a.display)}</b>

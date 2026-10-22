@@ -34,8 +34,13 @@ function Assets({ data, reload, edit }) {
   const [open, setOpen] = useState(null);
   const [adding, setAdding] = useState(false);
   return (
-    <Card title={`${data.assets.length} coins`} right={edit && <Btn kind="primary" small onClick={() => setAdding(true)}>+ Add coin</Btn>}>
-      <p className="dim small">Turn a coin off to hide it everywhere. Swap / P2P / transfer switches control each feature separately. Icons can be replaced under Icons &amp; media (key <code>asset:SYMBOL</code>).</p>
+    <Card title={`${data.assets.length} coins`} right={edit && <>
+      <ActBtn small ok="Synced" onDone={reload} run={() => post('/coins/sync')}>Sync names &amp; logos</ActBtn>
+      <Btn kind="primary" small onClick={() => setAdding(true)}>+ Add coin</Btn>
+    </>}>
+      <p className="dim small">Turn a coin off to hide it everywhere. Swap / P2P / transfer switches control each feature separately.
+        Official names, logos and market data are refreshed daily (by each coin's CoinGecko id) and stored on your server. A coin you renamed, or a logo
+        you uploaded under Icons &amp; media (key <code>asset:SYMBOL</code>), is never overwritten.</p>
       <Table rows={data.assets} rowKey={(r) => r.id} cols={[
         ['Coin', (r) => <b>{r.id} <span className="dim small">{r.name}</span></b>],
         ['Price', (r) => (data.prices[r.id] ? <>{usd(data.prices[r.id].usd)} <span className="dim small">{fmtAgo(data.prices[r.id].updated_at)}</span></> : <span className="down">no price</span>), 'r'],

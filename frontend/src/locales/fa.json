@@ -45,7 +45,6 @@
   "maintenance_title": "Zohra Wallet در حال به‌روزرسانی است",
   "update_ready": "نسخه جدید آماده است",
   "update_now": "به‌روزرسانی",
-
   "status_pending": "در انتظار",
   "status_processing": "در حال پردازش",
   "status_completed": "انجام شد",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "در انتظار پشتیبان",
   "status_answered": "پاسخ داده شد",
   "status_open": "باز",
-
   "tx_deposit": "واریز",
   "tx_withdraw": "برداشت",
   "tx_send": "ارسال شده",
@@ -82,13 +80,11 @@
   "tx_referral": "پاداش معرفی",
   "tx_reward": "پاداش",
   "tx_adjust": "تعدیل",
-
   "nav_home": "کیف پول",
   "nav_swap": "تبدیل",
   "nav_p2p": "P2P",
   "nav_rewards": "جوایز",
   "nav_profile": "پروفایل",
-
   "total_balance": "موجودی کل",
   "hide_balance": "پنهان کردن موجودی",
   "today_change": "امروز",
@@ -114,14 +110,12 @@
   "price_updated": "قیمت‌ها به‌روز شد {time}",
   "notifications": "اعلان‌ها",
   "no_notifications": "اعلان جدیدی ندارید",
-
   "price": "قیمت",
   "change_24h": "۲۴ ساعت",
   "networks_label": "شبکه‌ها",
   "recent_activity": "تراکنش‌های اخیر",
   "no_activity": "هنوز تراکنشی ندارید",
   "in_orders": "در سفارش‌ها",
-
   "deposit_title": "واریز",
   "choose_asset": "ارز را انتخاب کنید",
   "choose_network": "شبکه را انتخاب کنید",
@@ -153,7 +147,6 @@
   "connected_wallet": "متصل: {address}",
   "amount_to_deposit": "مبلغ واریز",
   "deposit_sent": "از کیف پول شما ارسال شد. ظرف چند ثانیه اینجا نمایش داده می‌شود.",
-
   "send_title": "ارسال",
   "send_to_user": "به کاربر Zohra Wallet",
   "send_to_user_sub": "با @نام‌کاربری — فوری و رایگان",
@@ -171,7 +164,6 @@
   "send_now": "ارسال",
   "sent_success": "برای {name} ارسال شد",
   "instant_free": "فوری · رایگان",
-
   "pick_contact_title": "انتخاب مخاطب",
   "pick_contact_sub": "انتخابگر مخاطبان تلگرام را در گفتگوی ربات باز می‌کنیم. یک نفر را انتخاب کنید و به اینجا برگردید.",
   "open_picker": "باز کردن انتخابگر مخاطب",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} از Zohra Wallet استفاده می‌کند — انتقال فوری و رایگان است.",
   "picked_not_registered": "{name} هنوز Zohra Wallet ندارد. هدیه‌ای بفرستید که فقط خودش بتواند دریافت کند.",
   "send_as_gift": "ارسال به‌عنوان هدیه شخصی",
-
   "withdraw_title": "برداشت",
   "recipient_address": "آدرس گیرنده",
   "paste": "چسباندن",
@@ -195,7 +186,6 @@
   "fee_free_badge": "بدون کارمزد (جایزه)",
   "eta": "زمان تقریبی",
   "check_address_note": "آدرس و شبکه را دوباره بررسی کنید. انتقال‌های بلاکچین قابل بازگشت نیستند.",
-
   "swap_title": "تبدیل",
   "from": "از",
   "to": "به",
@@ -207,7 +197,6 @@
   "swap_now": "تبدیل کنید",
   "swap_success": "تبدیل انجام شد",
   "enter_amount": "مقدار را وارد کنید",
-
   "gift_title": "هدیه",
   "gift_who": "چه کسی می‌تواند آن را دریافت کند؟",
   "lock_user": "یک نفر",
@@ -243,13 +232,11 @@
   "expires_in": "انقضا {when}",
   "claimed_of": "{n} از {total} دریافت شده",
   "choose_recipient": "انتخاب گیرنده",
-
   "history_title": "تاریخچه",
   "filter_in": "ورودی",
   "filter_out": "خروجی",
   "filter_swaps": "تبدیل‌ها",
   "no_history": "تراکنش‌های شما اینجا نمایش داده می‌شود",
-
   "tx_details": "جزئیات تراکنش",
   "reference": "شماره پیگیری",
   "tx_hash_label": "هش بلاکچین",
@@ -261,7 +248,6 @@
   "to_label": "به",
   "cancel_request": "لغو درخواست",
   "confirmations_progress": "{n}/{need} تأیید",
-
   "p2p_title": "P2P",
   "buy": "خرید",
   "sell": "فروش",
@@ -348,7 +334,6 @@
   "field_papara_no": "شماره Papara",
   "field_upi_id": "شناسه UPI",
   "field_pix_key": "کلید PIX",
-
   "referral_title": "دعوت دوستان",
   "referral_hero": "{pct}% از کارمزد دوستانتان را دریافت کنید",
   "referral_hero_sub": "به مدت {days} روز پس از عضویت · پرداخت با {asset}",
@@ -368,7 +353,6 @@
   "ref_step3": "شما از هر کارمزدی که می‌پردازند سهم می‌برید",
   "leaderboard": "برترین دعوت‌کنندگان این ماه",
   "invite_text": "به Zohra Wallet بپیوند — کیف پول رمزارز داخل تلگرام با انتقال‌های فوری و رایگان 🚀",
-
   "rewards_title": "جوایز",
   "daily_checkin": "حضور روزانه",
   "checkin_now": "ثبت حضور",
@@ -391,7 +375,6 @@
   "kind_gift": "هدیه",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "آگهی‌های P2P",
-
   "support_title": "پشتیبانی",
   "ai_intro": "سلام! من {name} هستم. می‌توانم واریزها، برداشت‌ها و کارمزدهای شما را به‌صورت لحظه‌ای بررسی کنم و قدم‌به‌قدم راهنمایی‌تان کنم.",
   "ask_placeholder": "سؤال خود را بنویسید…",
@@ -421,7 +404,6 @@
   "clear_chat": "پاک کردن گفتگو",
   "ticket_opened": "درخواست شماره {id} باز شد — پشتیبان اینجا و در گفتگوی ربات پاسخ می‌دهد.",
   "rate_support": "به این پاسخ امتیاز دهید",
-
   "profile_title": "پروفایل",
   "language": "زبان",
   "currency": "ارز نمایش",
@@ -487,7 +469,6 @@
   "doc_passport": "گذرنامه",
   "doc_id": "کارت شناسایی",
   "doc_license": "گواهینامه رانندگی",
-
   "outside_title": "Zohra Wallet داخل تلگرام کار می‌کند",
   "outside_sub": "کیف پول رمزارز شما با همه شبکه‌ها، انتقال فوری و رایگان، تبدیل و P2P — مستقیماً داخل تلگرام.",
   "open_in_telegram": "باز کردن در تلگرام",
@@ -495,7 +476,6 @@
   "perk1": "۱۰ شبکه، یک کیف پول",
   "perk2": "انتقال فوری و رایگان",
   "perk3": "محافظت با PIN و امانت",
-
   "welcome_title": "خوش آمدید، {name}",
   "ob1_title": "همه شبکه‌ها. یک کیف پول.",
   "ob1_sub": "TRON، TON، BNB Chain، Ethereum، Solana، Polygon، Arbitrum، Base، Bitcoin و Avalanche.",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN، سیستم امانت، فهرست آدرس‌های مورد اعتماد و نظارت ۲۴ ساعته از دارایی شما محافظت می‌کنند.",
   "get_started": "شروع کنید",
   "later": "بعداً",
-
   "err_auth_required": "لطفاً Zohra Wallet را از داخل تلگرام باز کنید.",
   "err_auth_invalid": "تأیید نشست ناموفق بود. برنامه را دوباره از ربات باز کنید.",
   "err_auth_expired": "نشست شما منقضی شد. برنامه را دوباره از ربات باز کنید.",
@@ -599,5 +578,13 @@
   "err_user_not_found": "کاربر پیدا نشد.",
   "err_bad_phone": "شماره تلفن نامعتبر است.",
   "err_phone_used": "این شماره به حساب دیگری متصل است.",
-  "err_deposit_unassignable": "این واریز به‌طور خودکار قابل تخصیص نیست."
+  "err_deposit_unassignable": "این واریز به‌طور خودکار قابل تخصیص نیست.",
+  "market_stats": "بازار",
+  "market_rank": "رتبه",
+  "market_cap": "ارزش بازار",
+  "volume_24h": "حجم ۲۴س",
+  "high_24h": "بیشترین ۲۴س",
+  "low_24h": "کمترین ۲۴س",
+  "all_time_high": "بالاترین قیمت تاریخ",
+  "circulating_supply": "عرضه در گردش"
 }

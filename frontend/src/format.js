@@ -37,6 +37,12 @@ export function fiat(usd, digits = 2) {
   return `${v < 0 ? '−' : ''}${sym}${s}`;
 }
 
+export function fiatCompact(usd) {
+  const v = Number(usd || 0) * Number(FX[CUR] || 1);
+  const sym = SYMBOL[CUR] ?? `${CUR} `;
+  return sym + new Intl.NumberFormat(LOCALE, { notation: 'compact', maximumFractionDigits: 2 }).format(v);
+}
+
 export function priceFmt(usd) {
   const n = Number(usd || 0);
   if (n === 0) return fiat(0);

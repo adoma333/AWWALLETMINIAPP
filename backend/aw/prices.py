@@ -83,6 +83,17 @@ def _coingecko(syms: dict) -> dict:
 
 
 SOURCES = {"binance": _binance, "okx": _okx, "bybit": _bybit, "kucoin": _kucoin, "coingecko": _coingecko}
+MIN_INTERVAL = {"coingecko": 120}  # the public aggregator API is rate-limited; its last answer is reused in between
+_CACHE: dict[str, tuple[float, dict]] = {}
+
+
+def _fetch(name: str, fn, syms: dict) -> dict:
+    hit = _CACHE.get(name)
+    if hit and time.time() - hit[0] < MIN_INTERVAL.get(name, 0):
+        return hit[1]
+    res = fn(syms)
+    _CACHE[name] = (time.time(), res)
+    return res
 
 
 def refresh() -> dict:
@@ -94,7 +105,7 @@ def refresh() -> dict:
         if not fn:
             continue
         try:
-            for aid, (price, ch) in fn(syms).items():
+            for aid, (price, ch) in _fetch(name, fn, syms).items():
                 per_asset.setdefault(aid, {})[name] = (price, ch)
         except Exception as e:  # one source down is normal
             log.warning("price source %s failed: %s", name, e)
@@ -186,6 +197,12 @@ def side_price(asset: str, side: str) -> Decimal:
 
 def to_usd(asset: str, amount) -> Decimal:
     return D(amount) * usd(asset)
+
+
+def snapshot() -> dict:
+    """Public live ticker: {asset: [usd, change24h]} plus the time of the newest price."""
+    rows = db.q("SELECT p.asset, p.usd, p.change24h, p.updated_at FROM prices p JOIN assets a ON a.id=p.asset WHERE a.enabled=1")
+    return {"p": {r["asset"]: [r["usd"], r["change24h"]] for r in rows}, "at": max((r["updated_at"] or 0 for r in rows), default=0)}
 
 
 def history(asset: str, hours: int = 24) -> list:

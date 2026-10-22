@@ -45,7 +45,6 @@
   "maintenance_title": "Zohra Wallet оновлюється",
   "update_ready": "Нова версія готова",
   "update_now": "Оновити",
-
   "status_pending": "Очікує",
   "status_processing": "Обробляється",
   "status_completed": "Завершено",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "Очікує оператора",
   "status_answered": "Є відповідь",
   "status_open": "Відкрито",
-
   "tx_deposit": "Поповнення",
   "tx_withdraw": "Виведення",
   "tx_send": "Надіслано",
@@ -82,13 +80,11 @@
   "tx_referral": "Реферальна винагорода",
   "tx_reward": "Винагорода",
   "tx_adjust": "Коригування",
-
   "nav_home": "Гаманець",
   "nav_swap": "Обмін",
   "nav_p2p": "P2P",
   "nav_rewards": "Бонуси",
   "nav_profile": "Профіль",
-
   "total_balance": "Загальний баланс",
   "hide_balance": "Приховати баланс",
   "today_change": "сьогодні",
@@ -114,14 +110,12 @@
   "price_updated": "Ціни оновлено {time}",
   "notifications": "Сповіщення",
   "no_notifications": "Нових сповіщень немає",
-
   "price": "Ціна",
   "change_24h": "24 год",
   "networks_label": "Мережі",
   "recent_activity": "Остання активність",
   "no_activity": "Поки немає активності",
   "in_orders": "В ордерах",
-
   "deposit_title": "Поповнення",
   "choose_asset": "Оберіть монету",
   "choose_network": "Оберіть мережу",
@@ -153,7 +147,6 @@
   "connected_wallet": "Підключено: {address}",
   "amount_to_deposit": "Сума поповнення",
   "deposit_sent": "Надіслано з вашого гаманця. З'явиться тут за кілька секунд.",
-
   "send_title": "Надіслати",
   "send_to_user": "Користувачу Zohra Wallet",
   "send_to_user_sub": "За @username — миттєво й безкоштовно",
@@ -171,7 +164,6 @@
   "send_now": "Надіслати зараз",
   "sent_success": "Надіслано {name}",
   "instant_free": "Миттєво · Безкоштовно",
-
   "pick_contact_title": "Оберіть контакт",
   "pick_contact_sub": "Ми відкриємо вибір контактів Telegram у чаті з ботом. Оберіть людину й поверніться сюди.",
   "open_picker": "Відкрити вибір контактів",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} користується Zohra Wallet — переказ миттєвий і безкоштовний.",
   "picked_not_registered": "У {name} ще немає Zohra Wallet. Надішліть подарунок, який зможе отримати лише ця людина.",
   "send_as_gift": "Надіслати як особистий подарунок",
-
   "withdraw_title": "Виведення",
   "recipient_address": "Адреса отримувача",
   "paste": "Вставити",
@@ -195,7 +186,6 @@
   "fee_free_badge": "Без комісії (бонус)",
   "eta": "Орієнтовний час",
   "check_address_note": "Ще раз перевірте адресу й мережу. Перекази в блокчейні неможливо скасувати.",
-
   "swap_title": "Обмін",
   "from": "З",
   "to": "На",
@@ -207,7 +197,6 @@
   "swap_now": "Обміняти зараз",
   "swap_success": "Обмін завершено",
   "enter_amount": "Введіть суму",
-
   "gift_title": "Подарунок",
   "gift_who": "Хто може отримати?",
   "lock_user": "Одна людина",
@@ -243,13 +232,11 @@
   "expires_in": "Діє до {when}",
   "claimed_of": "Отримано {n} з {total}",
   "choose_recipient": "Оберіть отримувача",
-
   "history_title": "Історія",
   "filter_in": "Вхідні",
   "filter_out": "Вихідні",
   "filter_swaps": "Обміни",
   "no_history": "Тут з'являться ваші транзакції",
-
   "tx_details": "Транзакція",
   "reference": "Номер",
   "tx_hash_label": "Хеш у блокчейні",
@@ -261,7 +248,6 @@
   "to_label": "Кому",
   "cancel_request": "Скасувати заявку",
   "confirmations_progress": "{n}/{need} підтверджень",
-
   "p2p_title": "P2P",
   "buy": "Купити",
   "sell": "Продати",
@@ -348,7 +334,6 @@
   "field_papara_no": "Номер Papara",
   "field_upi_id": "UPI ID",
   "field_pix_key": "Ключ PIX",
-
   "referral_title": "Запросити друзів",
   "referral_hero": "Заробляйте {pct}% комісій ваших друзів",
   "referral_hero_sub": "Протягом {days} днів після реєстрації · виплата в {asset}",
@@ -368,7 +353,6 @@
   "ref_step3": "Ви отримуєте частку кожної їхньої комісії",
   "leaderboard": "Найкращі запрошувачі місяця",
   "invite_text": "Приєднуйся до Zohra Wallet — криптогаманець у Telegram із безкоштовними миттєвими переказами 🚀",
-
   "rewards_title": "Бонуси",
   "daily_checkin": "Щоденна відмітка",
   "checkin_now": "Відмітитися",
@@ -391,7 +375,6 @@
   "kind_gift": "подарунки",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "P2P-оголошення",
-
   "support_title": "Підтримка",
   "ai_intro": "Вітаю! Я {name}. Можу в реальному часі перевірити ваші поповнення, виведення й комісії та провести вас крок за кроком.",
   "ask_placeholder": "Опишіть ваше питання…",
@@ -421,7 +404,6 @@
   "clear_chat": "Очистити чат",
   "ticket_opened": "Звернення #{id} відкрито — оператор відповість тут і в чаті з ботом.",
   "rate_support": "Оцініть відповідь",
-
   "profile_title": "Профіль",
   "language": "Мова",
   "currency": "Валюта відображення",
@@ -487,7 +469,6 @@
   "doc_passport": "Паспорт",
   "doc_id": "ID-картка",
   "doc_license": "Посвідчення водія",
-
   "outside_title": "Zohra Wallet живе в Telegram",
   "outside_sub": "Ваш криптогаманець з усіма мережами, безкоштовними миттєвими переказами, обміном і P2P — просто в Telegram.",
   "open_in_telegram": "Відкрити в Telegram",
@@ -495,7 +476,6 @@
   "perk1": "10 мереж, один гаманець",
   "perk2": "Безкоштовні миттєві перекази",
   "perk3": "Захист PIN-кодом та ескроу",
-
   "welcome_title": "Вітаємо, {name}",
   "ob1_title": "Усі мережі. Один гаманець.",
   "ob1_sub": "TRON, TON, BNB Chain, Ethereum, Solana, Polygon, Arbitrum, Base, Bitcoin і Avalanche.",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN, ескроу, білі списки адрес і моніторинг 24/7 бережуть ваші кошти.",
   "get_started": "Почати",
   "later": "Пізніше",
-
   "err_auth_required": "Відкрийте Zohra Wallet через Telegram.",
   "err_auth_invalid": "Не вдалося перевірити сесію. Відкрийте застосунок знову через бота.",
   "err_auth_expired": "Сесія закінчилася. Відкрийте застосунок знову через бота.",
@@ -599,5 +578,13 @@
   "err_user_not_found": "Користувача не знайдено.",
   "err_bad_phone": "Недійсний номер телефону.",
   "err_phone_used": "Цей телефон прив'язано до іншого акаунта.",
-  "err_deposit_unassignable": "Це поповнення неможливо зарахувати автоматично."
+  "err_deposit_unassignable": "Це поповнення неможливо зарахувати автоматично.",
+  "market_stats": "Ринок",
+  "market_rank": "Місце",
+  "market_cap": "Капіталізація",
+  "volume_24h": "Обсяг 24 год",
+  "high_24h": "Макс. 24 год",
+  "low_24h": "Мін. 24 год",
+  "all_time_high": "Історичний максимум",
+  "circulating_supply": "В обігу"
 }

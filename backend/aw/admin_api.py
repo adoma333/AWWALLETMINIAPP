@@ -336,6 +336,20 @@ def _abi_string(hexdata: str) -> str:
     return raw.rstrip(b"\0").decode("utf-8", "replace")  # old tokens return bytes32
 
 
+@router.post("/coins/sync")
+def sync_coins(request: Request, authorization: str = Header(default="")):
+    """Fetch official names, logos and market data now (the worker also does this daily)."""
+    from . import coinmeta
+
+    a = _admin(authorization, "catalog")
+    try:
+        res = coinmeta.sync()
+    except Exception as e:
+        raise AppError("upstream_unavailable", detail=str(e)[:160])
+    admin_auth.audit(a, "coins.sync", None, res, _ip(request))
+    return res
+
+
 @router.post("/networks/{nid}/verify")
 def verify_network(nid: str, request: Request, body: dict = Body(default={}), authorization: str = Header(default="")):
     """Check an EVM network against the chain itself: chain id, and each token's symbol() and decimals().

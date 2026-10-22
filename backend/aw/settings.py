@@ -65,6 +65,7 @@ DEFAULTS: dict = {
         "price_max_age_sec": 180,
         "max_source_deviation_pct": "2.5",   # halt pair when sources disagree more than this
         "sources": ["binance", "okx", "bybit", "kucoin", "coingecko"],
+        "refresh_sec": 15,                    # live price refresh (the slow aggregator source is polled every 2 min)
         "price_mode": "best_for_platform",    # median | best_for_platform | best_for_user
         "inventory_guard": True,              # block swaps that would exceed hot-wallet inventory
         "max_net_exposure_usd": {},           # {asset: usd} optional caps
@@ -74,7 +75,7 @@ DEFAULTS: dict = {
         "fee_pct": "0", "fee_fixed_usd": "0",
         "min_usd": "0.01",
         "allow_by_username": True, "allow_by_id": True,
-        "badge": "instant_free",
+        "badge": "",
     },
     "gifts": {
         "enabled": True, "fee_pct": "0", "min_usd": "0.1", "max_shares": 200, "expire_hours": 72,

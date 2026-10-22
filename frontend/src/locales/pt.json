@@ -45,7 +45,6 @@
   "maintenance_title": "Atualizando a Zohra Wallet",
   "update_ready": "Uma nova versão está pronta",
   "update_now": "Atualizar",
-
   "status_pending": "Pendente",
   "status_processing": "Processando",
   "status_completed": "Concluído",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "Aguardando atendente",
   "status_answered": "Respondido",
   "status_open": "Aberto",
-
   "tx_deposit": "Depósito",
   "tx_withdraw": "Saque",
   "tx_send": "Enviado",
@@ -82,13 +80,11 @@
   "tx_referral": "Recompensa de indicação",
   "tx_reward": "Recompensa",
   "tx_adjust": "Ajuste",
-
   "nav_home": "Carteira",
   "nav_swap": "Trocar",
   "nav_p2p": "P2P",
   "nav_rewards": "Prêmios",
   "nav_profile": "Perfil",
-
   "total_balance": "Saldo total",
   "hide_balance": "Ocultar saldo",
   "today_change": "hoje",
@@ -114,14 +110,12 @@
   "price_updated": "Preços atualizados {time}",
   "notifications": "Notificações",
   "no_notifications": "Tudo em dia",
-
   "price": "Preço",
   "change_24h": "24h",
   "networks_label": "Redes",
   "recent_activity": "Atividade recente",
   "no_activity": "Nenhuma atividade ainda",
   "in_orders": "Em ordens",
-
   "deposit_title": "Depositar",
   "choose_asset": "Escolha uma moeda",
   "choose_network": "Escolha uma rede",
@@ -153,7 +147,6 @@
   "connected_wallet": "Conectada: {address}",
   "amount_to_deposit": "Valor a depositar",
   "deposit_sent": "Enviado da sua carteira. Aparecerá aqui em alguns segundos.",
-
   "send_title": "Enviar",
   "send_to_user": "Para um usuário Zohra Wallet",
   "send_to_user_sub": "Por @username — instantâneo e grátis",
@@ -171,7 +164,6 @@
   "send_now": "Enviar agora",
   "sent_success": "Enviado para {name}",
   "instant_free": "Instantâneo · Grátis",
-
   "pick_contact_title": "Escolha um contato",
   "pick_contact_sub": "Abriremos o seletor de contatos do Telegram no chat do bot. Escolha uma pessoa e volte aqui.",
   "open_picker": "Abrir seletor de contatos",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} usa a Zohra Wallet — a transferência é instantânea e grátis.",
   "picked_not_registered": "{name} ainda não tem Zohra Wallet. Envie um presente que só essa pessoa pode resgatar.",
   "send_as_gift": "Enviar como presente pessoal",
-
   "withdraw_title": "Sacar",
   "recipient_address": "Endereço do destinatário",
   "paste": "Colar",
@@ -195,7 +186,6 @@
   "fee_free_badge": "Sem taxa (recompensa)",
   "eta": "Tempo estimado",
   "check_address_note": "Confira o endereço e a rede. Transferências na blockchain não podem ser revertidas.",
-
   "swap_title": "Trocar",
   "from": "De",
   "to": "Para",
@@ -207,7 +197,6 @@
   "swap_now": "Trocar agora",
   "swap_success": "Troca concluída",
   "enter_amount": "Digite um valor",
-
   "gift_title": "Presente",
   "gift_who": "Quem pode resgatar?",
   "lock_user": "Uma pessoa",
@@ -243,13 +232,11 @@
   "expires_in": "Expira {when}",
   "claimed_of": "{n} de {total} resgatados",
   "choose_recipient": "Escolher destinatário",
-
   "history_title": "Histórico",
   "filter_in": "Entradas",
   "filter_out": "Saídas",
   "filter_swaps": "Trocas",
   "no_history": "Suas transações aparecerão aqui",
-
   "tx_details": "Transação",
   "reference": "Referência",
   "tx_hash_label": "Hash na blockchain",
@@ -261,7 +248,6 @@
   "to_label": "Para",
   "cancel_request": "Cancelar solicitação",
   "confirmations_progress": "{n}/{need} confirmações",
-
   "p2p_title": "P2P",
   "buy": "Comprar",
   "sell": "Vender",
@@ -348,7 +334,6 @@
   "field_papara_no": "Número Papara",
   "field_upi_id": "ID UPI",
   "field_pix_key": "Chave PIX",
-
   "referral_title": "Convidar amigos",
   "referral_hero": "Ganhe {pct}% das taxas que seus amigos pagam",
   "referral_hero_sub": "Por {days} dias após o cadastro · pago em {asset}",
@@ -368,7 +353,6 @@
   "ref_step3": "Você ganha uma parte de cada taxa que eles pagam",
   "leaderboard": "Melhores convidadores do mês",
   "invite_text": "Venha para a Zohra Wallet — uma carteira cripto dentro do Telegram com transferências instantâneas grátis 🚀",
-
   "rewards_title": "Prêmios",
   "daily_checkin": "Check-in diário",
   "checkin_now": "Fazer check-in",
@@ -391,7 +375,6 @@
   "kind_gift": "presentes",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "anúncios P2P",
-
   "support_title": "Suporte",
   "ai_intro": "Olá! Eu sou {name}. Posso verificar seus depósitos, saques e taxas em tempo real e guiar você passo a passo.",
   "ask_placeholder": "Descreva sua dúvida…",
@@ -421,7 +404,6 @@
   "clear_chat": "Limpar chat",
   "ticket_opened": "Solicitação #{id} aberta — um atendente responderá aqui e no chat do bot.",
   "rate_support": "Avalie esta resposta",
-
   "profile_title": "Perfil",
   "language": "Idioma",
   "currency": "Moeda de exibição",
@@ -487,7 +469,6 @@
   "doc_passport": "Passaporte",
   "doc_id": "Carteira de identidade",
   "doc_license": "Carteira de motorista",
-
   "outside_title": "A Zohra Wallet vive no Telegram",
   "outside_sub": "Sua carteira cripto com todas as redes, transferências instantâneas grátis, trocas e P2P — direto no Telegram.",
   "open_in_telegram": "Abrir no Telegram",
@@ -495,7 +476,6 @@
   "perk1": "10 redes, uma carteira",
   "perk2": "Transferências instantâneas grátis",
   "perk3": "Proteção com PIN e custódia",
-
   "welcome_title": "Bem-vindo, {name}",
   "ob1_title": "Todas as redes. Uma carteira.",
   "ob1_sub": "TRON, TON, BNB Chain, Ethereum, Solana, Polygon, Arbitrum, Base, Bitcoin e Avalanche.",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN, custódia, listas de endereços confiáveis e monitoramento 24/7 mantêm seus fundos seguros.",
   "get_started": "Começar",
   "later": "Depois",
-
   "err_auth_required": "Abra a Zohra Wallet pelo Telegram.",
   "err_auth_invalid": "Falha ao verificar a sessão. Reabra o app pelo bot.",
   "err_auth_expired": "Sua sessão expirou. Reabra o app pelo bot.",
@@ -599,5 +578,13 @@
   "err_user_not_found": "Usuário não encontrado.",
   "err_bad_phone": "Número de telefone inválido.",
   "err_phone_used": "Este telefone está vinculado a outra conta.",
-  "err_deposit_unassignable": "Este depósito não pode ser atribuído automaticamente."
+  "err_deposit_unassignable": "Este depósito não pode ser atribuído automaticamente.",
+  "market_stats": "Mercado",
+  "market_rank": "Posição",
+  "market_cap": "Capitalização",
+  "volume_24h": "Volume 24 h",
+  "high_24h": "Máxima 24 h",
+  "low_24h": "Mínima 24 h",
+  "all_time_high": "Máxima histórica",
+  "circulating_supply": "Oferta circulante"
 }

@@ -45,7 +45,6 @@
   "maintenance_title": "Zohra Wallet sedang ditingkatkan",
   "update_ready": "Versi baru sudah siap",
   "update_now": "Perbarui",
-
   "status_pending": "Tertunda",
   "status_processing": "Diproses",
   "status_completed": "Selesai",
@@ -68,7 +67,6 @@
   "status_waiting_admin": "Menunggu agen",
   "status_answered": "Dijawab",
   "status_open": "Terbuka",
-
   "tx_deposit": "Deposit",
   "tx_withdraw": "Penarikan",
   "tx_send": "Terkirim",
@@ -82,13 +80,11 @@
   "tx_referral": "Hadiah referal",
   "tx_reward": "Hadiah",
   "tx_adjust": "Penyesuaian",
-
   "nav_home": "Dompet",
   "nav_swap": "Tukar",
   "nav_p2p": "P2P",
   "nav_rewards": "Hadiah",
   "nav_profile": "Profil",
-
   "total_balance": "Total saldo",
   "hide_balance": "Sembunyikan saldo",
   "today_change": "hari ini",
@@ -114,14 +110,12 @@
   "price_updated": "Harga diperbarui {time}",
   "notifications": "Notifikasi",
   "no_notifications": "Tidak ada yang baru",
-
   "price": "Harga",
   "change_24h": "24j",
   "networks_label": "Jaringan",
   "recent_activity": "Aktivitas terbaru",
   "no_activity": "Belum ada aktivitas",
   "in_orders": "Dalam order",
-
   "deposit_title": "Deposit",
   "choose_asset": "Pilih koin",
   "choose_network": "Pilih jaringan",
@@ -153,7 +147,6 @@
   "connected_wallet": "Terhubung: {address}",
   "amount_to_deposit": "Jumlah deposit",
   "deposit_sent": "Terkirim dari dompet Anda. Akan muncul di sini dalam beberapa detik.",
-
   "send_title": "Kirim",
   "send_to_user": "Ke pengguna Zohra Wallet",
   "send_to_user_sub": "Lewat @username — instan dan gratis",
@@ -171,7 +164,6 @@
   "send_now": "Kirim sekarang",
   "sent_success": "Terkirim ke {name}",
   "instant_free": "Instan · Gratis",
-
   "pick_contact_title": "Pilih kontak",
   "pick_contact_sub": "Kami akan membuka pemilih kontak Telegram di chat bot. Pilih seseorang lalu kembali ke sini.",
   "open_picker": "Buka pemilih kontak",
@@ -179,7 +171,6 @@
   "picked_registered": "{name} menggunakan Zohra Wallet — transfer instan dan gratis.",
   "picked_not_registered": "{name} belum punya Zohra Wallet. Kirim hadiah yang hanya bisa diklaim oleh mereka.",
   "send_as_gift": "Kirim sebagai hadiah pribadi",
-
   "withdraw_title": "Tarik",
   "recipient_address": "Alamat penerima",
   "paste": "Tempel",
@@ -195,7 +186,6 @@
   "fee_free_badge": "Bebas biaya (hadiah)",
   "eta": "Perkiraan waktu",
   "check_address_note": "Periksa ulang alamat dan jaringan. Transfer blockchain tidak dapat dibatalkan.",
-
   "swap_title": "Tukar",
   "from": "Dari",
   "to": "Ke",
@@ -207,7 +197,6 @@
   "swap_now": "Tukar sekarang",
   "swap_success": "Penukaran selesai",
   "enter_amount": "Masukkan jumlah",
-
   "gift_title": "Hadiah",
   "gift_who": "Siapa yang bisa mengklaim?",
   "lock_user": "Satu orang",
@@ -243,13 +232,11 @@
   "expires_in": "Kedaluwarsa {when}",
   "claimed_of": "{n} dari {total} diklaim",
   "choose_recipient": "Pilih penerima",
-
   "history_title": "Riwayat",
   "filter_in": "Masuk",
   "filter_out": "Keluar",
   "filter_swaps": "Tukar",
   "no_history": "Transaksi Anda akan muncul di sini",
-
   "tx_details": "Transaksi",
   "reference": "Referensi",
   "tx_hash_label": "Hash blockchain",
@@ -261,7 +248,6 @@
   "to_label": "Ke",
   "cancel_request": "Batalkan permintaan",
   "confirmations_progress": "{n}/{need} konfirmasi",
-
   "p2p_title": "P2P",
   "buy": "Beli",
   "sell": "Jual",
@@ -348,7 +334,6 @@
   "field_papara_no": "Nomor Papara",
   "field_upi_id": "ID UPI",
   "field_pix_key": "Kunci PIX",
-
   "referral_title": "Undang teman",
   "referral_hero": "Dapatkan {pct}% dari biaya yang dibayar teman Anda",
   "referral_hero_sub": "Selama {days} hari sejak mereka bergabung · dibayar dalam {asset}",
@@ -368,7 +353,6 @@
   "ref_step3": "Anda mendapat bagian dari setiap biaya yang mereka bayar",
   "leaderboard": "Pengundang teratas bulan ini",
   "invite_text": "Gabung dengan saya di Zohra Wallet — dompet kripto di dalam Telegram dengan transfer instan gratis 🚀",
-
   "rewards_title": "Hadiah",
   "daily_checkin": "Check-in harian",
   "checkin_now": "Check-in",
@@ -391,7 +375,6 @@
   "kind_gift": "hadiah",
   "kind_p2p_taker": "P2P",
   "kind_p2p_maker": "iklan P2P",
-
   "support_title": "Dukungan",
   "ai_intro": "Hai! Saya {name}. Saya bisa memeriksa deposit, penarikan, dan biaya Anda secara real time serta memandu Anda langkah demi langkah.",
   "ask_placeholder": "Jelaskan pertanyaan Anda…",
@@ -421,7 +404,6 @@
   "clear_chat": "Hapus chat",
   "ticket_opened": "Permintaan #{id} dibuka — agen akan membalas di sini dan di chat bot.",
   "rate_support": "Nilai jawaban ini",
-
   "profile_title": "Profil",
   "language": "Bahasa",
   "currency": "Mata uang tampilan",
@@ -487,7 +469,6 @@
   "doc_passport": "Paspor",
   "doc_id": "KTP",
   "doc_license": "SIM",
-
   "outside_title": "Zohra Wallet ada di Telegram",
   "outside_sub": "Dompet kripto Anda dengan semua jaringan, transfer instan gratis, penukaran, dan P2P — langsung di Telegram.",
   "open_in_telegram": "Buka di Telegram",
@@ -495,7 +476,6 @@
   "perk1": "10 jaringan, satu dompet",
   "perk2": "Transfer instan gratis",
   "perk3": "Perlindungan PIN & escrow",
-
   "welcome_title": "Selamat datang, {name}",
   "ob1_title": "Semua jaringan. Satu dompet.",
   "ob1_sub": "TRON, TON, BNB Chain, Ethereum, Solana, Polygon, Arbitrum, Base, Bitcoin, dan Avalanche.",
@@ -505,7 +485,6 @@
   "ob3_sub": "PIN, escrow, daftar alamat tepercaya, dan pemantauan 24/7 menjaga dana Anda tetap aman.",
   "get_started": "Mulai",
   "later": "Nanti",
-
   "err_auth_required": "Silakan buka Zohra Wallet dari Telegram.",
   "err_auth_invalid": "Pemeriksaan sesi gagal. Buka ulang aplikasi dari bot.",
   "err_auth_expired": "Sesi Anda telah berakhir. Buka ulang aplikasi dari bot.",
@@ -599,5 +578,13 @@
   "err_user_not_found": "Pengguna tidak ditemukan.",
   "err_bad_phone": "Nomor telepon tidak valid.",
   "err_phone_used": "Nomor ini terhubung ke akun lain.",
-  "err_deposit_unassignable": "Deposit ini tidak dapat ditetapkan secara otomatis."
+  "err_deposit_unassignable": "Deposit ini tidak dapat ditetapkan secara otomatis.",
+  "market_stats": "Pasar",
+  "market_rank": "Peringkat",
+  "market_cap": "Kapitalisasi pasar",
+  "volume_24h": "Volume 24j",
+  "high_24h": "Tertinggi 24j",
+  "low_24h": "Terendah 24j",
+  "all_time_high": "Tertinggi sepanjang masa",
+  "circulating_supply": "Pasokan beredar"
 }
