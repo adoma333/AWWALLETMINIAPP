@@ -15,6 +15,7 @@ case "${1:-help}" in
   start)    systemctl start aw-wallet aw-wallet-worker ;;
   update)   bash "$APP_DIR/deploy/update.sh" ;;
   doctor)   bash "$APP_DIR/deploy/doctor.sh" ;;
+  version)  echo "code:  $(git -C "$APP_DIR" log -1 --format='%h %ci %s' | cut -c1-100)"; echo "build: $(cat "$APP_DIR/frontend/dist/version.json" 2>/dev/null)" ;;
   backup)
     f="$APP_DIR/data/backups/aw-$(date +%Y%m%d-%H%M%S).db"
     cli backup "$f" && gzip -f "$f" && echo "→ $f.gz"
@@ -27,6 +28,7 @@ case "${1:-help}" in
 aw-wallet <command>
   status | logs [n] | restart | start | stop
   update          pull the latest code, rebuild, restart
+  version         installed code and app build
   doctor          check services, HTTPS, webhook, worker, wallet
   backup          database backup to data/backups (daily via cron, 14 days kept)
   hot-wallets     show treasury addresses to fund
