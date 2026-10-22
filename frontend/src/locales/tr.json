@@ -651,5 +651,6 @@
   "err_login_expired": "Giriş isteğinin süresi doldu. Yeniden başlayın.",
   "err_google_invalid": "Google girişi doğrulanamadı. Tekrar deneyin.",
   "err_google_not_linked": "Bu Google hesabı bir cüzdana bağlı değil. Önce Telegram ile giriş yapıp Google'ı bağlayın.",
-  "err_google_in_use": "Bu Google hesabı başka bir cüzdana bağlı."
+  "err_google_in_use": "Bu Google hesabı başka bir cüzdana bağlı.",
+  "approve_device_warn": "Yalnızca girişi az önce kendi cihazınızda kendiniz başlattıysanız izin verin. Birinin gönderdiği bağlantıya asla izin vermeyin."
 }

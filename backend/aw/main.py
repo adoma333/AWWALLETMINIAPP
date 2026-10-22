@@ -253,11 +253,9 @@ def login_approve(body: dict = Body(...), u: dict = Depends(current_user)):
 def login_google(request: Request, body: dict = Body(...)):
     _web_login_on()
     limiter.check(f"ip:{client_ip(request)}:google", 20)
-    res = appauth.google_login(str(body.get("credential") or ""), str(body.get("device") or request.headers.get("user-agent", ""))[:80],
-                               client_ip(request))
-    if body.get("approve"):  # browser hand-off for an app: approve its code with the new account
-        appauth.approve(str(body["approve"]), appauth.user_for(res["token"])["id"])
-    return res
+    # never approves a waiting device by itself: the user confirms that separately (anti-phishing)
+    return appauth.google_login(str(body.get("credential") or ""), str(body.get("device") or request.headers.get("user-agent", ""))[:80],
+                                client_ip(request))
 
 
 @app.post("/api/me/link/google")

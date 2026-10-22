@@ -651,5 +651,6 @@
   "err_login_expired": "O pedido expirou. Comece de novo.",
   "err_google_invalid": "Não foi possível verificar o login do Google. Tente de novo.",
   "err_google_not_linked": "Esta conta Google não está vinculada. Entre com o Telegram e vincule o Google.",
-  "err_google_in_use": "Esta conta Google já está vinculada a outra carteira."
+  "err_google_in_use": "Esta conta Google já está vinculada a outra carteira.",
+  "approve_device_warn": "Permita apenas se você mesmo acabou de iniciar o login no seu dispositivo. Nunca permita um link que alguém enviou."
 }

@@ -62,12 +62,12 @@ export default function Outside({ onSignedIn }) {
     if (deviceCode) api.get(`/api/login/device?code=${encodeURIComponent(deviceCode)}`).then(setDevice).catch(() => setDevice({ pending: false }));
   }, [deviceCode]);
 
-  const finish = useCallback(async (session) => {
+  const [, setSigned] = useState(0);
+  const finish = useCallback((session) => {
     setToken(session.token);
-    if (deviceCode) {
-      try { await api.post('/api/login/approve', { code: deviceCode }); setDevice({ pending: false, approved: true }); } catch { /* shown below */ }
-    }
-    onSignedIn?.();
+    // on the hand-off page the user still has to confirm the waiting device explicitly (never automatic)
+    if (deviceCode) setSigned((n) => n + 1);
+    else onSignedIn?.();
   }, [deviceCode, onSignedIn]);
 
   const polled = useCallback((r, status) => {
@@ -88,7 +88,7 @@ export default function Outside({ onSignedIn }) {
 
   const onGoogle = useCallback(async (credential) => {
     setErr('');
-    try { finish(await api.post('/api/login/google', { credential, device: deviceName(), approve: deviceCode || undefined })); } catch (e) { setErr(errText(t, e)); }
+    try { finish(await api.post('/api/login/google', { credential, device: deviceName() })); } catch (e) { setErr(errText(t, e)); }
   }, [deviceCode, finish, t]);
 
   if (device?.approved) {
@@ -114,6 +114,7 @@ export default function Outside({ onSignedIn }) {
 
         {deviceCode && getToken() && device?.pending && !wait ? (
           <div className="signin-actions">
+            <div className="warn-card"><Icon name="alert" size={18} /><span>{t('approve_device_warn')}</span></div>
             <Btn className="wide" onClick={async () => {
               try { await api.post('/api/login/approve', { code: deviceCode }); setDevice({ pending: false, approved: true }); } catch (e) { setErr(errText(t, e)); }
             }}>{t('approve_device_btn')}</Btn>

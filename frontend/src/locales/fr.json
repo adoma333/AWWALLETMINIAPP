@@ -651,5 +651,6 @@
   "err_login_expired": "Cette demande a expiré. Recommencez.",
   "err_google_invalid": "Connexion Google non vérifiée. Réessayez.",
   "err_google_not_linked": "Ce compte Google n’est lié à aucun portefeuille. Connectez-vous avec Telegram puis associez Google.",
-  "err_google_in_use": "Ce compte Google est déjà associé à un autre portefeuille."
+  "err_google_in_use": "Ce compte Google est déjà associé à un autre portefeuille.",
+  "approve_device_warn": "N’autorisez que si vous venez de lancer la connexion vous-même sur votre appareil. N’autorisez jamais un lien envoyé par quelqu’un."
 }

@@ -651,5 +651,6 @@
   "err_login_expired": "Permintaan kedaluwarsa. Mulai lagi.",
   "err_google_invalid": "Masuk Google tidak dapat diverifikasi. Coba lagi.",
   "err_google_not_linked": "Akun Google ini belum tertaut. Masuk dengan Telegram lalu tautkan Google.",
-  "err_google_in_use": "Akun Google ini sudah tertaut ke dompet lain."
+  "err_google_in_use": "Akun Google ini sudah tertaut ke dompet lain.",
+  "approve_device_warn": "Izinkan hanya jika Anda sendiri baru saja memulai masuk di perangkat Anda. Jangan pernah mengizinkan tautan kiriman orang lain."
 }

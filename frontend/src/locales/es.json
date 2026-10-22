@@ -651,5 +651,6 @@
   "err_login_expired": "La solicitud caducó. Empieza de nuevo.",
   "err_google_invalid": "No se pudo verificar el acceso con Google. Inténtalo de nuevo.",
   "err_google_not_linked": "Esta cuenta de Google no está vinculada. Inicia sesión con Telegram y vincula Google.",
-  "err_google_in_use": "Esta cuenta de Google ya está vinculada a otra billetera."
+  "err_google_in_use": "Esta cuenta de Google ya está vinculada a otra billetera.",
+  "approve_device_warn": "Permite solo si tú acabas de iniciar sesión en tu propio dispositivo. Nunca permitas un enlace que alguien te envió."
 }

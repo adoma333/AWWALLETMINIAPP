@@ -651,5 +651,6 @@
   "err_login_expired": "This sign-in request expired. Please start again.",
   "err_google_invalid": "Google sign-in couldn't be verified. Try again.",
   "err_google_not_linked": "This Google account isn't linked to a wallet. Sign in with Telegram first, then link Google.",
-  "err_google_in_use": "This Google account is already linked to another wallet."
+  "err_google_in_use": "This Google account is already linked to another wallet.",
+  "approve_device_warn": "Only allow this if you started the sign-in yourself on your own device, just now. Never allow a link someone sent you."
 }

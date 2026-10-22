@@ -651,5 +651,6 @@
   "err_login_expired": "So‘rov eskirdi. Qaytadan boshlang.",
   "err_google_invalid": "Google orqali kirish tasdiqlanmadi. Qayta urining.",
   "err_google_not_linked": "Bu Google hisobi hamyonga bog‘lanmagan. Avval Telegram orqali kirib, Googleni bog‘lang.",
-  "err_google_in_use": "Bu Google hisobi boshqa hamyonga bog‘langan."
+  "err_google_in_use": "Bu Google hisobi boshqa hamyonga bog‘langan.",
+  "approve_device_warn": "Faqat kirishni hozirgina o‘z qurilmangizda o‘zingiz boshlagan bo‘lsangiz ruxsat bering. Birov yuborgan havolaga hech qachon ruxsat bermang."
 }

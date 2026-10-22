@@ -651,5 +651,6 @@
   "err_login_expired": "Die Anfrage ist abgelaufen. Bitte neu starten.",
   "err_google_invalid": "Google-Anmeldung konnte nicht geprüft werden. Erneut versuchen.",
   "err_google_not_linked": "Dieses Google-Konto ist mit keiner Wallet verknüpft. Melde dich mit Telegram an und verknüpfe Google.",
-  "err_google_in_use": "Dieses Google-Konto ist bereits mit einer anderen Wallet verknüpft."
+  "err_google_in_use": "Dieses Google-Konto ist bereits mit einer anderen Wallet verknüpft.",
+  "approve_device_warn": "Nur erlauben, wenn du die Anmeldung gerade selbst auf deinem Gerät gestartet hast. Nie einen Link erlauben, den dir jemand geschickt hat."
 }

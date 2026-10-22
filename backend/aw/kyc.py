@@ -119,8 +119,15 @@ def _norm(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", (s or "").upper())
 
 
+def _secret() -> bytes:
+    secret = config.SESSION_SECRET or ("test" if config.TESTING else "")
+    if not secret:
+        raise AppError("server_misconfigured", 500)  # never sign with a guessable key
+    return secret.encode()
+
+
 def doc_hash(issuer: str, number: str) -> str:
-    return hmac.new((config.SESSION_SECRET or "kyc").encode(), f"{issuer}|{_norm(number)}".encode(), hashlib.sha256).hexdigest()
+    return hmac.new(_secret(), f"{issuer}|{_norm(number)}".encode(), hashlib.sha256).hexdigest()
 
 
 def age(birth_iso: str) -> int:
@@ -248,13 +255,13 @@ def status(user: dict) -> dict:
 # ───────────── private document links (admins only) ─────────────
 def signed_url(rel: str, ttl: int = 900) -> str:
     exp = int(time.time()) + ttl
-    sig = hmac.new((config.SESSION_SECRET or "kyc").encode(), f"{rel}|{exp}".encode(), hashlib.sha256).hexdigest()[:32]
+    sig = hmac.new(_secret(), f"{rel}|{exp}".encode(), hashlib.sha256).hexdigest()[:32]
     return f"/api/kyc-file/{rel.split('/', 1)[1]}?e={exp}&s={sig}"
 
 
 def check_signed(name: str, exp: int, sig: str) -> str:
     rel = f"kyc/{name}"
-    good = hmac.new((config.SESSION_SECRET or "kyc").encode(), f"{rel}|{exp}".encode(), hashlib.sha256).hexdigest()[:32]
+    good = hmac.new(_secret(), f"{rel}|{exp}".encode(), hashlib.sha256).hexdigest()[:32]
     if exp < time.time() or not hmac.compare_digest(good, sig or ""):
         raise AppError("not_found", 404)
     return rel

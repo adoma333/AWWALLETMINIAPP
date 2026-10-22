@@ -661,7 +661,9 @@ def test_sign_in_outside_telegram_with_bot_approval_and_google(api, client, monk
     # device hand-off: an app's code approved by signing in with Google in the browser
     dev = client.post("/api/login/start", json={"kind": "device", "device": "Windows app"}).json()
     assert client.get("/api/login/device", params={"code": dev["code"]}).json()["device"] == "Windows app"
-    client.post("/api/login/google", json={"credential": "x", "approve": dev["code"]})
+    g2 = client.post("/api/login/google", json={"credential": "x", "approve": dev["code"]}).json()
+    assert client.post("/api/login/poll", json={"code": dev["code"]}).json()["status"] == "pending"  # signing in never approves by itself
+    client.post("/api/login/approve", json={"code": dev["code"]}, headers={"Authorization": "Bearer " + g2["token"]})
     assert client.post("/api/login/poll", json={"code": dev["code"]}).json()["status"] == "approved"
 
 
