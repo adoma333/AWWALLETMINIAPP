@@ -23,11 +23,15 @@ MAX_BYTES = 400 * 1024 * 1024
 
 
 def release_key() -> str:
-    return "zr_" + hmac.new((config.SESSION_SECRET or "zohra").encode(), b"releases", hashlib.sha256).hexdigest()[:40]
+    secret = config.SESSION_SECRET or ("test" if config.TESTING else "")
+    if not secret:
+        return ""  # no server secret configured → uploads stay disabled
+    return "zr_" + hmac.new(secret.encode(), b"releases", hashlib.sha256).hexdigest()[:40]
 
 
 def check_key(key: str):
-    if not key or not hmac.compare_digest(key, release_key()):
+    expected = release_key()
+    if not key or not expected or not hmac.compare_digest(key, expected):
         raise AppError("unauthorized", 401)
 
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exit_hint">اضغط رجوع مرة أخرى للخروج</string>
+    <string name="update_title">تحديث متوفر</string>
+    <string name="update_body">الإصدار %1$s من Zohra Wallet جاهز للتثبيت.</string>
+    <string name="update_now">تحديث</string>
+    <string name="later">لاحقًا</string>
+</resources>

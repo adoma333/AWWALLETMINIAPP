@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Zohra Wallet</string>
+    <string name="exit_hint">Press back again to exit</string>
+    <string name="update_title">Update available</string>
+    <string name="update_body">Zohra Wallet %1$s is ready to install.</string>
+    <string name="update_now">Update</string>
+    <string name="later">Later</string>
+</resources>

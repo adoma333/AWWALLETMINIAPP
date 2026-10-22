@@ -9,7 +9,50 @@ export default function Ops({ tab, me }) {
   if (tab === 'broadcast') return <Broadcast />;
   if (tab === 'admins') return <Admins me={me} />;
   if (tab === 'audit') return <Audit />;
+  if (tab === 'apps') return <Apps />;
   return <System me={me} />;
+}
+
+/* ─────────── apps (built by GitHub Actions, published here) ─────────── */
+const PLAT = [['android', 'Android (APK)'], ['windows', 'Windows'], ['mac_arm', 'macOS — Apple Silicon'], ['mac_x64', 'macOS — Intel']];
+
+function Apps() {
+  const { data, error, reload } = useLoad('/releases');
+  if (!data) return <Loading error={error} reload={reload} />;
+  const files = data.latest?.files || {};
+  return (
+    <div className="stack">
+      <Card title="Download page" right={<a href={data.download_page} target="_blank" rel="noreferrer">Open ↗</a>}>
+        <p className="dim small">Users get every version here: Android, iPhone (installs as a web app), Windows, macOS, Telegram and the web.
+          Share this link anywhere.</p>
+        <Copy text={data.download_page}>{data.download_page}</Copy>
+      </Card>
+      <Card title={data.latest?.version ? `Current release ${data.latest.version}` : 'No release yet'}
+        right={data.latest?.published_at && <span className="dim small">{fmtDate(data.latest.published_at)}</span>}>
+        <Table rows={PLAT} rowKey={(r) => r[0]} cols={[
+          ['Platform', (r) => <b>{r[1]}</b>],
+          ['Version', (r) => files[r[0]]?.version || <span className="dim">—</span>],
+          ['Size', (r) => (files[r[0]] ? `${(files[r[0]].size / 1048576).toFixed(1)} MB` : '—'), 'r'],
+          ['', (r) => files[r[0]] && <a href={files[r[0]].url}>Download</a>],
+        ]} />
+        <p className="dim small">Android signing key: {data.has_keystore ? <Badge tone="ok">stored on this server</Badge> : <Badge tone="warn">created on the first build</Badge>}</p>
+      </Card>
+      <Card title="Build new versions with GitHub Actions (free)">
+        <ol className="steps">
+          <li>On GitHub open your repository → <b>Settings → Secrets and variables → Actions → New repository secret</b> and add these two:
+            <div className="kv">
+              <div><span>ZOHRA_URL</span><b><Copy text={data.server_url}>{data.server_url}</Copy></b></div>
+              <div><span>ZOHRA_RELEASE_KEY</span><b>{data.release_key ? <Copy text={data.release_key}>{data.release_key.slice(0, 10)}…</Copy> : <span className="dim">only the owner can see it</span>}</b></div>
+            </div>
+          </li>
+          <li>Open <b>Actions → Build apps → Run workflow</b>, enter a version higher than the current one (e.g. 1.0.1) and what is new.</li>
+          <li>About 15 minutes later the files appear above and on the download page, you get a message in the admin chat, and installed apps offer the update.</li>
+        </ol>
+        <p className="dim small">The interface itself (every screen) updates instantly for all apps when you update the server; new builds are only needed when the
+          app shells change. Keep the release key secret: it lets someone publish files on your download page.</p>
+      </Card>
+    </div>
+  );
 }
 
 /* ─────────── icons & media ─────────── */

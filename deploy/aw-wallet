@@ -19,7 +19,7 @@ case "${1:-help}" in
     f="$APP_DIR/data/backups/aw-$(date +%Y%m%d-%H%M%S).db"
     cli backup "$f" && gzip -f "$f" && echo "→ $f.gz"
     find "$APP_DIR/data/backups" -name 'aw-*.db.gz' -mtime +14 -delete ;;
-  hot-wallets|ledger-audit|init-wallet|seed-catalog) cli "$1" ;;
+  hot-wallets|ledger-audit|init-wallet|seed-catalog|release-key) cli "$1" ;;
   import-wallet) sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR/backend' && '$PY' -m aw.cli import-wallet" ;;
   add-admin) [ $# -eq 3 ] || { echo "usage: aw-wallet add-admin <telegram_id> <admin|finance|support|viewer>"; exit 1; }; cli add-admin "$2" "$3" ;;
   env)      ${EDITOR:-nano} "$APP_DIR/backend/.env" && systemctl restart aw-wallet aw-wallet-worker ;;
@@ -30,6 +30,7 @@ aw-wallet <command>
   doctor          check services, HTTPS, webhook, worker, wallet
   backup          database backup to data/backups (daily via cron, 14 days kept)
   hot-wallets     show treasury addresses to fund
+  release-key     GitHub secrets for building the Android / Windows / macOS apps
   ledger-audit    verify every balance against the journal
   add-admin <id> <role>
   init-wallet | import-wallet

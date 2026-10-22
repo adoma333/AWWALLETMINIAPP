@@ -238,3 +238,4 @@ pre.mrz { margin: 10px 0; padding: 10px 12px; border-radius: 10px; background: v
 .doc-wrap { position: relative; display: inline-block; }
 .doc-wrap span { position: absolute; left: 6px; bottom: 6px; padding: 2px 8px; border-radius: 8px; background: rgba(0,0,0,.65); color: #fff; font-size: 11px; text-transform: capitalize; }
 td.bad { color: var(--danger); font-weight: 600; }
+.steps { margin: 0 0 12px; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 12px; line-height: 1.55; }

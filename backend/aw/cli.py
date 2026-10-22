@@ -3,6 +3,7 @@
   init-wallet              generate a new 24-word master seed (printed ONCE — write it down offline)
   import-wallet            import an existing 24-word seed (read from stdin)
   hot-wallets              show the hot-wallet (treasury) address of every network family
+  release-key              the two GitHub secrets for building the apps (ZOHRA_URL, ZOHRA_RELEASE_KEY)
   add-admin <id> <role>    grant panel access (admin | finance | support | viewer)
   ledger-audit             verify every balance against the journal
   backup <file>            consistent online copy of the database
@@ -11,7 +12,7 @@
 import getpass
 import sys
 
-from . import catalog, db, keys, ledger, treasury
+from . import catalog, config, db, keys, ledger, treasury
 
 
 def main(argv: list[str]) -> int:
@@ -43,6 +44,11 @@ def main(argv: list[str]) -> int:
             return 1
         keys.save_mnemonic(m)
         print("Imported.")
+        return 0
+    if cmd == "release-key":
+        from . import releases
+
+        print(f"ZOHRA_URL={config.WEBAPP_URL}\nZOHRA_RELEASE_KEY={releases.release_key()}")
         return 0
     if cmd == "hot-wallets":
         for fam, addr in treasury.hot_addresses().items():

@@ -138,6 +138,27 @@ A database backup runs every day at 03:17 and is kept for 14 days. **To restore 
 - Every setting section (multilingual texts, badges, banners).
 - Icon uploads, broadcasts, team roles, audit log, system health.
 
+## 📱 Apps: Android, iPhone, Windows, macOS, web
+
+- **Download page.** Everything users can install is at **`https://<your domain>/get/`**: Android, iPhone, Windows, macOS, Telegram and the web. The page is in 14 languages and highlights the right button for each device.
+- **The same account everywhere.**
+  - Inside Telegram, nothing changes.
+  - In the apps and on the web, users tap **Continue with Telegram**, then approve the sign-in with one tap in the bot chat.
+  - **Continue with Google** also works once you set `auth.google_client_id` in Admin → Settings (a free OAuth client from console.cloud.google.com).
+  - Users manage their signed-in devices under Profile → Security → Devices.
+- **The interface updates itself.** The apps are thin, secure shells around your server, so every screen updates as soon as you update the server.
+- **iPhone** installs from Safari with Share → *Add to Home Screen*.
+
+**Build the apps for free with GitHub Actions** (nothing is built on your server):
+1. Add two repository secrets: `ZOHRA_URL` and `ZOHRA_RELEASE_KEY`. Admin → Ops → **Apps & downloads** shows both values, or run `aw-wallet release-key` on the server.
+2. Open **Actions → Build apps → Run workflow** and enter a version such as `1.0.0`.
+3. About 15 minutes later:
+   - The APK, Windows and macOS builds are on your server under `/dl/`.
+   - The download page shows them, and admins get a message.
+   - Installed apps offer the update.
+
+The Android signing key is created on the first build and kept encrypted on your server, so every update installs over the previous version.
+
 ## Project layout
 
 ```
@@ -147,6 +168,10 @@ backend/aw/            FastAPI app, worker, chain adapters (chains/), ledger, fe
 backend/tests/         47 tests (flows, ledger invariants, chain signing)
 frontend/src/          Telegram Mini App (React + Vite), locales/*.json
 frontend/admin/        admin panel (second page of the same build)
+frontend/get/          download page (/get/)
+apps/android/          Android app (WebView shell, Java)
+apps/desktop/          Windows / macOS app (Electron)
+.github/workflows/     apps.yml: builds and publishes the apps
 brand/                 logo files
 ```
 

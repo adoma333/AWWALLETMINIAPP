@@ -1,0 +1,50 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Passed by the GitHub Actions workflow (.github/workflows/apps.yml): server address, version and signing key.
+def prop = { String k, String d -> project.hasProperty(k) ? project.property(k).toString() : d }
+def serverUrl = prop('serverUrl', 'https://example.com')
+def vCode = prop('versionCode', '1').toInteger()
+def vName = prop('versionName', '1.0.0')
+
+android {
+    namespace 'app.zohra.wallet'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'app.zohra.wallet'
+        minSdk 24
+        targetSdk 34
+        versionCode vCode
+        versionName vName
+        buildConfigField 'String', 'SERVER_URL', "\"${serverUrl}\""
+    }
+
+    buildFeatures { buildConfig true }
+
+    signingConfigs {
+        release {
+            if (project.hasProperty('storeFile')) {
+                storeFile file(prop('storeFile', ''))
+                storePassword prop('storePassword', '')
+                keyAlias prop('keyAlias', 'zohra')
+                keyPassword prop('keyPassword', '')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (project.hasProperty('storeFile')) signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint { checkReleaseBuilds false; abortOnError false }
+}

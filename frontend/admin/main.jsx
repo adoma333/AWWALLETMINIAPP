@@ -38,6 +38,7 @@ const NAV = [
   ['icons', 'Icons & media', '▣', 'view', Ops, { tab: 'icons' }],
   ['broadcast', 'Broadcast', '📣', 'content', Ops, { tab: 'broadcast' }],
   ['admins', 'Team', '♛', 'view', Ops, { tab: 'admins' }],
+  ['apps', 'Apps & downloads', '⬇', 'settings', Ops, { tab: 'apps' }],
   ['audit', 'Audit log', '≡', 'view', Ops, { tab: 'audit' }],
   ['system', 'System', '⌘', 'view', Ops, { tab: 'system' }],
 ];

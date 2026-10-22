@@ -1,0 +1,16 @@
+{
+  "name": "zohra-wallet-desktop",
+  "productName": "Zohra Wallet",
+  "version": "1.0.0",
+  "description": "Zohra Wallet for Windows and macOS",
+  "main": "main.js",
+  "private": true,
+  "author": "Zohra Wallet",
+  "devDependencies": {
+    "@electron/packager": "18.3.6",
+    "electron": "33.2.1",
+    "pe-library": "2.0.1",
+    "resedit": "3.1.0"
+  },
+  "type": "commonjs"
+}
