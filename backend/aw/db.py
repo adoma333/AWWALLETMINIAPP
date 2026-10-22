@@ -513,6 +513,31 @@ SCHEMA = [
     );
     CREATE INDEX IF NOT EXISTS ix_alerts_asset ON price_alerts(asset, active);
     """,
+    """
+    CREATE TABLE IF NOT EXISTS earn_positions (
+        id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, product_id TEXT NOT NULL, asset TEXT NOT NULL, principal TEXT NOT NULL,
+        apy TEXT NOT NULL, term_days INTEGER DEFAULT 0, earned TEXT DEFAULT '0', status TEXT NOT NULL,
+        created_at INTEGER, accrued_at INTEGER, ends_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS ix_earn_user ON earn_positions(user_id, status);
+    CREATE TABLE IF NOT EXISTS autoinvest (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, from_asset TEXT NOT NULL, to_asset TEXT NOT NULL,
+        amount TEXT NOT NULL, freq TEXT NOT NULL, weekday INTEGER, day INTEGER, next_at INTEGER, active INTEGER DEFAULT 1,
+        deleted INTEGER DEFAULT 0, runs INTEGER DEFAULT 0, fails INTEGER DEFAULT 0, invested TEXT DEFAULT '0', bought TEXT DEFAULT '0',
+        last_error TEXT, last_run INTEGER, created_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS ix_autoinvest_due ON autoinvest(active, next_at);
+    CREATE TABLE IF NOT EXISTS pay_requests (
+        code TEXT PRIMARY KEY, user_id INTEGER NOT NULL, asset TEXT NOT NULL, amount TEXT, note TEXT, status TEXT NOT NULL,
+        split_id TEXT, payer_id INTEGER, payer_name TEXT, tx_id TEXT, created_at INTEGER, expires_at INTEGER, paid_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS ix_payreq_user ON pay_requests(user_id, created_at);
+    CREATE INDEX IF NOT EXISTS ix_payreq_split ON pay_requests(split_id);
+    CREATE TABLE IF NOT EXISTS splits (
+        id TEXT PRIMARY KEY, user_id INTEGER NOT NULL, title TEXT, asset TEXT NOT NULL, total TEXT NOT NULL, people INTEGER,
+        status TEXT NOT NULL, created_at INTEGER
+    );
+    """,
 ]
 
 

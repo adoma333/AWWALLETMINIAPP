@@ -142,6 +142,7 @@ html[lang='ar'] .btn, html[lang='fa'] .btn { font-family: var(--f-body); letter-
 .bar-bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 12px 16px calc(16px + var(--safe-b));
   background: linear-gradient(transparent, var(--void) 32%); display: flex; flex-direction: column; gap: 8px; }
 .bar-bottom > * { max-width: 448px; width: 100%; margin: 0 auto; }
+.bar-bottom.nav-gap { bottom: calc(62px + var(--safe-b)); padding-bottom: 12px; background: none; }
 
 .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font: 600 11.5px var(--f-body); background: var(--fill);
   color: var(--ember); white-space: nowrap; line-height: 1.5; }
@@ -339,3 +340,22 @@ html[lang='ar'] .btn, html[lang='fa'] .btn { font-family: var(--f-body); letter-
 .bars span { flex: 1; border-radius: 5px 5px 2px 2px; background: #2a2522; min-height: 4px; } .bars span.on { background: var(--grad); }
 html[data-theme='light'] .bars span { background: #e4ddd4; } html[data-theme='light'] .tl .st::before { background: #e0d8ce; } html[data-theme='light'] .toggle { background: #ddd5cb; }
 html[data-theme='light'] .pin i { border-color: #cfc6bb; } html[data-theme='light'] .grip { background: #d8d0c6; }
+
+/* raw form controls inside a Field look like the sheet inputs */
+.field > input, .field > textarea, .field > select { width: 100%; background: var(--s1); border: 0; border-radius: 18px; padding: 0 16px; min-height: 52px; color: var(--bone); font-size: 15px; }
+.field > textarea { padding: 12px 16px; resize: none; line-height: 1.5; }
+.field > input:focus, .field > textarea:focus, .field > select:focus { box-shadow: inset 0 0 0 1.5px rgba(255, 138, 0, .55); }
+.swap-flip { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 46px; height: 46px; border-radius: 50%; background: var(--grad); border: 5px solid var(--void); display: grid; place-items: center; color: var(--on-ember); z-index: 2; transition: transform .35s cubic-bezier(.2, .8, .2, 1); }
+.swap-flip:active { transform: translate(-50%, -50%) rotate(180deg) scale(.92); }
+.amt-in { background: none; border: 0; color: var(--bone); width: 100%; min-width: 0; font: 700 34px var(--f-disp); font-variant-numeric: tabular-nums; }
+.amt-in.bad { color: var(--bad); }
+.coin-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px 6px 6px; border-radius: 999px; background: var(--s2); font-weight: 600; font-size: 14.5px; flex: none; }
+.ad-card { padding: 14px 16px; }
+.price-big { font: 700 24px var(--f-disp); }
+.btn.buy { background: var(--grad-ok); color: #04140c; } .btn.sell { background: linear-gradient(135deg, #FF7A6E, #FF4D4D); color: #1a0402; }
+.seg button.on.buy { background: #3DDC97; color: #04140c; } .seg button.on.sell { background: #FF6B5E; color: #1a0402; }
+.mkt-banner { background: linear-gradient(135deg, rgba(61, 220, 151, .1), transparent 60%), var(--s1); }
+.mkt-banner.down { background: linear-gradient(135deg, rgba(255, 107, 94, .1), transparent 60%), var(--s1); }
+.star { color: var(--ash); } .star.on { color: #FFC24A; }
+.sources .li { padding: 10px 14px; animation: fadein .4s both; }
+@keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }

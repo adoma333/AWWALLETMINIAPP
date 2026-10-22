@@ -42,7 +42,7 @@ import {
   Handshake, Headset, Heart, History, Hourglass, House, IdCard, Image, Inbox, Info, Key, Landmark, Layers, LayoutGrid, LifeBuoy, Link, List, Lock, LogOut,
   Megaphone, MessageCircle, Mic, Minus, Moon, Package, Palette, Paperclip, Pencil, Percent, PiggyBank, Plus, Power, QrCode, Receipt, RefreshCw, Repeat,
   Rocket, ScanFace, ScanLine, Search, Send, Settings, Share, Shield, ShieldAlert, ShieldCheck, SlidersHorizontal, Smartphone, Sparkles, Split, Star,
-  Store, Sun, Tag, Target, Ticket, Trash2, TrendingUp, TriangleAlert, Trophy, User, UserPlus, Users, Volume2, VolumeX, Wallet, WifiOff, Wrench, X, Zap,
+  Store, Sun, Tag, Target, Ticket, Trash2, TrendingDown, TrendingUp, TriangleAlert, Trophy, User, UserPlus, Users, Volume2, VolumeX, Wallet, WifiOff, Wrench, X, Zap,
 } from 'lucide-react';
 
 // Telegram's paper plane (brand mark — not part of the icon font)
@@ -64,7 +64,7 @@ const ICONS = {
   rocket: Rocket, diamond: Gem, crown: Crown, fire: Flame, flame: Flame, heart: Heart, chat: MessageCircle, calendar: Calendar, clock: Clock,
   target: Target, coin: Coins, coins: Coins, percent: Percent, sparkle: Sparkles, info: Info, question: CircleHelp, help: CircleHelp, book: BookOpen,
   calc: Calculator, history: History, grid: LayoutGrid, apps: LayoutGrid, layers: Layers, palette: Palette, phone: Smartphone, device: Smartphone,
-  qr: QrCode, key: Key, lifebuoy: LifeBuoy, flag: Flag, list: List, trend: TrendingUp, link: Link, power: Power, lock: Lock, card: CreditCard, user: User,
+  qr: QrCode, key: Key, lifebuoy: LifeBuoy, flag: Flag, list: List, trend: TrendingUp, trendDown: TrendingDown, link: Link, power: Power, lock: Lock, card: CreditCard, user: User,
   megaphone: Megaphone, mega: Megaphone, arrowDown: ArrowDown, down: ArrowDown, arrowUp: ArrowUp, up: ArrowUp, arrowRight: ArrowRight,
   swap: ArrowLeftRight, p2p: Handshake, plus: Plus, minus: Minus, scan: ScanLine, idCard: IdCard, camera: Camera, face: ScanFace, car: Car,
   verified: BadgeCheck, contacts: BookUser, users: Users, chevron: ChevronRight, chev: ChevronRight, chevronDown: ChevronDown, dd: ChevronDown,

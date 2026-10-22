@@ -24,6 +24,7 @@ DEFAULTS: dict = {
         "features": {
             "deposit": True, "withdraw": True, "transfer": True, "swap": True, "gifts": True, "p2p": True,
             "ai": True, "referral": True, "rewards": True, "ton_connect": True, "kyc": True,
+            "earn": True, "autoinvest": True, "pay_requests": True,
         },
         # home-screen trust badges (fully editable: text per language, icon key, colour)
         "badges": [],    # optional home badges: [{key, enabled, icon, text{en, ar, …}}] — managed in the admin panel
@@ -73,6 +74,16 @@ DEFAULTS: dict = {
         "block_vpn_countries": [],
         "blocked_addresses": [],           # known scam / sanctioned addresses: withdrawals to them are refused
     },
+    "earn": {
+        # admin-controlled savings products; term_days 0 = flexible (redeem any time)
+        "products": [
+            {"id": "usdt-flex", "asset": "USDT", "apy": "6", "term_days": 0, "min": "10", "max_user": "50000", "enabled": True, "hot": True},
+            {"id": "usdt-30", "asset": "USDT", "apy": "9", "term_days": 30, "min": "50", "max_user": "50000", "enabled": True},
+            {"id": "ton-flex", "asset": "TON", "apy": "4", "term_days": 0, "min": "5", "max_user": "20000", "enabled": True},
+        ],
+    },
+    "autoinvest": {"min_usd": "5", "max_plans": 10},
+    "requests": {"expire_days": 30, "max_split": 20},
     "swap": {
         "spread_pct": "0.8",             # platform margin baked into the rate
         "fee_pct": "0",                  # optional explicit fee on top (shown separately)

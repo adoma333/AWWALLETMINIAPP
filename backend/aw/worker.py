@@ -88,6 +88,18 @@ def _chart_backfill():
         log.warning("chart backfill: %s", e)
 
 
+def _earn():
+    from . import earn
+
+    earn.accrue_all()
+
+
+def _autoinvest():
+    from . import autoinvest
+
+    autoinvest.run_due()
+
+
 def _heartbeat():
     state_set("worker:heartbeat", db.now())
 
@@ -107,6 +119,8 @@ def main():
     loop("expiries", 30, _expiries, 10)
     loop("treasury", 300, _treasury_fast, 60)
     loop("holdings", 600, _holdings, 30)
+    loop("earn", 600, _earn, 40)
+    loop("autoinvest", 60, _autoinvest, 20)
     loop("heartbeat", 30, _heartbeat)
     for net in db.q("SELECT id, kind FROM networks"):
         loop(f"scan-{net['id']}", SCAN_EVERY.get(net["kind"], 60), _scan(net["id"]), 3)

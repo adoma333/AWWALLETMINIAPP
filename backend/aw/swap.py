@@ -67,8 +67,17 @@ def quote(user: dict, frm: str, to: str, amount=None, amount_out=None) -> dict:
         "rate": s(q_down(rate, 12)), "inverse": s(q_down(1 / rate, 12)) if rate > 0 else "0",
         "fee": s(fee), "spread_pct": s(spread.quantize(Decimal("0.0001"))), "expires_in": ttl,
         "usd": s(usd_in.quantize(Decimal("0.01"))), "vip": fq["vip"], "promo": fq["promo"], "voucher": fq["voucher"],
-        "free": spread == 0 and fee == 0,
+        "free": spread == 0 and fee == 0, "sources": _sources(frm, to),
     }
+
+
+def _sources(*assets) -> int:
+    """How many independent price sources agreed on this rate (shown to the user, never by name)."""
+    n = []
+    for a in assets:
+        r = db.one("SELECT sources FROM prices WHERE asset=?", (a,))
+        n.append(len(db.jl(r["sources"], {}) or {}) if r else 0)
+    return min(n) if n else 0
 
 
 def _daily_usd(user_id: int) -> Decimal:

@@ -9,7 +9,7 @@ from decimal import Decimal
 from fastapi import Body, Depends, FastAPI, Header, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
-from . import (admin_api, admin_auth, appauth, bot, catalog, coinmeta, config, db, deposits, fees, files, gifts, guard, kyc, ledger, p2p, prices, referral, releases,
+from . import (admin_api, admin_auth, appauth, autoinvest, bot, catalog, coinmeta, config, db, deposits, earn, fees, files, gifts, guard, kyc, ledger, p2p, payreq, prices, referral, releases,
                rewards, settings, support, swap, transfers, ton_connect, users, withdrawals)
 from .money import AppError, D, s
 from .security import limiter, receipt_sig, verify_init_data
@@ -110,7 +110,13 @@ def public_config():
         "networks": [_net_out(n) for n in db.q("SELECT * FROM networks WHERE enabled=1 ORDER BY sort")],
         "tonconnect_manifest": f"{config.WEBAPP_URL}/tonconnect-manifest.json",
         "auth": {"web": bool(settings.get("auth").get("web_login", True)), "google_client_id": settings.get("auth").get("google_client_id") or None},
+        "earn_rates": earn.top_rates(), "earn_top": _earn_top(), "referral_pct": settings.get("referral").get("level1_pct", "30"),
     }
+
+
+def _earn_top():
+    best = max(earn.products(), key=lambda p: D(p["apy"]), default=None)
+    return {"asset": best["asset"], "apy": best["apy"]} if best else None
 
 
 def icons_map() -> dict:
@@ -289,7 +295,7 @@ def me(u: dict = Depends(current_user)):
     return _me(u)
 
 
-ALLOWED_SETTINGS = {"currency", "theme", "hide_balance", "notify", "whitelist_only", "hide_small", "home_assets", "haptics"}
+ALLOWED_SETTINGS = {"currency", "theme", "hide_balance", "notify", "whitelist_only", "hide_small", "home_assets", "haptics", "watchlist"}
 
 
 @app.patch("/api/me")
@@ -299,6 +305,10 @@ def update_me(body: dict = Body(...), u: dict = Depends(current_user)):
     st = dict(u["settings"])
     for k, v in (body.get("settings") or {}).items():
         if k in ALLOWED_SETTINGS:
+            if k in ("watchlist", "home_assets") and v is not None:
+                if not isinstance(v, list):
+                    raise AppError("bad_request")
+                v = [str(x)[:16].upper() for x in v][:80]
             if k == "whitelist_only" and not v and st.get("whitelist_only"):
                 guard.confirm(u, "address_book", body.get("pin"), body.get("bio"))
             st[k] = v
@@ -308,6 +318,7 @@ def update_me(body: dict = Body(...), u: dict = Depends(current_user)):
 
 def _assets_out(u: dict) -> list[dict]:
     bals = ledger.balances(u["id"])
+    earning = earn.earning_by_asset(u["id"])
     pr = {r["asset"]: r for r in db.q("SELECT * FROM prices")}
     nets: dict[str, list] = {}
     for an in db.q("SELECT an.*, n.name AS net_name, n.short AS net_short, n.enabled AS net_on, n.deposit_enabled AS net_dep, "
@@ -334,7 +345,8 @@ def _assets_out(u: dict) -> list[dict]:
                     "stable": bool(a["is_stable"]), "available": s(b["available"]), "locked": s(b["locked"]), "usd": s(usd),
                     "change24h": p.get("change24h") or "0", "value_usd": s(((b["available"] + b["locked"]) * usd).quantize(Decimal("0.01"))),
                     "swap": bool(a["swap_enabled"]), "transfer": bool(a["transfer_enabled"]), "p2p": bool(a["p2p_enabled"]),
-                    "badges": db.jl(a.get("badges"), []), "networks": nets.get(a["id"], []), "spark": sparks.get(a["id"], [])})
+                    "badges": db.jl(a.get("badges"), []), "networks": nets.get(a["id"], []), "spark": sparks.get(a["id"], []),
+                    "earning": s(earning.get(a["id"], 0)), "cap": (db.jl(a.get("meta")) or {}).get("market", {}).get("market_cap")})
     return out
 
 
@@ -408,6 +420,98 @@ def asset_chart(asset: str, range: str = Query("1W"), u: dict = Depends(current_
     if range not in ("1H", "1D", "1W", "1M", "1Y", "ALL"):
         raise AppError("bad_request")
     return {"points": prices.chart(asset.upper(), range)}
+
+
+# ───────────────────────── markets ─────────────────────────
+@app.get("/api/markets/summary")
+def markets_summary(u: dict = Depends(current_user)):
+    """Whole-market mood for the Trade screen: cap-weighted 24 h change over every listed coin."""
+    cap = Decimal(0)
+    w = Decimal(0)
+    for a in db.q("SELECT a.id, a.meta, p.change24h FROM assets a LEFT JOIN prices p ON p.asset=a.id WHERE a.enabled=1"):
+        mc = D((db.jl(a["meta"]) or {}).get("market", {}).get("market_cap") or 0)
+        cap += mc
+        w += mc * D(a["change24h"] or 0)
+    pts = [float(r["usd"]) for r in db.q("SELECT usd FROM price_history WHERE asset='BTC' AND ts>=? ORDER BY ts", (db.now() - 86400,))]
+    return {"cap_usd": s(cap.quantize(Decimal(1))), "change24h": s((w / cap).quantize(Decimal("0.01"))) if cap else "0", "spark": pts[::max(1, len(pts) // 24)]}
+
+
+# ───────────────────────── earn ─────────────────────────
+@app.get("/api/earn")
+def earn_overview(u: dict = Depends(current_user)):
+    return earn.overview(u)
+
+
+@app.post("/api/earn/subscribe")
+def earn_subscribe(body: dict = Body(...), u: dict = Depends(money_user)):
+    return earn.subscribe(u, str(body.get("product", "")), body.get("amount"), body.get("pin"), body.get("bio"), body.get("idem"))
+
+
+@app.post("/api/earn/{pos}/redeem")
+def earn_redeem(pos: str, body: dict = Body(default={}), u: dict = Depends(money_user)):
+    return earn.redeem(u, pos, body.get("amount"))
+
+
+# ───────────────────────── auto-invest ─────────────────────────
+@app.get("/api/autoinvest")
+def autoinvest_list(u: dict = Depends(current_user)):
+    return {"items": autoinvest.plans(u["id"]), "min_usd": settings.get("autoinvest").get("min_usd", "5")}
+
+
+@app.post("/api/autoinvest")
+def autoinvest_create(body: dict = Body(...), u: dict = Depends(money_user)):
+    return autoinvest.create(u, str(body.get("from", "")).upper(), str(body.get("to", "")).upper(), body.get("amount"),
+                             str(body.get("freq", "")), body.get("pin"), body.get("bio"))
+
+
+@app.patch("/api/autoinvest/{pid}")
+def autoinvest_update(pid: int, body: dict = Body(...), u: dict = Depends(current_user)):
+    return autoinvest.update(u, pid, active=body.get("active"), delete=bool(body.get("delete")))
+
+
+# ───────────────────────── payment requests & split bills ─────────────────────────
+@app.get("/api/requests")
+def requests_mine(u: dict = Depends(current_user)):
+    return {"items": payreq.mine(u["id"]), "splits": payreq.splits(u["id"])}
+
+
+@app.post("/api/requests")
+def request_create(body: dict = Body(...), u: dict = Depends(money_user)):
+    limiter.check(f"req:{u['id']}", 30)
+    return payreq.create(u, str(body.get("asset", "")).upper(), body.get("amount"), body.get("note"))
+
+
+@app.get("/api/requests/{code}")
+def request_view(code: str, u: dict = Depends(current_user)):
+    return payreq.view(code, u)
+
+
+@app.post("/api/requests/{code}/pay")
+def request_pay(code: str, body: dict = Body(default={}), u: dict = Depends(money_user)):
+    return payreq.pay(u, code, body.get("amount"), body.get("pin"), body.get("bio"), body.get("idem"))
+
+
+@app.post("/api/requests/{code}/cancel")
+def request_cancel(code: str, u: dict = Depends(current_user)):
+    return payreq.cancel(u, code)
+
+
+@app.post("/api/splits")
+def split_create(body: dict = Body(...), u: dict = Depends(money_user)):
+    limiter.check(f"split:{u['id']}", 10)
+    return payreq.split_create(u, str(body.get("asset", "")).upper(), body.get("total"), body.get("title", ""), body.get("people") or [],
+                               bool(body.get("include_me", True)), str(body.get("mode", "equal")))
+
+
+@app.get("/api/splits/{sid}")
+def split_view(sid: str, u: dict = Depends(current_user)):
+    return payreq.split_view(u, sid)
+
+
+@app.post("/api/splits/{sid}/remind")
+def split_remind(sid: str, u: dict = Depends(current_user)):
+    limiter.check(f"remind:{u['id']}", 5)
+    return payreq.remind(u, sid)
 
 
 # ───────────────────────── price alerts ─────────────────────────
