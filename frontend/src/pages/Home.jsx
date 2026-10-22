@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Icon, { CoinIcon } from '../components/Icon';
+import Promo from '../components/Promo';
 import { Avatar, HeadBtn, Li, Pill, Sheet, Skeleton, SkeletonList, Spark, Switch } from '../components/ui';
 import { amt, fiat, pct, timeAgo } from '../format';
 import { useI18n } from '../i18n';
@@ -14,10 +15,35 @@ function useHidden() {
   return [h, () => { const v = !h; setH(v); haptic.select(); try { localStorage.setItem('aw_hide', v ? '1' : '0'); } catch { /* */ } }];
 }
 
-/** $37,972.00 with the cents dimmed, like the design sheet. */
+let shownOnce = 0; // the balance counts up from zero only on the first open of a session
+
+function useCountUp(value, ms = 900) {
+  const [v, setV] = useState(() => (shownOnce ? value : 0));
+  const from = useRef(shownOnce ? value : 0);
+  useEffect(() => {
+    const start = performance.now();
+    const a = from.current;
+    const b = Number(value) || 0;
+    if (a === b) { setV(b); return undefined; }
+    let raf;
+    const step = (now) => {
+      const k = Math.min(1, (now - start) / ms);
+      const e = 1 - (1 - k) ** 3;
+      setV(a + (b - a) * e);
+      if (k < 1) raf = requestAnimationFrame(step);
+      else { from.current = b; shownOnce = 1; }
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [value, ms]);
+  return v;
+}
+
+/** $37,972.00 with the cents dimmed, like the design sheet; animates when the total changes. */
 export function Money({ usd, hidden, size }) {
+  const n = useCountUp(Number(usd) || 0);
   if (hidden) return <span className="big" style={size ? { fontSize: size } : undefined}>•••••</span>;
-  const s = fiat(usd);
+  const s = fiat(n);
   const m = s.match(/^(.*?)([.,]\d{2})(\D*)$/);
   return (
     <span className="big" dir="ltr" style={size ? { fontSize: size } : undefined}>
@@ -25,9 +51,6 @@ export function Money({ usd, hidden, size }) {
     </span>
   );
 }
-
-const STORY_BG = ['linear-gradient(135deg,#2a1606,#4a2205)', 'linear-gradient(135deg,#0b2a1e,#0f3d2b)', 'linear-gradient(135deg,#2b0b16,#45102a)',
-  'linear-gradient(135deg,#0b1a2e,#0f2d4a)'];
 
 /** Design sheet 02.1 — Home: balance, four actions, stories, assets with mini charts. Skeleton (01.5) and offline (01.8) states included. */
 export default function Home() {
@@ -71,16 +94,18 @@ export default function Home() {
   ].filter((a) => a.on);
 
   const stories = [
-    ...(config?.banners || []).map((b) => ({ key: `b${b.id}`, icon: b.icon || 'sparkle', title: b.title?.[lang] || b.title?.en, sub: b.body?.[lang] || b.body?.en,
-      to: b.link, image: b.image })),
-    config?.earn_top && f.earn !== false && { key: 'earn', icon: 'percent', title: t('story_earn', { pct: config.earn_top.apy, asset: config.earn_top.asset }), sub: t('story_earn_sub'), to: '/earn' },
-    f.referral !== false && { key: 'ref', icon: 'users', title: t('story_invite', { pct: config?.referral_pct || 30 }), sub: t('story_invite_sub'), to: '/referral' },
-    f.gifts !== false && { key: 'gift', icon: 'gift', title: t('story_gift'), sub: t('story_gift_sub'), to: '/gift' },
-    me?.kyc_level < 2 && f.kyc !== false && { key: 'kyc', icon: 'idCard', title: t('story_kyc'), sub: t('story_kyc_sub'), to: '/settings/kyc' },
+    ...(config?.banners || []).map((b) => ({ key: `b${b.id}`, icon: b.icon || 'sparkle', style: b.style || 'dark', title: b.title?.[lang] || b.title?.en,
+      sub: b.body?.[lang] || b.body?.en, to: b.link, image: b.image })),
+    config?.earn_top && f.earn !== false && { key: 'earn', icon: 'percent', style: 'ember', title: t('story_earn', { pct: config.earn_top.apy, asset: config.earn_top.asset }),
+      sub: t('story_earn_sub'), cta: t('start_earning'), to: '/earn' },
+    f.referral !== false && { key: 'ref', icon: 'users', style: 'green', title: t('story_invite', { pct: config?.referral_pct || 30 }), sub: t('story_invite_sub'),
+      cta: t('invite_friends'), to: '/referral' },
+    f.gifts !== false && { key: 'gift', icon: 'gift', style: 'violet', title: t('story_gift'), sub: t('story_gift_sub'), cta: t('create_gift'), to: '/gift' },
+    me?.kyc_level < 2 && f.kyc !== false && { key: 'kyc', icon: 'idCard', style: 'blue', title: t('story_kyc'), sub: t('story_kyc_sub'), cta: t('verify_now'), to: '/settings/kyc' },
   ].filter(Boolean);
 
   return (
-    <main className="page">
+    <main className="page stagger">
       <header className="row between" style={{ paddingTop: 6 }}>
         <button type="button" className="row grow" style={{ textAlign: 'start' }} onClick={() => go('/profile')}>
           <Avatar src={me.photo} name={me.first_name || me.name} size={38} />
@@ -127,20 +152,11 @@ export default function Home() {
         </button>
       )}
 
-      {stories.length > 0 && (
-        <div className="stories">
-          {stories.map((s, i) => (
-            <button key={s.key} type="button" className="story" onClick={() => s.to && go(s.to)}
-              style={{ background: s.image ? `center/cover url(${s.image})` : STORY_BG[i % STORY_BG.length] }}>
-              <Icon name={s.icon} size={20} /><span><b>{s.title}</b><small>{s.sub}</small></span>
-            </button>
-          ))}
-        </div>
-      )}
+      <Promo items={stories} />
 
       <div className="h2"><span>{t('assets')}</span><button type="button" onClick={() => setManage(true)}><Icon name="sliders" size={13} />{t('manage')}</button></div>
       {!wallet ? <SkeletonList rows={5} /> : (
-        <div className="list" style={offline ? { opacity: 0.55 } : undefined}>
+        <div className="list anim" style={offline ? { opacity: 0.55 } : undefined}>
           {assets.map((a) => {
             const ch = Number(a.change24h);
             const bal = Number(a.available) + Number(a.locked);
@@ -148,7 +164,7 @@ export default function Home() {
               <button key={a.id} type="button" className="li" onClick={() => go(`/asset/${a.id}`)}>
                 <CoinIcon asset={a.id} size={40} />
                 <span className="grow"><b>{a.id}</b><small>{a.name} <span className={ch >= 0 ? 'ok' : 'bad'} dir="ltr">{pct(ch)}</span></small></span>
-                <Spark points={a.spark} w={54} h={24} up={ch >= 0} />
+                <Spark points={a.spark} price={a.usd} w={54} h={24} up={ch >= 0} />
                 <span className="r" style={{ minWidth: 86 }} dir="ltr">
                   <b>{hidden ? '•••' : amt(bal, a.display)}</b><small>{hidden ? '•••' : fiat(a.value_usd)}</small>
                 </span>

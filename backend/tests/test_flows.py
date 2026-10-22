@@ -339,6 +339,11 @@ def test_p2p_sell_ad_full_cycle(api):
     msgs = buyer.ok("get", f"/api/p2p/orders/{o['id']}/messages")["items"]
     assert any(m["text"] == "Hi!" for m in msgs)
     assert seller.post(f"/api/p2p/orders/{o['id']}/release", {"pin": "000000"}).json()["error"] in ("pin_wrong", "pin_locked")
+    # both sides can write in the order chat (POST …/messages must not be taken for an order action)
+    buyer.ok("post", f"/api/p2p/orders/{o['id']}/messages", {"text": "sending now"})
+    seller.ok("post", f"/api/p2p/orders/{o['id']}/messages", {"text": "ok"})
+    texts = [m["text"] for m in buyer.ok("get", f"/api/p2p/orders/{o['id']}/messages")["items"]]
+    assert "sending now" in texts and "ok" in texts
     buyer.ok("post", f"/api/p2p/orders/{o['id']}/paid")
     seller.ok("post", f"/api/p2p/orders/{o['id']}/release", {"pin": "482917"})
     assert bal(301, "USDT") == Decimal("100")
@@ -517,14 +522,14 @@ def test_coin_metadata_sync_follows_official_names_but_keeps_admin_edits(client,
     from aw import coinmeta
 
     png = b64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
-    market = [{"id": "the-open-network", "name": "Gram", "image": "https://img.example/ton.png", "market_cap": 1.5e10, "market_cap_rank": 12},
+    market = [{"id": "the-open-network", "name": "Gram Network", "image": "https://img.example/ton.png", "market_cap": 1.5e10, "market_cap_rank": 12},
               {"id": "tether", "name": "Tether", "image": "https://img.example/usdt.png"}]
     monkeypatch.setitem(coinmeta.HTTP, "get", lambda url, params=None: market)
     monkeypatch.setitem(coinmeta.HTTP, "download", lambda url: png)
     db.x("UPDATE assets SET name='My Tether' WHERE id='USDT'")  # an admin rename
     r = coinmeta.sync()
     assert "TON" in r["renamed"] and "USDT" not in r["renamed"] and r["logos"] == 2
-    assert catalog.asset("TON")["name"] == "Gram" and catalog.asset("USDT")["name"] == "My Tether"
+    assert catalog.asset("TON")["name"] == "Gram Network" and catalog.asset("USDT")["name"] == "My Tether"
     assert coinmeta.market("TON")["market_cap_rank"] == 12
     icon = db.one("SELECT path FROM icons WHERE key='asset:TON'")["path"]
     assert icon.startswith("icons/") and icon.endswith(".png")

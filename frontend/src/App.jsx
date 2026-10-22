@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from './api';
 import BottomNav from './components/BottomNav';
 import { ConfirmProvider } from './components/Confirm';
@@ -13,28 +13,58 @@ import { hideSplash, splashProgress } from './splash';
 import { applyPrices, streamPrices } from './live';
 import { getToken, setToken } from './session';
 import TopBar, { PageLoading } from './components/TopBar';
+import { QrScannerHost } from './components/QrScanner';
 import { Btn, Countdown, Sheet, mmss } from './components/ui';
-import { backButton, inTelegram, startParam, tg } from './telegram';
+import { backButton, inTelegram, startParam, tg, tgUser } from './telegram';
 import Home from './pages/Home';
 import Outside from './pages/Outside';
 
-const Asset = lazy(() => import('./pages/Asset'));
-const Deposit = lazy(() => import('./pages/Deposit'));
-const Send = lazy(() => import('./pages/Send'));
-const Withdraw = lazy(() => import('./pages/Withdraw'));
-const Gift = lazy(() => import('./pages/Gift'));
-const Trade = lazy(() => import('./pages/Trade'));
-const AutoInvest = lazy(() => import('./pages/Trade').then((m) => ({ default: m.AutoInvest })));
-const Pay = lazy(() => import('./pages/Pay'));
-const History = lazy(() => import('./pages/History'));
-const P2P = lazy(() => import('./pages/P2P'));
-const Referral = lazy(() => import('./pages/Referral'));
-const Rewards = lazy(() => import('./pages/Rewards'));
-const Support = lazy(() => import('./pages/Support'));
-const Profile = lazy(() => import('./pages/Profile'));
-const Onboarding = lazy(() => import('./pages/Onboarding'));
-const PinSetup = lazy(() => import('./pages/Onboarding').then((m) => ({ default: m.PinSetup })));
-const Earn = lazy(() => import('./pages/Earn'));
+// every screen is its own chunk; all of them are fetched in the background right after start, so opening any
+// screen later is instant (no loading bar, no skeleton)
+const PAGES = {
+  Asset: () => import('./pages/Asset'), Deposit: () => import('./pages/Deposit'), Send: () => import('./pages/Send'),
+  Withdraw: () => import('./pages/Withdraw'), Gift: () => import('./pages/Gift'), Trade: () => import('./pages/Trade'),
+  Pay: () => import('./pages/Pay'), History: () => import('./pages/History'), P2P: () => import('./pages/P2P'),
+  Referral: () => import('./pages/Referral'), Rewards: () => import('./pages/Rewards'), Support: () => import('./pages/Support'),
+  Profile: () => import('./pages/Profile'), Onboarding: () => import('./pages/Onboarding'), Earn: () => import('./pages/Earn'),
+};
+const Asset = lazy(PAGES.Asset);
+const Deposit = lazy(PAGES.Deposit);
+const Send = lazy(PAGES.Send);
+const Withdraw = lazy(PAGES.Withdraw);
+const Gift = lazy(PAGES.Gift);
+const Trade = lazy(PAGES.Trade);
+const AutoInvest = lazy(() => PAGES.Trade().then((m) => ({ default: m.AutoInvest })));
+const Pay = lazy(PAGES.Pay);
+const History = lazy(PAGES.History);
+const P2P = lazy(PAGES.P2P);
+const Referral = lazy(PAGES.Referral);
+const Rewards = lazy(PAGES.Rewards);
+const Support = lazy(PAGES.Support);
+const Profile = lazy(PAGES.Profile);
+const Onboarding = lazy(PAGES.Onboarding);
+const PinSetup = lazy(() => PAGES.Onboarding().then((m) => ({ default: m.PinSetup })));
+const Earn = lazy(PAGES.Earn);
+
+function warmUp(config) {
+  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 300));
+  idle(() => {
+    Object.values(PAGES).forEach((load) => load().catch(() => {}));
+    // the data behind the most used screens, so they open filled in
+    api.prefetch(['/api/rewards', '/api/fees', '/api/referral', '/api/earn', '/api/limits', '/api/notifications', '/api/insights',
+      '/api/markets/summary', '/api/txs?type=&asset=&before=0&limit=30', '/api/requests']);
+    // coin pages for what the user holds (and the majors) open with their chart already drawn
+    const w = api.cached('/api/wallet');
+    const ids = [...new Set([...(w?.assets || []).filter((a) => Number(a.value_usd) > 0).map((a) => a.id), 'BTC', 'TON', 'ETH', 'USDT'])].slice(0, 10);
+    api.prefetch(ids.flatMap((id) => [`/api/assets/${id}`, `/api/assets/${id}/chart?range=1D`]));
+    // logos that are not bundled with the app
+    const auto = new Set(config?.icons_auto || []);
+    Object.entries(config?.icons || {}).forEach(([k, url]) => { if (!auto.has(k)) { const i = new Image(); i.src = url; } });
+  });
+}
+
+// balances cached per Telegram account (a shared device never shows someone else's numbers)
+const WKEY = `zw_wallet_${tgUser?.id || 'app'}`;
 
 const ROOTS = ['/', '/trade', '/pay', '/swap', '/p2p', '/rewards', '/profile'];
 
@@ -85,6 +115,7 @@ export default function App() {
   const [me, setMe] = useState(null);
   const [wallet, setWallet] = useState(null);
   const [fatal, setFatal] = useState(null);
+  const cfgRef = useRef(null);
   const t = useMemo(() => makeT(dict || {}), [dict]);
 
   const switchLang = useCallback(async (code, persist = false) => {
@@ -106,11 +137,11 @@ export default function App() {
       setWallet(w);
       setFx(w.fx);
       setOffline(false);
-      try { localStorage.setItem('zw_wallet', JSON.stringify({ ...w, cached_at: Date.now() })); } catch { /* quota */ }
+      try { localStorage.setItem(WKEY, JSON.stringify({ ...w, cached_at: Date.now() })); } catch { /* quota */ }
     } catch (e) {
       if (e.code === 'offline') {
         setOffline(true);
-        setWallet((cur) => cur || (() => { try { const c = JSON.parse(localStorage.getItem('zw_wallet') || 'null'); return c ? { ...c, cached: true } : null; } catch { return null; } })());
+        setWallet((cur) => cur || (() => { try { const c = JSON.parse(localStorage.getItem(WKEY) || 'null'); return c ? { ...c, cached: true } : null; } catch { return null; } })());
       } else toast(errText(t, e), 'error');
     }
   }, [t, toast]);
@@ -138,13 +169,14 @@ export default function App() {
       if (first && l !== first) await switchLang(l);
       setSignIn(false);
       await loadWallet();
+      warmUp(cfgRef.current);
     } catch (e) {
       if (e.status === 401 || e.status === 403) { setToken(''); setSignIn(true); } else setFatal(e);
     }
     hideSplash();
   }, [loadWallet, switchLang]);
   useEffect(() => {
-    const out = () => { setToken(''); setMe(null); setWallet(null); setSignIn(true); };
+    const out = () => { setToken(''); setMe(null); setWallet(null); setSignIn(true); try { localStorage.removeItem(WKEY); } catch { /* */ } };
     window.addEventListener('aw:signed-out', out);
     return () => window.removeEventListener('aw:signed-out', out);
   }, []);
@@ -152,28 +184,30 @@ export default function App() {
   useEffect(() => {
     (async () => {
       const first = detectLang();
-      await switchLang(first);
-      splashProgress(30, makeT(await loadLang(first))('splash_connecting'));
-      try {
-        const cfg = await api.get('/api/config');
-        setConfig(cfg);
-        applyBrand(cfg.branding);
-      } catch { /* shown below */ }
-      splashProgress(55);
+      // everything independent starts at once: language, public settings, the Telegram sign-in
+      const langP = switchLang(first);
+      const cfgP = api.get('/api/config').then((cfg) => { cfgRef.current = cfg; setConfig(cfg); applyBrand(cfg.branding); return cfg; }).catch(() => null);
+      const authP = inTelegram ? api.post('/api/auth') : null;
+      // last known balances render the home screen instantly; fresh numbers replace them a moment later
+      try { const c = JSON.parse(localStorage.getItem(WKEY) || 'null'); if (c) { setWallet(c); setFx(c.fx); } } catch { /* */ }
+      await langP;
       if (!inTelegram) {
+        await cfgP;
         if (getToken()) await bootStandalone(first);
         else hideSplash();
         return;
       }
       try {
-        const res = await api.post('/api/auth');
-        splashProgress(80, t('splash_wallet'));
+        const res = await authP;
         setMe(res.me);
         setFx(null, res.me.settings?.currency || 'USD');
         const l = detectLang(res.me.lang);
         if (l !== first) await switchLang(l);
-        await loadWallet();
+        await cfgP;
+        const fresh = loadWallet();
+        if (!localStorage.getItem(WKEY)) await fresh;
         hideSplash();
+        fresh.then(() => warmUp(cfgRef.current));
         const deep = routeFromStartParam(res.start_param || startParam);
         if (deep) go(deep, true);
         else if (res.created) go('/welcome', true);
@@ -252,6 +286,7 @@ export default function App() {
             </Suspense>
           </div>
           {showNav && <BottomNav path={path} />}
+          <QrScannerHost />
           <Sheet open={kycOffer && path !== '/settings/kyc'} onClose={() => setKycOffer(false)}>
             <div className="col center g8" style={{ textAlign: 'center', padding: '6px 6px 4px' }}>
               <span className="ic lg"><Icon name="idCard" size={30} /></span>

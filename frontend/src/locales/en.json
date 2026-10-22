@@ -1097,5 +1097,18 @@
   "err_account_restricted": "This account is restricted.",
   "unit_daily": "day",
   "unit_weekly": "week",
-  "unit_monthly": "month"
+  "unit_monthly": "month",
+  "camera_denied": "Camera is not available. Pick a photo of the QR code instead.",
+  "scan_no_code": "No QR code found in this picture.",
+  "scan_hint_qr": "Point the camera at a QR code",
+  "scan_from_photo": "Choose a photo",
+  "your_level": "Your level",
+  "volume_30d": "30-day volume",
+  "vip_top": "You are at the top level",
+  "vip_levels": "VIP levels",
+  "everyone": "Everyone",
+  "current": "Current",
+  "reached": "Reached",
+  "streak_reward": "Streak reward added to your vouchers",
+  "n_ready": "{n} ready"
 }

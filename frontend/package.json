@@ -10,12 +10,14 @@
     "check:i18n": "node scripts/check-i18n.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.2.5",
     "@fontsource/chakra-petch": "^5.1.0",
     "@fontsource/ibm-plex-sans-arabic": "^5.1.0",
     "@fontsource/inter": "^5.1.0",
     "@tesseract.js-data/eng": "^1.0.0",
     "@tonconnect/ui": "^2.4.4",
     "canvas-confetti": "^1.9.3",
+    "jsqr": "^1.4.0",
     "lucide-react": "^1.61.0",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",

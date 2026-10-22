@@ -1097,5 +1097,18 @@
   "err_account_restricted": "Bu akkaunt cheklangan.",
   "unit_daily": "kun",
   "unit_weekly": "hafta",
-  "unit_monthly": "oy"
+  "unit_monthly": "oy",
+  "camera_denied": "Kamera mavjud emas. Uning oʻrniga QR kod rasmini tanlang.",
+  "scan_no_code": "Bu rasmda QR kod topilmadi.",
+  "scan_hint_qr": "Kamerani QR kodga qarating",
+  "scan_from_photo": "Rasm tanlash",
+  "your_level": "Darajangiz",
+  "volume_30d": "30 kunlik hajm",
+  "vip_top": "Siz eng yuqori darajadasiz",
+  "vip_levels": "VIP darajalari",
+  "everyone": "Hamma",
+  "current": "Joriy",
+  "reached": "Erishildi",
+  "streak_reward": "Seriya mukofoti vaucherlaringizga qoʻshildi",
+  "n_ready": "{n} tayyor"
 }

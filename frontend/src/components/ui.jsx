@@ -142,19 +142,47 @@ export function SearchBox({ value, onChange, placeholder, right }) {
 }
 
 export function Sheet({ open, onClose, title, children, tall }) {
+  const box = useRef(null);
+  const drag = useRef(null);
+  const [dy, setDy] = useState(0);
+  const [closing, setClosing] = useState(false);
   useEffect(() => {
     if (!open) return undefined;
+    setDy(0); setClosing(false);
     const onKey = (e) => e.key === 'Escape' && onClose?.();
     window.addEventListener('keydown', onKey);
     document.body.classList.add('no-scroll');
     return () => { window.removeEventListener('keydown', onKey); document.body.classList.remove('no-scroll'); };
   }, [open, onClose]);
   if (!open) return null;
+  const close = () => { setClosing(true); setTimeout(() => onClose?.(), 200); };
+  // swipe down to close: from the grip / title anywhere, or from the content when it is scrolled to the top
+  const start = (e) => {
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const fromHead = e.target.closest?.('.sheet-head');
+    if (!fromHead && box.current?.scrollTop > 0) return;
+    drag.current = { y, t: performance.now(), head: Boolean(fromHead) };
+  };
+  const move = (e) => {
+    if (!drag.current) return;
+    const d = (e.touches ? e.touches[0].clientY : e.clientY) - drag.current.y;
+    if (d <= 0 && !drag.current.moved) return;
+    drag.current.moved = true;
+    setDy(Math.max(0, d));
+  };
+  const end = () => {
+    if (!drag.current) return;
+    const v = dy / Math.max(1, performance.now() - drag.current.t);
+    drag.current = null;
+    if (dy > 110 || v > 0.6) { haptic.tap(); close(); } else setDy(0);
+  };
   return (
-    <div className="sheet-bg" onClick={onClose} role="presentation">
-      <div className={`sheetm ${tall ? 'tall' : ''}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <div className="grip" />
-        {title && <h3>{title}</h3>}
+    <div className={`sheet-bg ${closing ? 'out' : ''}`} onClick={close} role="presentation" style={dy ? { background: `rgba(0,0,0,${Math.max(0.15, 0.6 - dy / 600)})` } : undefined}>
+      <div ref={box} className={`sheetm ${tall ? 'tall' : ''} ${closing ? 'out' : ''}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true"
+        style={dy ? { transform: `translateY(${dy}px)`, transition: 'none' } : undefined}
+        onTouchStart={start} onTouchMove={move} onTouchEnd={end} onPointerDown={(e) => e.pointerType === 'mouse' && e.target.closest('.sheet-head') && start(e)}
+        onPointerMove={(e) => e.pointerType === 'mouse' && move(e)} onPointerUp={(e) => e.pointerType === 'mouse' && end()}>
+        <div className="sheet-head"><div className="grip" />{title && <h3>{title}</h3>}</div>
         {children}
       </div>
     </div>
@@ -268,12 +296,21 @@ export function Ring({ pct, size = 120, stroke = 10, children }) {
   );
 }
 
-export function Spark({ points, w = 54, h = 24, up }) {
-  if (!points || points.length < 2) return <span style={{ width: w }} />;
-  const ys = points.map((p) => Number(Array.isArray(p) ? p[1] : p));
-  const min = Math.min(...ys);
-  const max = Math.max(...ys);
-  const d = ys.map((y, i) => `${((i / (ys.length - 1)) * w).toFixed(1)},${(h - 3 - ((y - min) / (max - min || 1)) * (h - 6)).toFixed(1)}`).join(' L');
+/** Vertical range with a floor (0.6 % of the price) so a stablecoin's tiny wobble reads as the calm line it is. */
+function span(ys) {
+  const lo = Math.min(...ys);
+  const hi = Math.max(...ys);
+  const mid = (lo + hi) / 2;
+  const half = Math.max((hi - lo) / 2, Math.abs(mid) * 0.003) || 1;
+  return [mid - half, half * 2];
+}
+
+export function Spark({ points, w = 54, h = 24, up, price }) {
+  let src = points && points.length >= 2 ? points : price ? [price, price] : null;
+  if (!src) return <span style={{ width: w, flex: 'none' }} />;
+  const ys = src.map((p) => Number(Array.isArray(p) ? p[1] : p));
+  const [min, rng] = span(ys);
+  const d = ys.map((y, i) => `${((i / (ys.length - 1)) * w).toFixed(1)},${(h - 3 - ((y - min) / rng) * (h - 6)).toFixed(1)}`).join(' L');
   const color = (up ?? ys[ys.length - 1] >= ys[0]) ? 'var(--ok)' : 'var(--bad)';
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="spark" aria-hidden="true">
@@ -283,18 +320,24 @@ export function Spark({ points, w = 54, h = 24, up }) {
 }
 
 /** Area chart with the gradient fill, dashed last-price line and an interactive scrubber. */
-export function AreaChart({ points, h = 160, format }) {
+export function AreaChart({ points: input, h = 160, format, fallback, up: upProp }) {
+  let points = input;
   const [hover, setHover] = useState(null);
   const box = useRef(null);
   const w = 390;
-  if (!points || points.length < 2) return <div className="chart-box"><Skeleton h={h} r={0} /></div>;
+  if (!points) return <div className="chart-box"><Skeleton h={h} r={0} /></div>;
+  if (points.length < 2) {
+    const now = Date.now() / 1000;
+    const v = points[0]?.[1] ?? fallback;
+    if (v === undefined || v === null) return <div className="chart-box" style={{ height: h }} />;
+    points = [[now - 86400, v], [now, v]];
+  }
   const ys = points.map((p) => Number(p[1]));
-  const min = Math.min(...ys);
-  const max = Math.max(...ys);
-  const pts = ys.map((y, i) => [(i / (ys.length - 1)) * w, 10 + (1 - (y - min) / (max - min || 1)) * (h - 24)]);
+  const [min, rng] = span(ys);
+  const pts = ys.map((y, i) => [(i / (ys.length - 1)) * w, 10 + (1 - (y - min) / rng) * (h - 24)]);
   const d = `M${pts.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' L')}`;
   const last = pts[pts.length - 1];
-  const up = ys[ys.length - 1] >= ys[0];
+  const up = upProp ?? ys[ys.length - 1] >= ys[0];
   const col = up ? '#FF8A00' : '#FF6B5E';
   const onMove = (e) => {
     const r = box.current.getBoundingClientRect();
@@ -424,4 +467,29 @@ export function AmountInput({ value, onChange, asset, max, usdPrice, display = 6
       </div>
     </div>
   );
+}
+
+/* VIP tiers: each level has its own metal, used on the badge, the tier card and the tier ladder */
+export const VIP_STYLE = [
+  { bg: 'linear-gradient(135deg,#4A4F5C,#2B2F38)', fg: '#F2F4F8', ring: '#8A93A6' },   // Standard — graphite
+  { bg: 'linear-gradient(135deg,#E9EDF3,#AEB7C6)', fg: '#1D2430', ring: '#C9D1DE' },   // Silver
+  { bg: 'linear-gradient(135deg,#FFE08A,#E6A515)', fg: '#3A2600', ring: '#F5C445' },   // Gold
+  { bg: 'linear-gradient(135deg,#C9F1FF,#7FB7D9)', fg: '#0E2A3A', ring: '#9FD5EE' },   // Platinum
+  { bg: 'linear-gradient(135deg,#C7B5FF,#7B5CFF)', fg: '#170A3D', ring: '#A08BFF' },   // Diamond
+];
+export const vipStyle = (level) => VIP_STYLE[Math.max(0, Math.min(VIP_STYLE.length - 1, Number(level) || 0))];
+
+export function VipBadge({ level = 0, name, onClick, size = 'md' }) {
+  const s = vipStyle(level);
+  const C = onClick ? 'button' : 'span';
+  return (
+    <C type={onClick ? 'button' : undefined} className={`vip-badge ${size}`} style={{ background: s.bg, color: s.fg }} onClick={onClick}>
+      <Icon name="crown" size={size === 'sm' ? 11 : 13} stroke={2.4} /><span>{name || 'VIP'}</span>
+    </C>
+  );
+}
+
+/** iOS-style settings icon: white glyph on a coloured rounded square (same size on every phone). */
+export function SqIcon({ name, color = 'ember' }) {
+  return <span className={`sq-ic ${color}`}><Icon name={name} size={18} stroke={2.1} /></span>;
 }

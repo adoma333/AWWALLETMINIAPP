@@ -13,7 +13,7 @@ import { haptic } from '../telegram';
 export default function Earn({ query = {} }) {
   const { t } = useI18n();
   const { wallet, loadWallet, toast } = useApp();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(() => api.cached('/api/earn') || null);
   const [tab, setTab] = useState('flex');
   const [open, setOpen] = useState(null);
   const load = () => api.get('/api/earn').then((d) => {

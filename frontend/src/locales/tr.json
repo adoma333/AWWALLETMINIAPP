@@ -1097,5 +1097,18 @@
   "err_account_restricted": "Bu hesap kısıtlanmış.",
   "unit_daily": "gün",
   "unit_weekly": "hafta",
-  "unit_monthly": "ay"
+  "unit_monthly": "ay",
+  "camera_denied": "Kamera kullanılamıyor. Bunun yerine QR kodun fotoğrafını seç.",
+  "scan_no_code": "Bu fotoğrafta QR kod bulunamadı.",
+  "scan_hint_qr": "Kamerayı bir QR koda tut",
+  "scan_from_photo": "Fotoğraf seç",
+  "your_level": "Seviyen",
+  "volume_30d": "30 günlük hacim",
+  "vip_top": "En üst seviyedesin",
+  "vip_levels": "VIP seviyeleri",
+  "everyone": "Herkes",
+  "current": "Mevcut",
+  "reached": "Ulaşıldı",
+  "streak_reward": "Seri ödülü kuponlarına eklendi",
+  "n_ready": "{n} hazır"
 }

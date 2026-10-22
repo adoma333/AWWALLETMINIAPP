@@ -1097,5 +1097,18 @@
   "err_account_restricted": "该账户已受限。",
   "unit_daily": "天",
   "unit_weekly": "周",
-  "unit_monthly": "月"
+  "unit_monthly": "月",
+  "camera_denied": "相机不可用，请改为选择二维码照片。",
+  "scan_no_code": "这张图片中未找到二维码。",
+  "scan_hint_qr": "将相机对准二维码",
+  "scan_from_photo": "选择照片",
+  "your_level": "您的等级",
+  "volume_30d": "30 天交易量",
+  "vip_top": "您已是最高等级",
+  "vip_levels": "VIP 等级",
+  "everyone": "所有人",
+  "current": "当前",
+  "reached": "已达到",
+  "streak_reward": "连签奖励已添加到您的券中",
+  "n_ready": "{n} 个可领取"
 }

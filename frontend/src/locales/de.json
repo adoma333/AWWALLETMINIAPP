@@ -1097,5 +1097,18 @@
   "err_account_restricted": "Dieses Konto ist eingeschränkt.",
   "unit_daily": "Tag",
   "unit_weekly": "Woche",
-  "unit_monthly": "Monat"
+  "unit_monthly": "Monat",
+  "camera_denied": "Kamera nicht verfügbar. Wähle stattdessen ein Foto des QR-Codes.",
+  "scan_no_code": "Auf diesem Bild wurde kein QR-Code gefunden.",
+  "scan_hint_qr": "Richte die Kamera auf einen QR-Code",
+  "scan_from_photo": "Foto wählen",
+  "your_level": "Dein Level",
+  "volume_30d": "30-Tage-Volumen",
+  "vip_top": "Du bist auf dem höchsten Level",
+  "vip_levels": "VIP-Level",
+  "everyone": "Alle",
+  "current": "Aktuell",
+  "reached": "Erreicht",
+  "streak_reward": "Serienbonus zu deinen Gutscheinen hinzugefügt",
+  "n_ready": "{n} bereit"
 }

@@ -94,3 +94,22 @@ def test_split_bill(api):
     sp = host.ok("get", f"/api/splits/{sp['id']}")
     assert sp["collected"] == "30" and sp["outstanding"] == "30" and sp["status"] == "open"
     assert f2.post(f"/api/splits/{sp['id']}", {}).status_code in (404, 405)
+
+
+def test_price_alert_fires_once_while_price_hovers(api):
+    from aw import prices
+
+    a = api(940)
+    a.ok("post", "/api/alerts", {"asset": "BTC", "op": "above", "price": "61000", "repeat": True})
+    n = lambda: db.val("SELECT COUNT(*) FROM notifications WHERE user_id=940 AND kind='price_alert'", (), 0)  # noqa: E731
+    for usd in ("61010", "60990", "61020", "60995", "61030"):  # ping-pong around the level
+        db.x("UPDATE prices SET usd=? WHERE asset='BTC'", (usd,))
+        prices.check_alerts()
+    assert n() == 1
+    # a real move back (>1 %) after the cooldown re-arms a repeating alert
+    db.x("UPDATE price_alerts SET fired_at=fired_at-? WHERE user_id=940", (7 * 3600,))
+    db.x("UPDATE prices SET usd='60000' WHERE asset='BTC'")
+    prices.check_alerts()
+    db.x("UPDATE prices SET usd='61500' WHERE asset='BTC'")
+    prices.check_alerts()
+    assert n() == 2

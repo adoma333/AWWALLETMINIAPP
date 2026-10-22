@@ -42,7 +42,7 @@ function Markets({ search, setSearch }) {
   const watch = me?.settings?.watchlist || [];
   const [cat, setCat] = useState(watch.length ? 'watch' : 'top');
   const [q, setQ] = useState('');
-  const [sum, setSum] = useState(null);
+  const [sum, setSum] = useState(() => api.cached('/api/markets/summary') || null);
   useEffect(() => { api.get('/api/markets/summary', { silent: true }).then(setSum).catch(() => {}); }, []);
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -83,7 +83,7 @@ function Markets({ search, setSearch }) {
               <button key={a.id} type="button" className="li" onClick={() => go(`/asset/${a.id}`)}>
                 <CoinIcon asset={a.id} size={38} />
                 <span className="grow"><b>{a.id}</b><small>{a.name}</small></span>
-                <Spark points={a.spark} w={58} h={24} up={ch >= 0} />
+                <Spark points={a.spark} price={a.usd} w={58} h={24} up={ch >= 0} />
                 <span className="r" style={{ minWidth: 84 }} dir="ltr">
                   <b><span key={a.usd} className={a.tick ? `tick-${a.tick}` : undefined}>{priceFmt(a.usd)}</span></b>
                   <small className={ch >= 0 ? 'ok' : 'bad'} style={{ fontWeight: 600 }}>{pct(ch)}</small>
@@ -237,7 +237,7 @@ export function AutoInvest({ query = {} }) {
   const [usd, setUsd] = useState('25');
   const [custom, setCustom] = useState(false);
   const [freq, setFreq] = useState('weekly');
-  const [plans, setPlans] = useState(null);
+  const [plans, setPlans] = useState(() => api.cached('/api/autoinvest')?.items || null);
   const [alerts, setAlerts] = useState([]);
   const [pick, setPick] = useState('');
   const [busy, setBusy] = useState(false);

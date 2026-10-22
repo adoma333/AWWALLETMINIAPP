@@ -95,13 +95,20 @@ function Fallback({ label, color }) {
   return <span className="coin-fb" style={color ? { background: color } : undefined}>{String(label || '?').slice(0, 3)}</span>;
 }
 
+/** Bundled logo first (instant, no request); an admin-uploaded logo overrides it; downloaded logos fill the gaps. */
+function coinSrc(icons, auto, asset) {
+  const server = icons?.[`asset:${asset}`];
+  if (server && !(auto || []).includes(`asset:${asset}`)) return server;
+  return COINS[asset] || server;
+}
+
 export function CoinIcon({ asset, size = 40, network }) {
-  const { icons } = useApp();
-  const src = icons?.[`asset:${asset}`] || COINS[asset];
+  const { icons, config } = useApp();
+  const src = coinSrc(icons, config?.icons_auto, asset);
   const nsrc = network ? icons?.[`net:${network}`] || NETS[network] : null;
   return (
     <span className="coin" style={{ width: size, height: size }}>
-      {src ? <img src={src} alt={asset} loading="lazy" /> : <Fallback label={asset} />}
+      {src ? <img src={src} alt={asset} decoding="async" /> : <Fallback label={asset} />}
       {nsrc && <img className="n" src={nsrc} alt={network} />}
     </span>
   );
@@ -112,7 +119,7 @@ export function NetIcon({ network, size = 22, className = '' }) {
   const src = icons?.[`net:${network}`] || NETS[network];
   return (
     <span className={`coin ${className}`} style={{ width: size, height: size }}>
-      {src ? <img src={src} alt={network} loading="lazy" /> : <Fallback label={network} />}
+      {src ? <img src={src} alt={network} decoding="async" /> : <Fallback label={network} />}
     </span>
   );
 }

@@ -1097,5 +1097,18 @@
   "err_account_restricted": "این حساب محدود شده است.",
   "unit_daily": "روز",
   "unit_weekly": "هفته",
-  "unit_monthly": "ماه"
+  "unit_monthly": "ماه",
+  "camera_denied": "دوربین در دسترس نیست. به‌جای آن عکس کد QR را انتخاب کنید.",
+  "scan_no_code": "در این عکس کد QR پیدا نشد.",
+  "scan_hint_qr": "دوربین را به سمت کد QR بگیرید",
+  "scan_from_photo": "انتخاب عکس",
+  "your_level": "سطح شما",
+  "volume_30d": "حجم ۳۰ روزه",
+  "vip_top": "شما در بالاترین سطح هستید",
+  "vip_levels": "سطوح VIP",
+  "everyone": "همه",
+  "current": "فعلی",
+  "reached": "رسیده",
+  "streak_reward": "پاداش زنجیره به کوپن‌های شما اضافه شد",
+  "n_ready": "{n} آماده"
 }

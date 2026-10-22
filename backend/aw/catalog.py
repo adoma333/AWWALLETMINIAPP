@@ -40,7 +40,7 @@ ASSETS = [
     ("USDC", "USD Coin", 6, 2, 1, "USDC", "usd-coin", "#2775CA", 2),
     ("BTC", "Bitcoin", 8, 6, 0, "BTC", "bitcoin", "#F7931A", 3),
     ("ETH", "Ethereum", 8, 5, 0, "ETH", "ethereum", "#627EEA", 4),
-    ("TON", "Toncoin", 8, 3, 0, "TON", "the-open-network", "#0098EA", 5),
+    ("TON", "Gram", 8, 3, 0, "TON", "the-open-network", "#0098EA", 5),
     ("BNB", "BNB", 8, 4, 0, "BNB", "binancecoin", "#F0B90B", 6),
     ("SOL", "Solana", 8, 4, 0, "SOL", "solana", "#9945FF", 7),
     ("TRX", "TRON", 6, 2, 0, "TRX", "tron", "#FF060A", 8),

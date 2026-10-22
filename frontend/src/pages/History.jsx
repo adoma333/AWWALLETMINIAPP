@@ -35,9 +35,9 @@ function dayLabel(ts, t, lang) {
 function HistoryList({ query }) {
   const { t, lang } = useI18n();
   const [f, setF] = useState(FILTERS[query.type] !== undefined ? query.type : 'all');
-  const [items, setItems] = useState(null);
+  const [items, setItems] = useState(() => api.cached(`/api/txs?type=${FILTERS[FILTERS[query.type] !== undefined ? query.type : 'all']}&asset=${query.asset || ''}&before=0&limit=30`)?.items || null);
   const [more, setMore] = useState(true);
-  const [ins, setIns] = useState(null);
+  const [ins, setIns] = useState(() => api.cached('/api/insights') || null);
   const [sel, setSel] = useState(11);
   const [q, setQ] = useState('');
   const [search, setSearch] = useState(false);
@@ -47,7 +47,7 @@ function HistoryList({ query }) {
     setItems((x) => (reset ? r.items : [...(x || []), ...r.items]));
     setMore(r.items.length === 30);
   }, [f, items, query.asset]);
-  useEffect(() => { setItems(null); load(true).catch(() => setItems([])); }, [f]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setItems(api.cached(`/api/txs?type=${FILTERS[f]}&asset=${query.asset || ''}&before=0&limit=30`)?.items || null); load(true).catch(() => setItems([])); }, [f]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { api.get('/api/insights', { silent: true }).then(setIns).catch(() => {}); }, []);
   const groups = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -120,7 +120,7 @@ const hm = (ts) => (ts ? new Date(ts * 1000).toLocaleTimeString(undefined, { hou
 function TxDetail({ id }) {
   const { t } = useI18n();
   const { config, loadWallet, toast } = useApp();
-  const [x, setX] = useState(null);
+  const [x, setX] = useState(() => api.cached(`/api/txs/${id}`) || null);
   const [err, setErr] = useState(null);
   const load = () => api.get(`/api/txs/${id}`, { silent: true }).then(setX).catch(setErr);
   const live = x && (['pending', 'processing'].includes(x.status) || ['review', 'approved', 'processing', 'broadcast'].includes(x.withdrawal?.status));

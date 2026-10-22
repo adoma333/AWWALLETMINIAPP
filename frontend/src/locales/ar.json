@@ -1097,5 +1097,18 @@
   "err_account_restricted": "هذا الحساب مقيّد.",
   "unit_daily": "يوم",
   "unit_weekly": "أسبوع",
-  "unit_monthly": "شهر"
+  "unit_monthly": "شهر",
+  "camera_denied": "الكاميرا غير متاحة. اختر صورة لرمز QR بدلًا من ذلك.",
+  "scan_no_code": "لم يتم العثور على رمز QR في هذه الصورة.",
+  "scan_hint_qr": "وجّه الكاميرا نحو رمز QR",
+  "scan_from_photo": "اختر صورة",
+  "your_level": "مستواك",
+  "volume_30d": "حجم 30 يومًا",
+  "vip_top": "أنت في أعلى مستوى",
+  "vip_levels": "مستويات VIP",
+  "everyone": "للجميع",
+  "current": "الحالي",
+  "reached": "تم الوصول",
+  "streak_reward": "أُضيفت مكافأة السلسلة إلى قسائمك",
+  "n_ready": "{n} جاهزة"
 }

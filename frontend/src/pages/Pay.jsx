@@ -29,7 +29,7 @@ const pretty = (url) => url.replace(/^https?:\/\//, '');
 
 async function scanAndGo(t, toast) {
   const raw = await scanQr(t('scan_to_pay'));
-  if (raw === null) { toast(t('scan_unavailable')); return; }
+  if (!raw) return;
   const r = parseScan(raw);
   if (!r) { toast(t('scan_unknown'), 'error'); return; }
   haptic.success();
@@ -44,7 +44,7 @@ function ZPay() {
   const f = config?.features || {};
   const [tab, setTab] = useState('receive');
   const [ok, copy] = useCopy();
-  const [mine, setMine] = useState(null);
+  const [mine, setMine] = useState(() => api.cached('/api/requests') || null);
   useEffect(() => { api.get('/api/requests', { silent: true }).then(setMine).catch(() => setMine({ items: [], splits: [] })); }, []);
   const link = payLink(config, me);
   const share = () => shareUrl(link, t('pay_me_text', { name: me.first_name || me.name }));

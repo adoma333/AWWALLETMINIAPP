@@ -107,7 +107,7 @@ def public_config():
         "banners": [b for b in g.get("banners", []) if b.get("enabled", True) and (not b.get("until") or b["until"] > db.now())],
         "announcement": g.get("announcement"), "support_username": g.get("support_username"), "channel_url": g.get("channel_url"),
         "terms_url": g.get("terms_url"), "privacy_url": g.get("privacy_url"),
-        "branding": br, "icons": icons_map(), "ai_name": settings.get("ai").get("name", "Zohra AI"),
+        "branding": br, "icons": icons_map(), "icons_auto": icons_auto(), "ai_name": settings.get("ai").get("name", "Zohra AI"),
         "networks": [_net_out(n) for n in db.q("SELECT * FROM networks WHERE enabled=1 ORDER BY sort")],
         "tonconnect_manifest": f"{config.WEBAPP_URL}/tonconnect-manifest.json",
         "auth": {"web": bool(settings.get("auth").get("web_login", True)), "google_client_id": settings.get("auth").get("google_client_id") or None},
@@ -122,6 +122,15 @@ def _earn_top():
 
 def icons_map() -> dict:
     return {r["key"]: files.url(r["path"]) for r in db.q("SELECT key, path FROM icons")}
+
+
+def icons_auto() -> list:
+    """Logo keys that were downloaded automatically (not uploaded by an admin): the app prefers its bundled copy."""
+    out = []
+    for a in db.q("SELECT a.id, a.meta, i.path FROM assets a JOIN icons i ON i.key='asset:'||a.id"):
+        if (db.jl(a["meta"]) or {}).get("logo_path") == a["path"]:
+            out.append(f"asset:{a['id']}")
+    return out
 
 
 def _net_out(n: dict) -> dict:
@@ -978,6 +987,18 @@ def p2p_order(oid: str, u: dict = Depends(current_user)):
     return p2p.get_order(u, oid)
 
 
+@app.get("/api/p2p/orders/{oid}/messages")
+def p2p_messages(oid: str, after: int = 0, u: dict = Depends(current_user)):
+    return {"items": p2p.messages(u, oid, after)}
+
+
+@app.post("/api/p2p/orders/{oid}/messages")
+def p2p_send(oid: str, body: dict = Body(...), u: dict = Depends(current_user)):
+    limiter.check(f"chat:{u['id']}", 40)
+    f = files.save(body["file"], "chat") if body.get("file") else None
+    return p2p.send_message(u, oid, body.get("text"), f)
+
+
 @app.post("/api/p2p/orders/{oid}/{action}")
 def p2p_order_action(oid: str, action: str, body: dict = Body(default={}), u: dict = Depends(money_user)):
     if action == "paid":
@@ -991,18 +1012,6 @@ def p2p_order_action(oid: str, action: str, body: dict = Body(default={}), u: di
     if action == "review":
         return p2p.review(u, oid, bool(body.get("positive")), body.get("comment", ""))
     raise AppError("not_found", 404)
-
-
-@app.get("/api/p2p/orders/{oid}/messages")
-def p2p_messages(oid: str, after: int = 0, u: dict = Depends(current_user)):
-    return {"items": p2p.messages(u, oid, after)}
-
-
-@app.post("/api/p2p/orders/{oid}/messages")
-def p2p_send(oid: str, body: dict = Body(...), u: dict = Depends(current_user)):
-    limiter.check(f"chat:{u['id']}", 40)
-    f = files.save(body["file"], "chat") if body.get("file") else None
-    return p2p.send_message(u, oid, body.get("text"), f)
 
 
 @app.get("/api/p2p/profile/{uid}")

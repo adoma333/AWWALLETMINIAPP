@@ -12,7 +12,7 @@ import { haptic, shareUrl } from '../telegram';
 export default function Referral() {
   const { t } = useI18n();
   const { loadWallet, toast } = useApp();
-  const [r, setR] = useState(null);
+  const [r, setR] = useState(() => api.cached('/api/referral') || null);
   const [board, setBoard] = useState([]);
   const [busy, setBusy] = useState(false);
   const [party, setParty] = useState(false);

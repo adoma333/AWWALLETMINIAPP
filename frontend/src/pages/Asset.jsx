@@ -15,14 +15,14 @@ const RANGES = ['1H', '1D', '1W', '1M', '1Y', 'ALL'];
 export default function Asset({ id }) {
   const { t } = useI18n();
   const { wallet, config, toast } = useApp();
-  const [detail, setDetail] = useState(null);
+  const [detail, setDetail] = useState(() => api.cached(`/api/assets/${id}`) || null);
   const [range, setRange] = useState('1D');
-  const [points, setPoints] = useState(null);
+  const [points, setPoints] = useState(() => api.cached(`/api/assets/${id}/chart?range=1D`)?.points || null);
   const [alertOpen, setAlertOpen] = useState(false);
   const load = () => api.get(`/api/assets/${id}`).then(setDetail).catch(() => setDetail(false));
   useEffect(() => { load(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    setPoints(null);
+    setPoints(api.cached(`/api/assets/${id}/chart?range=${range}`)?.points || null);
     api.get(`/api/assets/${id}/chart?range=${range}`, { silent: true }).then((r) => setPoints(r.points)).catch(() => setPoints([]));
   }, [id, range]);
   if (detail === false) return <Page title={id}><Empty icon="alert" title={t('err_not_found')} /></Page>;
@@ -54,7 +54,7 @@ export default function Asset({ id }) {
         ) : <span className="col g6"><Skeleton w={150} h={30} /><Skeleton w={120} h={14} /></span>}
       </div>
 
-      <AreaChart points={points} h={160} format={fmtPt} />
+      <AreaChart points={points} fallback={a?.usd} up={ch >= 0} h={160} format={fmtPt} />
       <Segmented value={range} onChange={(v) => { haptic.select(); setRange(v); }} options={RANGES.map((r) => [r, t(`range_${r}`)])} />
 
       <div className="card row between">

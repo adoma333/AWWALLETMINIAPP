@@ -1097,5 +1097,18 @@
   "err_account_restricted": "Цей акаунт обмежено.",
   "unit_daily": "день",
   "unit_weekly": "тиждень",
-  "unit_monthly": "місяць"
+  "unit_monthly": "місяць",
+  "camera_denied": "Камера недоступна. Виберіть фото QR-коду.",
+  "scan_no_code": "На фото не знайдено QR-код.",
+  "scan_hint_qr": "Наведіть камеру на QR-код",
+  "scan_from_photo": "Вибрати фото",
+  "your_level": "Ваш рівень",
+  "volume_30d": "Обсяг за 30 днів",
+  "vip_top": "У вас найвищий рівень",
+  "vip_levels": "Рівні VIP",
+  "everyone": "Усі",
+  "current": "Поточний",
+  "reached": "Досягнуто",
+  "streak_reward": "Нагороду за серію додано до ваучерів",
+  "n_ready": "Готово: {n}"
 }

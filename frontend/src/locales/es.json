@@ -1097,5 +1097,18 @@
   "err_account_restricted": "Esta cuenta está restringida.",
   "unit_daily": "día",
   "unit_weekly": "semana",
-  "unit_monthly": "mes"
+  "unit_monthly": "mes",
+  "camera_denied": "La cámara no está disponible. Elige una foto del código QR.",
+  "scan_no_code": "No se encontró ningún código QR en esta imagen.",
+  "scan_hint_qr": "Apunta la cámara a un código QR",
+  "scan_from_photo": "Elegir foto",
+  "your_level": "Tu nivel",
+  "volume_30d": "Volumen de 30 días",
+  "vip_top": "Estás en el nivel máximo",
+  "vip_levels": "Niveles VIP",
+  "everyone": "Todos",
+  "current": "Actual",
+  "reached": "Alcanzado",
+  "streak_reward": "Premio de racha añadido a tus cupones",
+  "n_ready": "{n} listos"
 }

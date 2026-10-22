@@ -63,13 +63,18 @@ export function shareMessage(id) {
   });
 }
 
+// Telegram's own scanner exists only in the phone apps; Desktop, macOS and the web get the in-app camera scanner.
+const NATIVE_SCAN = new Set(['ios', 'android', 'android_x']);
 export function scanQr(text) {
   return new Promise((resolve) => {
-    if (!tg?.showScanQrPopup) return resolve(null);
-    tg.showScanQrPopup({ text }, (value) => {
-      resolve(value);
-      return true; // close after first scan
-    });
+    const fallback = () => import('./components/QrScanner').then((m) => m.openScanner(text)).then(resolve);
+    if (!tg?.showScanQrPopup || !NATIVE_SCAN.has(tg.platform) || !ver('6.4')) return fallback();
+    try {
+      tg.showScanQrPopup({ text }, (value) => {
+        resolve(value);
+        return true; // close after first scan
+      });
+    } catch { fallback(); }
   });
 }
 

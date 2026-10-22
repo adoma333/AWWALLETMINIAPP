@@ -1097,5 +1097,18 @@
   "err_account_restricted": "यह अकाउंट प्रतिबंधित है।",
   "unit_daily": "दिन",
   "unit_weekly": "हफ़्ता",
-  "unit_monthly": "महीना"
+  "unit_monthly": "महीना",
+  "camera_denied": "कैमरा उपलब्ध नहीं है। इसके बजाय QR कोड की फ़ोटो चुनें।",
+  "scan_no_code": "इस तस्वीर में कोई QR कोड नहीं मिला।",
+  "scan_hint_qr": "कैमरा को QR कोड की ओर करें",
+  "scan_from_photo": "फ़ोटो चुनें",
+  "your_level": "आपका स्तर",
+  "volume_30d": "30 दिन का वॉल्यूम",
+  "vip_top": "आप सबसे ऊँचे स्तर पर हैं",
+  "vip_levels": "VIP स्तर",
+  "everyone": "सभी",
+  "current": "मौजूदा",
+  "reached": "हासिल",
+  "streak_reward": "स्ट्रीक इनाम आपके वाउचर में जोड़ा गया",
+  "n_ready": "{n} तैयार"
 }

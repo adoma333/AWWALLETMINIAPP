@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { api } from '../api';
 import { useConfirm, withConfirm } from '../components/Confirm';
 import Icon, { CoinIcon, NetIcon } from '../components/Icon';
-import { Avatar, Btn, Empty, Field, HeadBtn, Input, Li, Page, Pill, Ring, Segmented, Sheet, Skeleton, Switch } from '../components/ui';
+import { Avatar, Btn, Empty, Field, HeadBtn, Input, Li, Page, Pill, Ring, Segmented, Sheet, Skeleton, SqIcon, Switch, VipBadge, vipStyle } from '../components/ui';
 import { amt, dateTime, fiat, setFx, shortAddr, timeAgo } from '../format';
 import { LANGS, errText, useI18n } from '../i18n';
 import { go } from '../router';
@@ -27,9 +27,9 @@ export default function Profile({ path }) {
 const PLATFORM = { ios: 'iPhone', android: 'Android', tdesktop: 'Desktop', macos: 'Mac', web: 'Web', weba: 'Web', webk: 'Web', unigram: 'Windows' };
 const platformName = (p) => PLATFORM[String(p || '').toLowerCase()] || p || 'Telegram';
 
-const Row = ({ icon, tone = '', label, value, onClick, danger }) => (
-  <Li icon={icon} tone={danger ? 'r' : tone} title={<span style={{ fontSize: 15 }} className={danger ? 'bad' : ''}>{label}</span>}
-    right={value !== undefined && value !== null && value !== '' ? <span className="dim" style={{ fontSize: 13.5 }}>{value}</span> : null} chev={!!onClick} onClick={onClick} className="sm" />
+const Row = ({ icon, color = 'ember', label, value, onClick, danger }) => (
+  <Li lead={<SqIcon name={icon} color={danger ? 'red' : color} />} title={<span style={{ fontSize: 15.5 }} className={danger ? 'bad' : ''}>{label}</span>}
+    right={value !== undefined && value !== null && value !== '' ? <span className="dim" style={{ fontSize: 14, fontWeight: 500 }}>{value}</span> : null} chev={!!onClick} onClick={onClick} className="sm" />
 );
 
 function securityScore(me) {
@@ -43,8 +43,8 @@ function Home() {
   const { me, config, setMe, loadWallet, toast } = useApp();
   const [sheet, setSheet] = useState('');
   const [theme, setTheme] = useState(getThemePref());
-  const [fees, setFees] = useState(null);
-  const [lim, setLim] = useState(null);
+  const [fees, setFees] = useState(() => api.cached('/api/fees') || null);
+  const [lim, setLim] = useState(() => api.cached('/api/limits') || null);
   useEffect(() => {
     api.get('/api/fees', { silent: true }).then(setFees).catch(() => {});
     api.get('/api/limits', { silent: true }).then(setLim).catch(() => {});
@@ -64,47 +64,49 @@ function Home() {
   const vip = fees?.vip;
   return (
     <main className="page">
-      <div className="col center g6" style={{ padding: '8px 0 2px' }}>
-        <Avatar src={me.photo} name={me.first_name || me.name} size={76} seed={me.id} />
-        <b className="disp" style={{ fontSize: 22 }}>{me.first_name || me.name}</b>
-        <span className="dim xs" dir="ltr">{me.username ? `@${me.username}` : `ID ${me.id}`}</span>
-        <span className="row g6">
+      <div className="col center g6 profile-hero">
+        <span className="av-ring"><Avatar src={me.photo} name={me.first_name || me.name} size={80} seed={me.id} /></span>
+        <b style={{ fontSize: 23, fontWeight: 750, letterSpacing: '-.02em' }}>{me.first_name || me.name}</b>
+        <span className="dim" style={{ fontSize: 14, fontWeight: 500 }} dir="ltr">{me.username ? `@${me.username}` : `ID ${me.id}`}</span>
+        <span className="row g6" style={{ marginTop: 2 }}>
           <button type="button" onClick={() => go('/settings/kyc')}><Pill tone={me.kyc_level ? 'g' : 'n'} icon={me.kyc_level ? 'shieldok' : 'idCard'}>{me.kyc_level ? t('verified') : t('not_verified')}</Pill></button>
-          {me.vip && <button type="button" onClick={() => go('/fees')}><Pill tone="y" icon="crown">VIP {me.vip.name}</Pill></button>}
+          {me.vip && <VipBadge level={me.vip.level} name={`VIP ${me.vip.name}`} onClick={() => go('/fees')} />}
         </span>
       </div>
       {vip?.next && (
-        <button type="button" className="card col g8" style={{ padding: '14px 16px' }} onClick={() => go('/fees')}>
-          <div className="row between" style={{ fontSize: 13.5 }}><b>{t('vip_in_volume', { tier: vip.next.name, amount: fiat(Number(vip.next.min_volume_usd) - Number(vip.volume_30d), 0) })}</b>
-            <span className="em">−{vip.next.discount_pct}% {t('fees_short')}</span></div>
-          <div className="prog"><i style={{ width: `${Math.min(100, (Number(vip.volume_30d) / Number(vip.next.min_volume_usd)) * 100)}%` }} /></div>
+        <button type="button" className="card col g10 tier-next" onClick={() => go('/fees')}>
+          <div className="row between g8">
+            <span className="row g8"><VipBadge level={vip.next.level} name={vip.next.name} size="sm" />
+              <b style={{ fontSize: 14 }}>{t('vip_in_volume', { tier: vip.next.name, amount: fiat(Number(vip.next.min_volume_usd) - Number(vip.volume_30d), 0) })}</b></span>
+            <span className="ok" style={{ fontWeight: 700, fontSize: 13.5 }} dir="ltr">−{vip.next.discount_pct}%</span></div>
+          <div className="prog"><i style={{ width: `${Math.max(3, Math.min(100, (Number(vip.volume_30d) / Number(vip.next.min_volume_usd)) * 100))}%`, background: vipStyle(vip.next.level).bg }} /></div>
         </button>
       )}
-      <div className="list">
-        <Row icon="shield" label={t('security_centre')} value={<Pill tone={sc.n >= 4 ? 'g' : sc.n >= 2 ? 'y' : 'r'}>{t(sc.n >= 4 ? 'sec_strong' : sc.n >= 2 ? 'sec_medium' : 'sec_weak')}</Pill>} onClick={() => go('/settings/security')} />
-        <Row icon="sliders" label={t('limits_title')} value={lim ? `${fiat(lim.withdraw_daily, 0)} / ${t('day')}` : ''} onClick={() => go('/settings/limits')} />
-        <Row icon="percent" label={t('fees_vip')} onClick={() => go('/fees')} />
-        <Row icon="wallet" label={t('address_book')} onClick={() => go('/settings/addressbook')} />
-        <Row icon="history" label={t('activity')} onClick={() => go('/history')} />
-        {config?.features?.earn !== false && <Row icon="earn" label={t('earn')} onClick={() => go('/earn')} />}
-        <Row icon="gift" label={t('my_gifts')} onClick={() => go('/gifts')} />
-        <Row icon="users" label={t('invite_friends')} onClick={() => go('/referral')} />
+      <div className="list set">
+        <Row icon="shield" color="green" label={t('security_centre')} value={<Pill tone={sc.n >= 4 ? 'g' : sc.n >= 2 ? 'y' : 'r'}>{t(sc.n >= 4 ? 'sec_strong' : sc.n >= 2 ? 'sec_medium' : 'sec_weak')}</Pill>} onClick={() => go('/settings/security')} />
+        <Row icon="sliders" color="blue" label={t('limits_title')} value={lim ? `${fiat(lim.withdraw_daily, 0)} / ${t('day')}` : ''} onClick={() => go('/settings/limits')} />
+        <Row icon="crown" color="gold" label={t('fees_vip')} onClick={() => go('/fees')} />
+        <Row icon="contacts" color="indigo" label={t('address_book')} onClick={() => go('/settings/addressbook')} />
+        <Row icon="history" color="teal" label={t('activity')} onClick={() => go('/history')} />
+        {config?.features?.earn !== false && <Row icon="earn" color="ember" label={t('earn')} onClick={() => go('/earn')} />}
+        <Row icon="gift" color="pink" label={t('my_gifts')} onClick={() => go('/gifts')} />
+        <Row icon="users" color="violet" label={t('invite_friends')} onClick={() => go('/referral')} />
       </div>
-      <div className="list">
-        <Row icon="globe" tone="n" label={t('language')} value={LANGS.find(([c]) => c === lang)?.[1]} onClick={() => setSheet('lang')} />
-        <Row icon="dollar" tone="n" label={t('currency')} value={cur} onClick={() => setSheet('cur')} />
-        <Row icon={theme === 'light' ? 'sun' : 'moon'} tone="n" label={t('appearance')} value={t(`theme_${theme}`)} onClick={() => setSheet('theme')} />
-        <Row icon="bell" tone="n" label={t('notifications')} value={me.unread || ''} onClick={() => go('/notifications')} />
-        {config?.features?.ton_connect !== false && <Row icon="wallet" tone="n" label={t('ton_wallet')} value={me.ton_wallet ? `${shortAddr(me.ton_wallet.address, 4)} ✓` : t('connect_wallet')} onClick={tonConnect} />}
-        <Row icon="device" tone="n" label={t('devices_title')} onClick={() => go('/settings/devices')} />
+      <div className="list set">
+        <Row icon="globe" color="blue" label={t('language')} value={LANGS.find(([c]) => c === lang)?.[1]} onClick={() => setSheet('lang')} />
+        <Row icon="dollar" color="green" label={t('currency')} value={cur} onClick={() => setSheet('cur')} />
+        <Row icon={theme === 'light' ? 'sun' : 'moon'} color="indigo" label={t('appearance')} value={t(`theme_${theme}`)} onClick={() => setSheet('theme')} />
+        <Row icon="bell" color="red" label={t('notifications')} value={me.unread || ''} onClick={() => go('/notifications')} />
+        {config?.features?.ton_connect !== false && <Row icon="wallet" color="blue" label={t('ton_wallet')} value={me.ton_wallet ? `${shortAddr(me.ton_wallet.address, 4)} ✓` : t('connect_wallet')} onClick={tonConnect} />}
+        <Row icon="device" color="gray" label={t('devices_title')} onClick={() => go('/settings/devices')} />
       </div>
-      <div className="list">
-        <Row icon="bot" tone="n" label={config?.ai_name || 'Zohra AI'} value={t('online_247')} onClick={() => go('/support')} />
-        <Row icon="headset" tone="n" label={t('support_title')} onClick={() => go('/support/tickets')} />
-        {config?.channel_url && <Row icon="mega" tone="n" label={t('channel')} onClick={() => openTelegramLink(config.channel_url)} />}
-        {config?.terms_url && <Row icon="book" tone="n" label={t('terms')} onClick={() => openLink(config.terms_url)} />}
-        {config?.privacy_url && <Row icon="lock" tone="n" label={t('privacy')} onClick={() => openLink(config.privacy_url)} />}
-        {me.is_admin && <Row icon="settings" tone="n" label={t('admin_panel')} onClick={() => { location.href = '/admin/'; }} />}
+      <div className="list set">
+        <Row icon="bot" color="ember" label={config?.ai_name || 'Zohra AI'} value={t('online_247')} onClick={() => go('/support')} />
+        <Row icon="headset" color="teal" label={t('support_title')} onClick={() => go('/support/tickets')} />
+        {config?.channel_url && <Row icon="mega" color="blue" label={t('channel')} onClick={() => openTelegramLink(config.channel_url)} />}
+        {config?.terms_url && <Row icon="book" color="gray" label={t('terms')} onClick={() => openLink(config.terms_url)} />}
+        {config?.privacy_url && <Row icon="lock" color="gray" label={t('privacy')} onClick={() => openLink(config.privacy_url)} />}
+        {me.is_admin && <Row icon="settings" color="gray" label={t('admin_panel')} onClick={() => { location.href = '/admin/'; }} />}
       </div>
       <p className="dim center xs" style={{ padding: '4px 0 8px' }}>ZOHRA WALLET · {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : ''}</p>
       <Sheet open={sheet === 'lang'} onClose={() => setSheet('')} title={t('language')} tall>
@@ -128,7 +130,7 @@ function Security() {
   const { me, setMe, toast } = useApp();
   const ask = useConfirm();
   const [bio, setBio] = useState(false);
-  const [sessions, setSessions] = useState(null);
+  const [sessions, setSessions] = useState(() => api.cached('/api/me/sessions') || null);
   const [activity, setActivity] = useState([]);
   const [sheet, setSheet] = useState('');
   const [oldPin, setOldPin] = useState('');
@@ -197,31 +199,31 @@ function Security() {
           {next && <Btn kind="f" size="sm" style={{ height: 32, marginTop: 8 }} onClick={next[1]}>{t('finish_setup')}</Btn>}
         </span>
       </div>
-      <div className="list">
-        <Li icon="lock" tone={me.pin_set ? 'g' : ''} className="sm" title={t('pin_code')} right={<State on={me.pin_set} label={me.pin_set ? t('change') : t('set_up')} />}
+      <div className="list set">
+        <Li lead={<SqIcon name="lock" color="ember" />} className="sm" title={t('pin_code')} right={<State on={me.pin_set} label={me.pin_set ? t('change') : t('set_up')} />}
           onClick={() => (me.pin_set ? setSheet('pin') : go('/security/pin?next=/settings/security'))} />
-        {bio && me.pin_set && <Li icon="finger" tone={me.bio_enabled ? 'g' : ''} className="sm" title={t('biometric')} right={<Switch on={me.bio_enabled} onChange={toggleBio} />} />}
-        <Li icon="shieldok" tone={me.settings?.whitelist_only ? 'g' : ''} className="sm" title={t('whitelist_only')} sub={t('whitelist_only_sub')} right={<Switch on={me.settings?.whitelist_only} onChange={setWl} />} />
-        <Li icon="key" tone={me.anti_phishing ? 'g' : ''} className="sm" title={t('anti_phishing')} sub={t('anti_phishing_sub')}
+        {bio && me.pin_set && <Li lead={<SqIcon name="finger" color="violet" />} className="sm" title={t('biometric')} right={<Switch on={me.bio_enabled} onChange={toggleBio} />} />}
+        <Li lead={<SqIcon name="shieldok" color="green" />} className="sm" title={t('whitelist_only')} sub={t('whitelist_only_sub')} right={<Switch on={me.settings?.whitelist_only} onChange={setWl} />} />
+        <Li lead={<SqIcon name="key" color="gold" />} className="sm" title={t('anti_phishing')} sub={t('anti_phishing_sub')}
           right={<State on={Boolean(me.anti_phishing)} label={me.anti_phishing || t('set_up')} />} onClick={() => setSheet('code')} />
-        <Li icon="phone" tone={me.phone ? 'g' : ''} className="sm" title={t('phone_verification')} right={<State on={Boolean(me.phone)} label={me.phone || t('verify')} />} onClick={verifyPhone} />
-        <Li icon="idCard" tone={me.kyc_level >= 2 ? 'g' : ''} className="sm" title={t('verify_identity')} right={<span className="dim" style={{ fontSize: 13 }}>{t(`kyc_level_${me.kyc_level}`)}</span>} chev onClick={() => go('/settings/kyc')} />
+        <Li lead={<SqIcon name="phone" color="teal" />} className="sm" title={t('phone_verification')} right={<State on={Boolean(me.phone)} label={me.phone || t('verify')} />} onClick={verifyPhone} />
+        <Li lead={<SqIcon name="idCard" color="blue" />} className="sm" title={t('verify_identity')} right={<span className="dim" style={{ fontSize: 13 }}>{t(`kyc_level_${me.kyc_level}`)}</span>} chev onClick={() => go('/settings/kyc')} />
       </div>
       <div className="h2"><span>{t('active_sessions')}</span>{sessions?.items?.some((d) => d.id !== sessions.current) && <button type="button" onClick={async () => {
         for (const d of sessions.items.filter((x) => x.id !== sessions.current)) await api.post(`/api/me/sessions/${d.id}/revoke`).catch(() => {});
         haptic.success(); toast(t('device_signed_out'), 'ok'); loadSessions();
       }}>{t('end_others')}</button>}</div>
-      <div className="list">
-        <Li icon="device" tone="n" className="sm" title={inTelegram ? `Telegram · ${platformName(window.Telegram?.WebApp?.platform)}` : t('this_device')} sub={t('now')} right={<Pill tone="g">{t('this_device')}</Pill>} />
+      <div className="list set">
+        <Li lead={<SqIcon name="device" color="gray" />} className="sm" title={inTelegram ? `Telegram · ${platformName(window.Telegram?.WebApp?.platform)}` : t('this_device')} sub={t('now')} right={<Pill tone="g">{t('this_device')}</Pill>} />
         {(sessions?.items || []).filter((d) => d.id !== sessions.current).map((d) => (
-          <Li key={d.id} icon="device" tone="n" className="sm" title={d.device || '—'} sub={timeAgo(d.last_seen, t)}
+          <Li key={d.id} lead={<SqIcon name="device" color="gray" />} className="sm" title={d.device || '—'} sub={timeAgo(d.last_seen, t)}
             right={<button type="button" onClick={async () => { await api.post(`/api/me/sessions/${d.id}/revoke`).catch(() => {}); toast(t('device_signed_out'), 'ok'); loadSessions(); }}><Pill tone="r">{t('end')}</Pill></button>} />
         ))}
       </div>
       {activity.length > 0 && (
         <>
           <div className="h2"><span>{t('login_activity')}</span></div>
-          <div className="list">{activity.slice(0, 6).map((a, i) => <Li key={i} icon="activity" tone="n" className="sm" title={`Telegram · ${platformName(a.platform)}`} sub={dateTime(a.created_at)} />)}</div>
+          <div className="list set">{activity.slice(0, 6).map((a, i) => <Li key={i} lead={<SqIcon name="activity" color="gray" />} className="sm" title={`Telegram · ${platformName(a.platform)}`} sub={dateTime(a.created_at)} />)}</div>
         </>
       )}
       <Sheet open={sheet === 'pin'} onClose={() => setSheet('')} title={t('change_pin')}>
@@ -244,7 +246,7 @@ function AddressBook() {
   const { t } = useI18n();
   const { config, toast } = useApp();
   const ask = useConfirm();
-  const [items, setItems] = useState(null);
+  const [items, setItems] = useState(() => api.cached('/api/addressbook')?.items || null);
   const [f, setF] = useState(null);
   const load = () => api.get('/api/addressbook').then((r) => setItems(r.items)).catch(() => setItems([]));
   useEffect(() => { load(); }, []);
@@ -291,7 +293,7 @@ function AddressBook() {
 function Limits() {
   const { t } = useI18n();
   const { me } = useApp();
-  const [l, setL] = useState(null);
+  const [l, setL] = useState(() => api.cached('/api/limits') || null);
   useEffect(() => { api.get('/api/limits').then(setL).catch(() => {}); }, []);
   return (
     <Page title={t('limits_title')}>
@@ -319,24 +321,45 @@ function Limits() {
 
 function Fees() {
   const { t } = useI18n();
-  const [f, setF] = useState(null);
+  const [f, setF] = useState(() => api.cached('/api/fees') || null);
   useEffect(() => { api.get('/api/fees').then(setF).catch(() => {}); }, []);
-  if (!f) return <Page title={t('fees_vip')}><Skeleton h={200} r={22} /></Page>;
+  if (!f) return <Page title={t('fees_vip')}><Skeleton h={190} r={26} /><Skeleton h={260} r={22} /></Page>;
   const v = f.vip;
+  const s = vipStyle(v.level);
+  const pct = v.next ? Math.max(3, Math.min(100, (Number(v.volume_30d) / Number(v.next.min_volume_usd)) * 100)) : 100;
   return (
     <Page title={t('fees_vip')}>
-      <div className="card glow col g10">
-        <div className="row between"><b className="row g6 disp" style={{ fontSize: 18 }}><Icon name="crown" size={18} className="gold" />VIP {v.name}</b><Pill tone="g">−{v.discount_pct}%</Pill></div>
-        {v.next && <><div className="prog"><i style={{ width: `${Math.min(100, (Number(v.volume_30d) / Number(v.next.min_volume_usd)) * 100)}%` }} /></div>
-          <small className="dim" style={{ fontSize: 12.5 }}>{t('vip_progress', { amount: fiat(Number(v.next.min_volume_usd) - Number(v.volume_30d)), tier: v.next.name })}</small></>}
-        <div className="row g6" style={{ overflowX: 'auto' }}>
-          {v.tiers.map((x) => (
-            <div key={x.level} className={`opt-tile ${x.level === v.level ? 'on' : ''}`} style={{ minWidth: 92, textAlign: 'center', padding: '10px 8px' }}>
-              <b style={{ margin: 0 }}>{x.name}</b><small style={{ display: 'block' }}>≥ {fiat(x.min_volume_usd, 0)}</small><small className="ok" style={{ display: 'block' }}>−{x.discount_pct}%</small>
-            </div>
-          ))}
+      <div className="tier-card" style={{ background: s.bg, color: s.fg }}>
+        <div className="row between">
+          <span className="row g8"><span className="tier-crown"><Icon name="crown" size={20} stroke={2.2} /></span>
+            <span className="col"><small style={{ opacity: .75, fontWeight: 600, fontSize: 12.5 }}>{t('your_level')}</small><b style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-.02em' }}>VIP {v.name}</b></span></span>
+          <span className="tier-off"><span dir="ltr">−{v.discount_pct}%</span><small>{t('fees_short')}</small></span>
+        </div>
+        <div className="col g6" style={{ marginTop: 18 }}>
+          <div className="row between" style={{ fontSize: 13, fontWeight: 600, opacity: .85 }}>
+            <span>{t('volume_30d')}: <b dir="ltr">{fiat(v.volume_30d, 0)}</b></span>
+            {v.next && <span dir="ltr">{fiat(v.next.min_volume_usd, 0)}</span>}
+          </div>
+          <div className="tier-prog"><i style={{ width: `${pct}%` }} /></div>
+          <small style={{ fontSize: 12.5, fontWeight: 600, opacity: .85 }}>{v.next ? t('vip_progress', { amount: fiat(Number(v.next.min_volume_usd) - Number(v.volume_30d), 0), tier: v.next.name }) : t('vip_top')}</small>
         </div>
       </div>
+      <div className="h2"><span>{t('vip_levels')}</span></div>
+      <div className="list">
+        {v.tiers.map((x) => {
+          const on = x.level === v.level;
+          const done = x.level < v.level;
+          return (
+            <div key={x.level} className={`li tier-row ${on ? 'on' : ''}`}>
+              <span className="tier-dot" style={{ background: vipStyle(x.level).bg, color: vipStyle(x.level).fg }}><Icon name="crown" size={15} stroke={2.3} /></span>
+              <span className="grow"><b>VIP {x.name}</b><small dir="ltr">{Number(x.min_volume_usd) ? `≥ ${fiat(x.min_volume_usd, 0)} / 30d` : t('everyone')}</small></span>
+              <span className="r"><b className={Number(x.discount_pct) ? 'ok' : ''} dir="ltr">−{x.discount_pct}%</b>
+                <small>{on ? <span className="em">{t('current')}</span> : done ? t('reached') : t('fees_short')}</small></span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="h2"><span>{t('fees_title')}</span></div>
       <div className="card tight">
         <div className="kv"><span>{t('send_to_user')}</span><b className={Number(f.transfer) ? '' : 'ok'}>{Number(f.transfer) ? `${f.transfer}%` : t('free')}</b></div>
         <div className="kv"><span>{t('gift_title')}</span><b className={Number(f.gift) ? '' : 'ok'}>{Number(f.gift) ? `${f.gift}%` : t('free')}</b></div>
@@ -346,7 +369,7 @@ function Fees() {
       <div className="h2"><span>{t('withdraw_fees')}</span></div>
       <div className="list">
         {f.withdraw.map((w) => (
-          <Li key={`${w.asset}-${w.network}`} lead={<CoinIcon asset={w.asset} size={34} network={w.network} />} className="sm" title={w.asset} sub={w.network_name || w.network}
+          <Li key={`${w.asset}-${w.network}`} lead={<CoinIcon asset={w.asset} size={36} network={w.network} />} className="sm" title={w.asset} sub={w.network_name || w.network}
             right={<span className="r" dir="ltr"><b className={Number(w.fee) || Number(w.pct) ? '' : 'ok'}>{Number(w.fee) ? amt(w.fee) : t('free')}{Number(w.pct) ? ` + ${w.pct}%` : ''}</b><small>min {w.min}</small></span>} />
         ))}
       </div>
@@ -379,7 +402,7 @@ function GoogleLink({ onLinked }) {
 function Devices() {
   const { t } = useI18n();
   const { toast } = useApp();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(() => api.cached('/api/me/sessions') || null);
   const load = React.useCallback(() => api.get('/api/me/sessions').then(setData).catch(() => setData({ items: [], identities: [] })), []);
   useEffect(() => { load(); }, [load]);
   const google = data?.identities?.find((i) => i.provider === 'google');
@@ -429,7 +452,7 @@ const ago = (ts) => {
 function Notifications() {
   const { t } = useI18n();
   const { setMe, me } = useApp();
-  const [items, setItems] = useState(null);
+  const [items, setItems] = useState(() => api.cached('/api/notifications')?.items || null);
   const [cat, setCat] = useState('all');
   useEffect(() => { api.get('/api/notifications').then((r) => setItems(r.items)).catch(() => setItems([])); }, []);
   const readAll = async () => {

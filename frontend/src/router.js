@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 
 // Hash router: works inside Telegram's WebView without server rewrites and keeps deep links (/#/tx/AW…) shareable.
 export function currentPath() {
-  const h = location.hash.replace(/^#/, '') || '/';
-  return h.startsWith('/') ? h : `/${h}`;
+  const h = location.hash.replace(/^#/, '');
+  // Telegram opens Mini Apps with "#tgWebAppData=…&tgWebAppVersion=…" — that is launch data, not a route
+  if (!h || !h.startsWith('/') || h.startsWith('/tgWebApp')) return '/';
+  return h.replace(/[?&]tgWebApp[^&]*/g, '').replace(/\?$/, '') || '/';
 }
 
 export function go(path, replace = false) {

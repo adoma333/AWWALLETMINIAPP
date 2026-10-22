@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from 'react';
 import { loader } from './loader';
 import { getToken } from './session';
 import { initData } from './telegram';
@@ -43,12 +44,44 @@ async function send(method, path, body) {
   return data;
 }
 
+// Last good answer of every GET: screens render from it instantly and refresh quietly in the background.
+const cache = new Map();
+const inflight = new Map();
+function getCached(p, silent) {
+  if (inflight.has(p)) return inflight.get(p);
+  const pr = request('GET', p, undefined, silent).then((d) => { cache.set(p, d); return d; }).finally(() => inflight.delete(p));
+  inflight.set(p, pr);
+  return pr;
+}
+
 export const api = {
-  get: (p, opts) => request('GET', p, undefined, opts?.silent),
-  post: (p, b = {}) => request('POST', p, b),
-  patch: (p, b = {}) => request('PATCH', p, b),
-  del: (p) => request('DELETE', p),
+  get: (p, opts) => getCached(p, opts?.silent || cache.has(p)),
+  cached: (p) => cache.get(p),
+  put: (p, d) => cache.set(p, d),
+  forget: (prefix) => { for (const k of cache.keys()) if (k.startsWith(prefix)) cache.delete(k); },
+  prefetch: (paths) => paths.forEach((p) => { if (!cache.has(p)) getCached(p, true).catch(() => {}); }),
+  post: (p, b = {}) => { const r = request('POST', p, b); r.then(() => invalidate(p)).catch(() => {}); return r; },
+  patch: (p, b = {}) => { const r = request('PATCH', p, b); r.then(() => invalidate(p)).catch(() => {}); return r; },
+  del: (p) => { const r = request('DELETE', p); r.then(() => invalidate(p)).catch(() => {}); return r; },
 };
+
+// after a change, cached reads of the same area are dropped (e.g. POST /api/alerts → GET /api/alerts, /api/assets/…)
+function invalidate(p) {
+  const area = p.split('?')[0].split('/').slice(0, 3).join('/');
+  for (const k of cache.keys()) if (k.startsWith(area) || k.startsWith('/api/txs') || k.startsWith('/api/notifications')) cache.delete(k);
+}
+
+/** Data for a screen: cached value right away (no spinner), fresh value as soon as it arrives. */
+export function useApi(path, { silent = false } = {}) {
+  const [data, setData] = useState(() => (path ? cache.get(path) : undefined));
+  const [error, setError] = useState(null);
+  const load = useCallback(() => {
+    if (!path) return Promise.resolve();
+    return getCached(path, silent || cache.has(path)).then((d) => { setData(d); setError(null); return d; }).catch((e) => { setError(e); if (!cache.has(path)) setData(false); });
+  }, [path, silent]);
+  useEffect(() => { setData(path ? cache.get(path) : undefined); load(); }, [path]); // eslint-disable-line react-hooks/exhaustive-deps
+  return [data, load, setData, error];
+}
 
 export const idem = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 

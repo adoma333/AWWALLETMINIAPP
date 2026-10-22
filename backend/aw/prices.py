@@ -79,9 +79,12 @@ def _coingecko(syms: dict) -> dict:
     for cg, aid in ids.items():
         d = data.get(cg)
         if d and d.get("usd"):
+            RAW_USD[aid] = D(d["usd"])  # true USD quote (stablecoin charts show their real tiny moves)
             out[aid] = (D(d["usd"]) / usdt, D(d.get("usd_24h_change")))  # convert to USDT terms
     return out
 
+
+RAW_USD: dict[str, Decimal] = {}
 
 SOURCES = {"binance": _binance, "okx": _okx, "bybit": _bybit, "kucoin": _kucoin, "coingecko": _coingecko}
 MIN_INTERVAL = {"coingecko": 120}  # the public aggregator API is rate-limited; its last answer is reused in between
@@ -117,6 +120,11 @@ def refresh() -> dict:
                 db.x("INSERT INTO prices(asset, usd, change24h, sources, updated_at) VALUES(?,?,?,?,?) "
                      "ON CONFLICT(asset) DO UPDATE SET usd=excluded.usd, change24h=excluded.change24h, sources=excluded.sources, updated_at=excluded.updated_at",
                      (aid, "1", "0", '{"peg":"1"}', now))
+                # balances and swaps use the peg; the chart shows the real market quote around it
+                quote = RAW_USD.get(aid) or Decimal(1)
+                db.x("INSERT OR REPLACE INTO price_history(asset, ts, usd) VALUES(?,?,?)", (aid, now - now % 900, s(quote)))
+                db.x("INSERT OR REPLACE INTO price_ticks(asset, ts, usd) VALUES(?,?,?)", (aid, now - now % 60, s(quote)))
+                db.x("INSERT OR REPLACE INTO price_daily(asset, day, usd) VALUES(?,?,?)", (aid, time.strftime("%Y-%m-%d", time.gmtime(now)), s(quote)))
                 continue
             src = per_asset.get(aid)
             if not src:
@@ -163,8 +171,13 @@ def chart(asset: str, rng: str) -> list:
 
 
 # ───────────── price alerts ─────────────
+REARM_BAND = Decimal("0.01")      # a repeating alert re-arms only after the price moved 1 % back past the target …
+REARM_AFTER = 6 * 3600            # … and at least 6 hours after it last fired (no ping-pong around the level)
+
+
 def check_alerts():
-    """Fire alerts whose condition is met (once; `repeat` alerts re-arm after the price moves back)."""
+    """Fire each alert once when its condition is met. Repeating alerts re-arm only after a real move back
+    (hysteresis band + cooldown), so a price hovering around the target never sends a stream of messages."""
     from .notify import notify
 
     live = {r["asset"]: D(r["usd"]) for r in db.q("SELECT asset, usd FROM prices")}
@@ -173,17 +186,24 @@ def check_alerts():
         if p is None or p <= 0:
             continue
         target = D(a["price"])
-        hit = p >= target if a["op"] == "above" else p <= target
+        above = a["op"] == "above"
+        hit = p >= target if above else p <= target
         if hit and not a["fired_at"]:
-            db.x("UPDATE price_alerts SET fired_at=?, active=? WHERE id=?", (db.now(), 1 if a["repeat"] else 0, a["id"]))
+            # atomic claim: the API and the worker may both refresh prices — only one of them sends the message
+            n = db.x("UPDATE price_alerts SET fired_at=?, active=? WHERE id=? AND fired_at IS NULL AND active=1",
+                     (db.now(), 1 if a["repeat"] else 0, a["id"])).rowcount
+            if n != 1:
+                continue
             from .bot_texts import t as bt
             from .notify import user_lang
 
-            word = bt(user_lang(a["user_id"]), "price_above" if a["op"] == "above" else "price_below")
+            word = bt(user_lang(a["user_id"]), "price_above" if above else "price_below")
             notify(a["user_id"], "price_alert", path=f"/asset/{a['asset']}", asset=a["asset"], price=f"${s(target)}",
                    now=f"${s(p.quantize(Decimal('0.0001')))}", direction_word=word)
-        elif not hit and a["fired_at"] and a["repeat"]:
-            db.x("UPDATE price_alerts SET fired_at=NULL WHERE id=?", (a["id"],))  # re-arm
+        elif a["fired_at"] and a["repeat"] and db.now() - a["fired_at"] >= REARM_AFTER:
+            back = p < target * (1 - REARM_BAND) if above else p > target * (1 + REARM_BAND)
+            if back:
+                db.x("UPDATE price_alerts SET fired_at=NULL WHERE id=?", (a["id"],))
 
 
 def refresh_fx():

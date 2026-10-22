@@ -1097,5 +1097,18 @@
   "err_account_restricted": "Akun ini dibatasi.",
   "unit_daily": "hari",
   "unit_weekly": "minggu",
-  "unit_monthly": "bulan"
+  "unit_monthly": "bulan",
+  "camera_denied": "Kamera tidak tersedia. Pilih foto kode QR sebagai gantinya.",
+  "scan_no_code": "Tidak ada kode QR di gambar ini.",
+  "scan_hint_qr": "Arahkan kamera ke kode QR",
+  "scan_from_photo": "Pilih foto",
+  "your_level": "Level Anda",
+  "volume_30d": "Volume 30 hari",
+  "vip_top": "Anda di level tertinggi",
+  "vip_levels": "Level VIP",
+  "everyone": "Semua",
+  "current": "Saat ini",
+  "reached": "Tercapai",
+  "streak_reward": "Hadiah beruntun ditambahkan ke voucher Anda",
+  "n_ready": "{n} siap"
 }

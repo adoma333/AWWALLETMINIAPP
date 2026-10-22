@@ -1097,5 +1097,18 @@
   "err_account_restricted": "Этот аккаунт ограничен.",
   "unit_daily": "день",
   "unit_weekly": "неделю",
-  "unit_monthly": "месяц"
+  "unit_monthly": "месяц",
+  "camera_denied": "Камера недоступна. Выберите фото QR-кода.",
+  "scan_no_code": "На фото не найден QR-код.",
+  "scan_hint_qr": "Наведите камеру на QR-код",
+  "scan_from_photo": "Выбрать фото",
+  "your_level": "Ваш уровень",
+  "volume_30d": "Объём за 30 дней",
+  "vip_top": "У вас максимальный уровень",
+  "vip_levels": "Уровни VIP",
+  "everyone": "Все",
+  "current": "Текущий",
+  "reached": "Достигнут",
+  "streak_reward": "Награда за серию добавлена в ваучеры",
+  "n_ready": "Готово: {n}"
 }

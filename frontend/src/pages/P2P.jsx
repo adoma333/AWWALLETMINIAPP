@@ -297,7 +297,12 @@ function OrderChat({ id }) {
   const endRef = useRef(null);
   const lastId = useRef(0);
   const loadMsgs = () => api.get(`/api/p2p/orders/${id}/messages?after=${lastId.current}`, { silent: true }).then((r) => {
-    if (r.items.length) { lastId.current = r.items[r.items.length - 1].id; setMsgs((x) => [...x, ...r.items]); setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 60); }
+    if (r.items.length) {
+      lastId.current = Math.max(lastId.current, r.items[r.items.length - 1].id);
+      // overlapping polls can return the same rows: keep each message once, in id order
+      setMsgs((x) => { const seen = new Set(x.map((m) => m.id)); return [...x, ...r.items.filter((m) => !seen.has(m.id))].sort((a, b) => a.id - b.id); });
+      setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 60);
+    }
   }).catch(() => {});
   useEffect(() => {
     loadMsgs();
