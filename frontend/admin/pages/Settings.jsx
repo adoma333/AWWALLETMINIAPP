@@ -13,7 +13,7 @@ const SECTIONS = [
   ['p2p', 'P2P', 'Fiat currencies, coins, maker/taker fees, payment windows, merchant criteria, cancellation bans.'],
   ['referral', 'Referral', 'Commission shares, tiers, duration and the welcome bonus for invited friends.'],
   ['rewards', 'Rewards', 'Daily check-in, first-transaction bonus, welcome voucher and missions.'],
-  ['ai', 'AW AI assistant', 'Assistant name, effort, daily limit, extra instructions, known issues and suggestion chips.'],
+  ['ai', 'Zohra AI assistant', 'Assistant name, effort, daily limit, extra instructions, known issues and suggestion chips.'],
   ['branding', 'Branding', 'Brand colours, logo and welcome text.'],
   ['ton_connect', 'TON Connect', 'Direct deposits from the user\'s own TON wallet.'],
   ['notifications', 'Admin alerts', 'When the admin channel gets alerts.'],

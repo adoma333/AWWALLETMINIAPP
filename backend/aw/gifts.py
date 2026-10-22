@@ -1,4 +1,4 @@
-"""Gifts / "send to anyone" links — including people who don't have AW Wallet yet.
+"""Gifts / "send to anyone" links — including people who don't have Zohra Wallet yet.
 
 Locks (who can claim):
   • user      — bound to one Telegram account id (picked from the native Telegram contact picker). A forwarded link is
@@ -126,7 +126,7 @@ def prepare_share(sender: dict, gift_id: str) -> dict:
         "type": "article", "id": g["id"][:64], "title": f"🎁 {g['amount']} {g['asset']}",
         "input_message_content": {"message_text": text, "parse_mode": "HTML"},
         "reply_markup": {"inline_keyboard": [[{"text": "🎁 " + t(lang, "gift_claim"), "url": link(g["code"])}]]},
-        "description": "AW Wallet",
+        "description": "Zohra Wallet",
     }
     res = tg.call("savePreparedInlineMessage", {"user_id": sender["id"], "result": result, "allow_user_chats": True,
                                                 "allow_group_chats": g["lock_type"] == "open", "allow_bot_chats": False,

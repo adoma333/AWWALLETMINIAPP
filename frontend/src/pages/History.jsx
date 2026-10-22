@@ -97,7 +97,7 @@ function TxDetail({ id }) {
       {x.type === 'withdraw' && ['review', 'approved'].includes(x.withdrawal?.status) && (
         <Btn kind="ghost" className="wide" onClick={async () => { try { await api.post(`/api/withdraw/${x.id}/cancel`); loadWallet(); load(); } catch (e) { toast(errText(t, e), 'error'); } }}>{t('cancel_request')}</Btn>
       )}
-      <Btn kind="ghost" className="wide" onClick={() => shareUrl(x.receipt, `AW WALLET · ${t(`tx_${x.type}`)} ${amt(x.amount)} ${x.asset}`)}><Icon name="receipt" size={18} />{t('share_receipt')}</Btn>
+      <Btn kind="ghost" className="wide" onClick={() => shareUrl(x.receipt, `ZOHRA WALLET · ${t(`tx_${x.type}`)} ${amt(x.amount)} ${x.asset}`)}><Icon name="receipt" size={18} />{t('share_receipt')}</Btn>
     </Page>
   );
 }

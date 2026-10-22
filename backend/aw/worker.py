@@ -93,7 +93,7 @@ def main():
     loop("heartbeat", 30, _heartbeat)
     for net in db.q("SELECT id, kind FROM networks"):
         loop(f"scan-{net['id']}", SCAN_EVERY.get(net["kind"], 60), _scan(net["id"]), 3)
-    log.info("AW Wallet worker started")
+    log.info("Zohra Wallet worker started")
     while not STOP.is_set():
         STOP.wait(1)
     log.info("worker stopping")

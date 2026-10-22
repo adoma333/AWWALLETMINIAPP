@@ -100,19 +100,46 @@ def _esc(s: str) -> str:
     return html.escape(s or "")
 
 
+def sync_profile(force: bool = False) -> bool:
+    """Push the bot name / descriptions (per language) to Telegram — only when they changed, Telegram rate-limits these calls."""
+    import hashlib
+    import json
+
+    from . import settings
+    from .chains.base import state_get, state_set
+
+    b = settings.get("bot")
+    langs = ["en", "ar", "ru", "tr", "fa", "fr", "es", "pt", "de", "id", "hi", "zh", "uk", "uz"]
+    digest = hashlib.sha256(json.dumps(b, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    if not force and state_get("bot:profile", "") == digest:
+        return False
+    pick = lambda d, lang: (d or {}).get(lang) or ""  # noqa: E731
+    for lang in langs:
+        lc = {} if lang == "en" else {"language_code": lang}
+        desc, short = pick(b.get("description"), lang), pick(b.get("short_description"), lang)
+        if lang == "en" or desc:
+            tg.call("setMyDescription", {"description": desc[:512], **lc})
+        if lang == "en" or short:
+            tg.call("setMyShortDescription", {"short_description": short[:120], **lc})
+    tg.call("setMyName", {"name": (b.get("name") or "Zohra Wallet")[:64]})
+    state_set("bot:profile", digest)
+    return True
+
+
 def setup_webhook() -> dict:
     """Register webhook, commands and the menu button (called at startup)."""
     if not config.BOT_TOKEN or not config.WEBAPP_URL:
         return {"ok": False}
     res = tg.call("setWebhook", {"url": f"{config.WEBAPP_URL}/api/tg/webhook", "secret_token": config.WEBHOOK_SECRET,
                                  "allowed_updates": ["message", "my_chat_member"], "drop_pending_updates": False})
-    tg.call("setChatMenuButton", {"menu_button": {"type": "web_app", "text": "AW Wallet", "web_app": {"url": config.WEBAPP_URL}}})
+    tg.call("setChatMenuButton", {"menu_button": {"type": "web_app", "text": "Zohra Wallet", "web_app": {"url": config.WEBAPP_URL}}})
     for lang in ["en", "ar", "ru", "tr", "fa", "fr", "es", "pt", "de", "id", "hi", "zh", "uk", "uz"]:
         cmds = [{"command": "start", "description": t(lang, "open")}, {"command": "phone", "description": t(lang, "phone_btn").replace("📱 ", "")}]
         payload = {"commands": cmds}
         if lang != "en":
             payload["language_code"] = lang
         tg.call("setMyCommands", payload)
+    sync_profile()
     me = tg.call("getMe")
     if me.get("ok") and not config.BOT_USERNAME:
         config.BOT_USERNAME = me["result"]["username"]

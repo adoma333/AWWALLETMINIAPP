@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════════════════════
-#  AW WALLET — one-command installer
+#  ZOHRA WALLET — one-command installer
 #
 #    curl -fsSL https://raw.githubusercontent.com/adoma333/AWWALLETMINIAPP/claude/aw-wallet-telegram-mini-app-9c2043/setup.sh | sudo bash
 #
@@ -72,7 +72,7 @@ else
   ask DOMAIN "Domain" "$AUTO_DOMAIN"
   echo -e "  ${D}4. E-mail for the free HTTPS certificate (Let's Encrypt).${N}"
   ask EMAIL "E-mail"
-  echo -e "  ${D}5. Optional: Anthropic API key — powers the AW AI assistant (press Enter to skip; FAQ mode is used).${N}"
+  echo -e "  ${D}5. Optional: Anthropic API key — powers the Zohra AI assistant (press Enter to skip; FAQ mode is used).${N}"
   ask ANTHROPIC_API_KEY "Anthropic API key" "" secret
   echo -e "  ${D}6. Master wallet: [1] generate a new 24-word seed (recommended)  [2] import an existing seed${N}"
   [ -n "${WALLET_MODE:-}" ] || ask WALLET_CHOICE "Choose 1 or 2" "1"
@@ -124,13 +124,13 @@ if [ -d "$APP_DIR/.git" ]; then
   git -C "$APP_DIR" checkout -q "$BRANCH"
   git -C "$APP_DIR" reset -q --hard "origin/$BRANCH"
 else
-  say "Downloading AW Wallet ($BRANCH)…"
+  say "Downloading Zohra Wallet ($BRANCH)…"
   git clone -q --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
 fi
 mkdir -p "$APP_DIR/data/keys" "$APP_DIR/data/uploads" "$APP_DIR/data/backups"
 git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
 
-say "Installing Python 3.12 for AW Wallet (separate from the system Python) and dependencies…"
+say "Installing Python 3.12 for Zohra Wallet (separate from the system Python) and dependencies…"
 # a private, pinned interpreter: the system Python may be too new/old for crypto libraries (e.g. 3.14)
 export UV_INSTALL_DIR=/usr/local/bin UV_PYTHON_INSTALL_DIR="$APP_DIR/.python" UV_NO_MODIFY_PATH=1
 command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null 2>&1 || die "Could not install uv (Python manager)."
@@ -147,7 +147,7 @@ if [ "$FIRST_RUN" = 1 ]; then
   say "Writing configuration (backend/.env)…"
   umask 077
   cat > "$ENV_FILE" <<EOF
-# AW Wallet configuration — written by setup.sh. Edit, then: aw-wallet restart
+# Zohra Wallet configuration — written by setup.sh. Edit, then: aw-wallet restart
 BOT_TOKEN=$BOT_TOKEN
 BOT_USERNAME=$BOT_USERNAME
 WEBAPP_URL=https://$DOMAIN
@@ -251,14 +251,14 @@ fi
 [ -d "/etc/letsencrypt/live/$DOMAIN" ] && ok "HTTPS enabled for https://$DOMAIN"
 
 # ─────────────────────────── start ───────────────────────────
-say "Starting AW Wallet…"
+say "Starting Zohra Wallet…"
 systemctl restart aw-wallet aw-wallet-worker
 for _ in $(seq 1 40); do curl -fsS -o /dev/null http://127.0.0.1:$AW_PORT/api/health 2>/dev/null && break; sleep 1; done
 curl -fsS -o /dev/null http://127.0.0.1:$AW_PORT/api/health 2>/dev/null && ok "API is up" || warn "API not answering yet — see: aw-wallet logs"
 
 echo
 echo -e "${O}═══════════════════════════════════════════════════════════════${N}"
-echo -e "  ${B}AW WALLET is live${N}"
+echo -e "  ${B}ZOHRA WALLET is live${N}"
 echo -e "  Bot:          https://t.me/$BOT_USERNAME   (press Start — the wallet button is in the menu)"
 echo -e "  Mini App:     https://$DOMAIN"
 echo -e "  Admin panel:  send ${B}/admin${N} to the bot → one-time login link"

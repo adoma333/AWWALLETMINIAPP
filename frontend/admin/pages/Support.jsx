@@ -53,7 +53,7 @@ function Ticket({ tid }) {
           <ActBtn kind="primary" disabled={!text.trim()} run={() => post(`/tickets/${tid}/reply`, { text, close })} ok="Reply sent" onDone={() => { setText(''); reload(); }}>Send reply</ActBtn>
         </div>
       </Card>
-      <Card title="Conversation with AW AI before escalation" right={<Toggle on={showAi} onChange={setShowAi} label="Show" />}>
+      <Card title="Conversation with Zohra AI before escalation" right={<Toggle on={showAi} onChange={setShowAi} label="Show" />}>
         {showAi && <div className="chat">
           {(t.ai_chat || []).map((m, i) => (
             <div key={i} className={'msg ' + (m.role === 'user' ? 'b' : 'sys')}>

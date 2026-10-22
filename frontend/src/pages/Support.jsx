@@ -8,7 +8,7 @@ import { errText, useI18n } from '../i18n';
 import { go, match } from '../router';
 import { useApp } from '../store';
 import { haptic } from '../telegram';
-import logo from '../assets/logo-mark.png';
+import { ZMark } from '../components/Logo';
 
 export default function Support({ path }) {
   const m = match('/support/ticket/:id', path);
@@ -32,7 +32,7 @@ function Chat() {
   const toast = useToast();
   const [items, setItems] = useState([]);
   const [sugg, setSugg] = useState([]);
-  const [name, setName] = useState(config?.ai_name || 'AW AI');
+  const [name, setName] = useState(config?.ai_name || 'Zohra AI');
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const end = useRef(null);
@@ -55,7 +55,7 @@ function Chat() {
   };
   return (
     <Page title={t('support_title')} className="support" right={<button type="button" className="icon-btn" onClick={() => go('/support/tickets')}><Icon name="list" /></button>}>
-      <div className="ai-head"><img src={logo} alt="" /><div><b>{name}</b><small className="ok-dot">online · 24/7</small></div></div>
+      <div className="ai-head"><ZMark size={42} radius={0.5} /><div><b>{name}</b><small className="ok-dot">online · 24/7</small></div></div>
       <section className="chat ai">
         <div className="msg bot"><Md text={t('ai_intro', { name })} /></div>
         {items.map((m, i) => (

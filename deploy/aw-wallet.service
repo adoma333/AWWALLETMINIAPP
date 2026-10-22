@@ -1,5 +1,5 @@
 [Unit]
-Description=AW Wallet API (FastAPI)
+Description=Zohra Wallet API (FastAPI)
 After=network-online.target
 Wants=network-online.target
 

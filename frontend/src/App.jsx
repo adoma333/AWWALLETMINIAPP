@@ -9,6 +9,7 @@ import { I18n, applyDir, detectLang, errText, loadLang, makeT } from './i18n';
 import { go, match, useRoute } from './router';
 import { AppCtx } from './store';
 import { applyBrand } from './theme';
+import { hideSplash, splashProgress } from './splash';
 import { backButton, inTelegram, startParam, tg } from './telegram';
 import Home from './pages/Home';
 import Outside from './pages/Outside';
@@ -101,24 +102,29 @@ export default function App() {
     (async () => {
       const first = detectLang();
       await switchLang(first);
+      splashProgress(30);
       try {
         const cfg = await api.get('/api/config');
         setConfig(cfg);
         applyBrand(cfg.branding);
       } catch { /* shown below */ }
+      splashProgress(55);
       if (!inTelegram) return;
       try {
         const res = await api.post('/api/auth');
+        splashProgress(80);
         setMe(res.me);
         setFx(null, res.me.settings?.currency || 'USD');
         const l = detectLang(res.me.lang);
         if (l !== first) await switchLang(l);
         await loadWallet();
+        hideSplash();
         const deep = routeFromStartParam(res.start_param || startParam);
         if (deep) go(deep, true);
         else if (res.created) go('/welcome', true);
       } catch (e) {
         setFatal(e);
+        hideSplash();
       }
     })();
     const onVis = () => { if (document.visibilityState === 'visible') loadWallet(); };
@@ -147,8 +153,8 @@ export default function App() {
     [config, me, wallet, refresh, loadWallet, toast, lang]);
   const i18n = useMemo(() => ({ lang, t, setLang: (c) => switchLang(c, true) }), [lang, t, switchLang]);
 
-  if (!dict) return <div className="boot"><div className="boot-ring" /></div>;
-  if (!inTelegram) return <I18n.Provider value={i18n}><AppCtx.Provider value={ctx}><Outside /></AppCtx.Provider></I18n.Provider>;
+  if (!dict) return null; // the splash in index.html is still showing
+  if (!inTelegram) { hideSplash(); return <I18n.Provider value={i18n}><AppCtx.Provider value={ctx}><Outside /></AppCtx.Provider></I18n.Provider>; }
   if (fatal) {
     return (
       <I18n.Provider value={i18n}>
@@ -160,7 +166,7 @@ export default function App() {
       </I18n.Provider>
     );
   }
-  if (!me) return <div className="boot"><div className="boot-ring" /></div>;
+  if (!me) return null;
   const showNav = ROOTS.includes(path);
   return (
     <I18n.Provider value={i18n}>

@@ -1,2 +1,2 @@
-"""AW WALLET backend package."""
+"""ZOHRA WALLET backend package."""
 __version__ = "1.0.0"

@@ -1,4 +1,4 @@
-"""AW AI — the in-app support assistant, tickets with human hand-off, forms, and dispute summaries.
+"""Zohra AI — the in-app support assistant, tickets with human hand-off, forms, and dispute summaries.
 
 The assistant runs on Claude with read-only tools scoped to the asking user (balances, transactions, deposit info,
 on-chain tx checker, withdrawal status, fees, P2P orders) plus `create_ticket` to escalate to a human. It can never
@@ -14,9 +14,9 @@ from .notify import admin_alert, notify
 
 log = logging.getLogger("aw.support")
 
-SYSTEM = """You are {name}, the support assistant inside AW WALLET — a custodial multi-network crypto wallet that runs as a Telegram Mini App.
+SYSTEM = """You are {name}, the support assistant inside ZOHRA WALLET — a custodial multi-network crypto wallet that runs as a Telegram Mini App.
 
-What AW WALLET offers: deposits and withdrawals on TRON (TRC20), TON, BNB Smart Chain (BEP20), Ethereum (ERC20), Solana, Polygon, Arbitrum One, Base, Bitcoin and Avalanche C-Chain; one deposit address shared by all EVM networks; TON deposits use the hot-wallet address plus the user's personal numeric memo (a deposit without the right memo cannot be matched automatically and must be assigned by staff); instant free internal transfers by @username or Telegram contact; gift links that can be locked to one person; instant swaps at a firm quoted rate (the platform margin is built into the rate); a P2P marketplace with escrow, payment windows and appeals; referral commissions; fee-free reward vouchers; VIP fee tiers by 30-day volume; a 6-digit PIN for sensitive actions; phone verification for higher limits; TON Connect.
+What ZOHRA WALLET offers: deposits and withdrawals on TRON (TRC20), TON, BNB Smart Chain (BEP20), Ethereum (ERC20), Solana, Polygon, Arbitrum One, Base, Bitcoin and Avalanche C-Chain; one deposit address shared by all EVM networks; TON deposits use the hot-wallet address plus the user's personal numeric memo (a deposit without the right memo cannot be matched automatically and must be assigned by staff); instant free internal transfers by @username or Telegram contact; gift links that can be locked to one person; instant swaps at a firm quoted rate (the platform margin is built into the rate); a P2P marketplace with escrow, payment windows and appeals; referral commissions; fee-free reward vouchers; VIP fee tiers by 30-day volume; a 6-digit PIN for sensitive actions; phone verification for higher limits; TON Connect.
 
 How you work:
 - Use the tools to look at this user's real data before answering anything about their money. Never guess balances, statuses or fees.
@@ -161,7 +161,7 @@ def _history(user_id: int, limit: int = 16) -> list[dict]:
 def _claude(user: dict, cfg: dict) -> tuple[str, list]:
     client = _client()
     lang = user.get("lang") or "en"
-    system = SYSTEM.format(name=cfg.get("name", "AW AI"), lang_name=LANG_NAMES.get(lang, "English"),
+    system = SYSTEM.format(name=cfg.get("name", "Zohra AI"), lang_name=LANG_NAMES.get(lang, "English"),
                            extra=("\nTeam instructions:\n" + cfg["extra_instructions"]) if cfg.get("extra_instructions") else "")
     messages = _history(user["id"])
     actions: list = []

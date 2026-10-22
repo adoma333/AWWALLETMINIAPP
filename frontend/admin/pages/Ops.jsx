@@ -174,7 +174,7 @@ function System({ me }) {
       <div className="grid4">
         <Stat label="Worker" value={hbOk ? 'running' : 'down'} sub={'heartbeat ' + fmtAgo(s.worker_heartbeat)} tone={hbOk ? 'ok' : 'danger'} />
         <Stat label="HD wallet" value={s.wallet_ready ? 'ready' : 'not set'} tone={s.wallet_ready ? 'ok' : 'danger'} />
-        <Stat label="AW AI" value={s.ai ? 'Claude connected' : 'FAQ mode'} sub={s.ai ? '' : 'add ANTHROPIC_API_KEY in .env'} tone={s.ai ? 'ok' : 'warn'} />
+        <Stat label="Zohra AI" value={s.ai ? 'Claude connected' : 'FAQ mode'} sub={s.ai ? '' : 'add ANTHROPIC_API_KEY in .env'} tone={s.ai ? 'ok' : 'warn'} />
         <Stat label="Database" value={(s.db_bytes / 1048576).toFixed(1) + ' MB'} sub={'prices ' + fmtAgo(s.prices_updated)} />
       </div>
       <div className="grid2">

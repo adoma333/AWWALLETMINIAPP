@@ -1,4 +1,4 @@
-"""AW Wallet — environment configuration (read once at import).
+"""Zohra Wallet — environment configuration (read once at import).
 
 Every secret lives in backend/.env (chmod 600), written by setup.sh. Nothing here is ever sent to the client.
 """

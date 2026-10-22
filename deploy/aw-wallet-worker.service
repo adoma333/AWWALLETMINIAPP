@@ -1,5 +1,5 @@
 [Unit]
-Description=AW Wallet worker (deposits, withdrawals, prices, bot queue)
+Description=Zohra Wallet worker (deposits, withdrawals, prices, bot queue)
 After=network-online.target aw-wallet.service
 Wants=network-online.target
 

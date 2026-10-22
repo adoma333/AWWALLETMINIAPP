@@ -78,7 +78,7 @@ function Methods() {
   const [open, setOpen] = useState(null);
   return (
     <Card title="Payment methods" right={<Btn kind="primary" small onClick={() => setOpen({ id: '', name: '', type: 'bank', fields: ['account_name', 'account_number'], currencies: [], enabled: true, sort: 100, _new: true })}>+ Add method</Btn>}>
-      <p className="dim small">Users suggest new methods through AW AI → “Suggest a payment method”; you'll find them under Support → Forms. Icons: key <code>pm:METHOD_ID</code> under Icons &amp; media.</p>
+      <p className="dim small">Users suggest new methods through Zohra AI → “Suggest a payment method”; you'll find them under Support → Forms. Icons: key <code>pm:METHOD_ID</code> under Icons &amp; media.</p>
       {error && <Loading error={error} reload={reload} />}
       <Table rows={data?.items} onRow={setOpen} cols={[
         ['Method', (r) => <b>{r.name} <span className="dim small">{r.id}</span></b>], ['Type', (r) => r.type],

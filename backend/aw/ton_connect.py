@@ -12,7 +12,7 @@ from .money import AppError, amount_in, to_units
 
 def manifest() -> dict:
     cfg = settings.get("ton_connect")
-    return {"url": config.WEBAPP_URL, "name": cfg.get("manifest_name", "AW Wallet"),
+    return {"url": config.WEBAPP_URL, "name": cfg.get("manifest_name", "Zohra Wallet"),
             "iconUrl": f"{config.WEBAPP_URL}/icon-512.png",
             "termsOfUseUrl": settings.get("general").get("terms_url") or config.WEBAPP_URL,
             "privacyPolicyUrl": settings.get("general").get("privacy_url") or config.WEBAPP_URL}
@@ -46,7 +46,7 @@ def _comment_boc(text: str) -> str:
 
 
 def deposit_message(user: dict, asset: str, amount, sender: str) -> dict:
-    """A TON Connect `sendTransaction` message (to, amount in nanotons, payload) that deposits into AW Wallet."""
+    """A TON Connect `sendTransaction` message (to, amount in nanotons, payload) that deposits into Zohra Wallet."""
     an = catalog.asset_network(asset.upper(), "ton")
     a = catalog.asset(asset.upper())
     if not an or not a or not an["deposit_enabled"]:

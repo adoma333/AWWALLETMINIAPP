@@ -1,6 +1,6 @@
-<p align="center"><img src="brand/logo-wordmark-on-black.png" alt="AW WALLET" width="420"></p>
+<p align="center"><img src="brand/logo-wordmark-on-black.png" alt="ZOHRA WALLET" width="420"></p>
 
-<p align="center"><b>A multi-chain crypto wallet inside Telegram</b> — 10 networks · free instant transfers · gifts · swap · P2P with escrow · AW AI · full admin panel</p>
+<p align="center"><b>A multi-chain crypto wallet inside Telegram</b> — 10 networks · free instant transfers · gifts · swap · P2P with escrow · Zohra AI · full admin panel</p>
 
 ---
 
@@ -18,7 +18,7 @@ The installer asks for:
 2. your Telegram ID (admin);
 3. the domain;
 4. an e-mail for HTTPS;
-5. an optional Anthropic API key for AW AI;
+5. an optional Anthropic API key for Zohra AI;
 6. whether to create a new master wallet or import one.
 
 It then installs everything (Python, Node, nginx, a Let's Encrypt certificate, and systemd services), builds the app and starts the bot. Run it again at any time to update. Your settings and wallet are kept.
@@ -90,7 +90,7 @@ A database backup runs every day at 03:17 and is kept for 14 days. **To restore 
 - Two-level referral with commission tiers.
 - Welcome and first-transaction vouchers, daily check-in streaks, missions.
 
-**AW AI**
+**Zohra AI**
 - Built on Claude.
 - Reads the user's own balances, deposits and withdrawals in real time.
 - Guides step by step and shows suggestion chips.

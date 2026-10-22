@@ -78,7 +78,7 @@ def from_units(n: int | str, decimals: int) -> Decimal:
 _ALPH = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"  # no 0/O/1/I
 
 
-def ref_id(prefix: str = "AW", n: int = 9) -> str:
+def ref_id(prefix: str = "ZW", n: int = 9) -> str:
     return prefix + "".join(secrets.choice(_ALPH) for _ in range(n))
 
 

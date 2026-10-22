@@ -1,11 +1,11 @@
 import React from 'react';
-import logo from '../assets/logo-wordmark.png';
+import Logo from '../components/Logo';
 import Icon from '../components/Icon';
 import { QR } from '../components/ui';
 import { LANGS, useI18n } from '../i18n';
 import { useApp } from '../store';
 
-// Opened in a normal browser: AW Wallet only works inside Telegram → QR code + deep link (like AW ROBOT).
+// Opened in a normal browser: Zohra Wallet only works inside Telegram → QR code + deep link (like our other bots).
 export default function Outside() {
   const { t, lang, setLang } = useI18n();
   const { config } = useApp();
@@ -14,7 +14,7 @@ export default function Outside() {
   return (
     <main className="outside">
       <div className="outside-top">
-        <img src={logo} alt="AW WALLET" className="logo-wordmark" />
+        <Logo height={20} />
         <select className="lang-select" value={lang} onChange={(e) => setLang(e.target.value)} aria-label="language">
           {LANGS.map(([c, n]) => <option key={c} value={c}>{n}</option>)}
         </select>

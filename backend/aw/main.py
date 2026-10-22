@@ -1,4 +1,4 @@
-"""AW Wallet API (FastAPI). Users authenticate with Telegram initData on every request (header X-Init-Data)."""
+"""Zohra Wallet API (FastAPI). Users authenticate with Telegram initData on every request (header X-Init-Data)."""
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -26,7 +26,7 @@ async def lifespan(_app):
     yield
 
 
-app = FastAPI(title="AW Wallet", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+app = FastAPI(title="Zohra Wallet", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 
 
 @app.exception_handler(AppError)
@@ -95,7 +95,7 @@ def public_config():
         "banners": [b for b in g.get("banners", []) if b.get("enabled", True) and (not b.get("until") or b["until"] > db.now())],
         "announcement": g.get("announcement"), "support_username": g.get("support_username"), "channel_url": g.get("channel_url"),
         "terms_url": g.get("terms_url"), "privacy_url": g.get("privacy_url"),
-        "branding": br, "icons": icons_map(), "ai_name": settings.get("ai").get("name", "AW AI"),
+        "branding": br, "icons": icons_map(), "ai_name": settings.get("ai").get("name", "Zohra AI"),
         "networks": [_net_out(n) for n in db.q("SELECT * FROM networks WHERE enabled=1 ORDER BY sort")],
         "tonconnect_manifest": f"{config.WEBAPP_URL}/tonconnect-manifest.json",
     }
@@ -672,7 +672,7 @@ def ai_chat(body: dict = Body(...), u: dict = Depends(current_user)):
 
 @app.get("/api/ai/history")
 def ai_history(u: dict = Depends(current_user)):
-    return {"items": support.history(u), "suggestions": support.suggestions(u), "name": settings.get("ai").get("name", "AW AI"),
+    return {"items": support.history(u), "suggestions": support.suggestions(u), "name": settings.get("ai").get("name", "Zohra AI"),
             "ai": bool(config.ANTHROPIC_API_KEY)}
 
 

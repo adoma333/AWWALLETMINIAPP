@@ -85,7 +85,7 @@ function Home() {
         {config?.privacy_url && <Item icon="lock" label={t('privacy')} onClick={() => openLink(config.privacy_url)} />}
         {me.is_admin && <Item icon="settings" label={t('admin_panel')} onClick={() => { location.href = '/admin/'; }} />}
       </div>
-      <p className="version dim">AW WALLET · {t('version')} {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : ''}</p>
+      <p className="version dim">ZOHRA WALLET · {t('version')} {typeof __BUILD_ID__ !== 'undefined' ? __BUILD_ID__ : ''}</p>
       <Sheet open={sheet === 'lang'} onClose={() => setSheet('')} title={t('language')} tall>
         <div className="list">{LANGS.filter(([c]) => !config?.languages || config.languages.includes(c)).map(([c, n]) => (
           <button key={c} type="button" className={`net-row ${c === lang ? 'on' : ''}`} onClick={() => { setLang(c); setSheet(''); }}><b>{n}</b>{c === lang && <Icon name="check" size={18} />}</button>))}</div>

@@ -1,4 +1,4 @@
-"""Instant internal transfers between AW Wallet users (by @username, Telegram id, or a contact picked in Telegram)."""
+"""Instant internal transfers between Zohra Wallet users (by @username, Telegram id, or a contact picked in Telegram)."""
 from . import catalog, db, events, fees, guard, ledger, prices, settings, users
 from .money import AppError, amount_in, s
 from .notify import notify

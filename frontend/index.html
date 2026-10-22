@@ -3,14 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-    <title>AW WALLET</title>
-    <meta name="description" content="AW WALLET — your multi-network crypto wallet inside Telegram." />
+    <title>ZOHRA WALLET</title>
+    <meta name="description" content="ZOHRA WALLET — send, swap, buy and gift crypto on every major network, right inside Telegram." />
     <meta name="theme-color" content="#000000" />
-    <link rel="icon" href="/icon-512.png" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:title" content="ZOHRA WALLET" />
+    <meta property="og:description" content="Your crypto wallet inside Telegram." />
+    <meta property="og:image" content="/og.png" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+      /* first paint — shown before any JavaScript runs */
+      html, body { margin: 0; background: #000; }
+      .splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; z-index: 999; background: #000; transition: opacity .25s; }
+      .splash svg { width: 76px; height: 76px; }
+      .splash .bar { width: 120px; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+      .splash .bar i { display: block; height: 100%; width: var(--p, 8%); border-radius: 3px; background: linear-gradient(90deg, #FF8A00, #FF5A00); transition: width .35s ease-out; }
+      .splash.done { opacity: 0; pointer-events: none; }
+    </style>
   </head>
   <body>
-    <div id="root"><div class="boot"><div class="boot-ring"></div></div></div>
+    <div class="splash" id="splash">
+      <svg viewBox="0 0 64 64" aria-label="ZOHRA WALLET"><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A1A"/><stop offset="1" stop-color="#FF4D00"/></linearGradient></defs><rect width="64" height="64" rx="19.2" fill="url(#sg)"/><path d="M17 15.5h30a3.5 3.5 0 0 1 0 7H17a3.5 3.5 0 0 1 0-7zM17 41.5h30a3.5 3.5 0 0 1 0 7H17a3.5 3.5 0 0 1 0-7z" fill="#160800"/><path d="M18 45C21 32 31 22.5 46.5 19 43.5 32 33.5 41.5 18 45z" fill="#fff"/></svg>
+      <div class="bar"><i></i></div>
+    </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

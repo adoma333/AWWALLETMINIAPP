@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import logo from '../assets/logo-mark.png';
+import { ZMark } from '../components/Logo';
 import Icon from '../components/Icon';
 import { NetIcon } from '../components/Icon';
 import { Avatar } from '../components/ui';
@@ -25,7 +25,7 @@ export default function Onboarding() {
   return (
     <main className="onboarding">
       <div className="ob-who">
-        <img src={logo} alt="" className="ob-logo" />
+        <ZMark size={36} />
         <Avatar src={me?.photo} name={me?.name} size={44} />
         <b>{t('welcome_title', { name: me?.first_name || me?.name || '' })}</b>
       </div>

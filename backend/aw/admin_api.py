@@ -189,7 +189,7 @@ def user_action(uid: int, action: str, request: Request, body: dict = Body(defau
         text = (body.get("text") or "").strip()
         if not text:
             raise AppError("bad_request")
-        tg.send(uid, text[:3500], [[tg.webapp_button("AW Wallet")]] if config.WEBAPP_URL else None, priority=2)
+        tg.send(uid, text[:3500], [[tg.webapp_button("Zohra Wallet")]] if config.WEBAPP_URL else None, priority=2)
     else:
         raise AppError("not_found", 404)
     admin_auth.audit(a, f"user.{action}", str(uid), body, _ip(request))
@@ -476,6 +476,13 @@ def put_settings(section: str, request: Request, body: dict = Body(...), authori
                 p["api_key"] = cur.get(k, {}).get("api_key", "")
     settings.put(section, value)
     admin_auth.audit(a, "settings.update", section, {"keys": list(value)}, _ip(request))
+    if section == "bot":  # push the new bot name / descriptions to Telegram right away
+        from . import bot
+
+        try:
+            bot.sync_profile(force=True)
+        except Exception:  # pragma: no cover - Telegram unreachable; retried at next start
+            pass
     return {"ok": True}
 
 

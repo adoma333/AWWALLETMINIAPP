@@ -1,4 +1,4 @@
-/* AW WALLET admin — same brand book as the mini app */
+/* ZOHRA WALLET admin — same brand book as the mini app */
 :root {
   --ember: #FF8A00; --flame: #FF5A00; --void: #000000; --surface: #100E0C; --surface-2: #151210; --surface-3: #0A0908;
   --bone: #F5EFE8; --ash: #8C8378; --ok: #3DDC97; --danger: #FF6B5E; --warn: #FFC24A; --info: #6BB8FF;
@@ -33,7 +33,10 @@ pre { white-space: pre-wrap; word-break: break-word; margin: 6px 0 0; }
 .side { width: 232px; flex: none; background: var(--surface-3); border-right: 1px solid var(--line-dim); display: flex; flex-direction: column;
   position: sticky; top: 0; height: 100vh; }
 .side-logo { display: flex; align-items: center; gap: 10px; padding: 18px 16px 14px; }
-.side-logo img { height: 22px; }
+.logo { display: inline-flex; align-items: center; gap: .45em; }
+.wordmark { display: inline-flex; align-items: baseline; gap: .3em; font-family: Chakra Petch, sans-serif; line-height: 1; white-space: nowrap; }
+.wordmark b { font-weight: 700; letter-spacing: .08em; color: var(--bone); }
+.wordmark span { font-weight: 600; font-size: .55em; letter-spacing: .32em; color: var(--ember); }
 .side-logo span { font: 600 10px var(--font-display); letter-spacing: 0.2em; color: var(--ember); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; }
 .side nav { flex: 1; overflow-y: auto; padding: 4px 8px; }
 .side nav a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: var(--ash); margin-bottom: 1px; }
@@ -222,7 +225,7 @@ fieldset.plain { border: none; padding: 0; margin: 0; min-width: 0; }
 
 /* login */
 .login { max-width: 420px; margin: 12vh auto; padding: 28px 24px; background: var(--surface); border: 1px solid var(--line-dim); border-radius: 20px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
-.login-logo { height: 30px; margin: 0 auto 4px; }
+.login-logo { margin: 0 auto 4px; }
 .login ol { text-align: left; color: var(--bone); padding-left: 20px; margin: 0; display: flex; flex-direction: column; gap: 6px; }
 
 /* toasts */

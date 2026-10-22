@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# AW Wallet management command (installed to /usr/local/bin by setup.sh)
+# Zohra Wallet management command (installed to /usr/local/bin by setup.sh)
 set -euo pipefail
 APP_DIR="/opt/aw-wallet"
 APP_USER="awwallet"

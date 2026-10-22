@@ -1,4 +1,4 @@
-"""AW Wallet — SQLite storage (WAL) with serialized money transactions.
+"""Zohra Wallet — SQLite storage (WAL) with serialized money transactions.
 
 Why SQLite: one file, zero ops, survives power loss (WAL + synchronous=FULL), and `BEGIN IMMEDIATE` gives every
 money-moving transaction an exclusive write lock, so two requests can never spend the same balance.

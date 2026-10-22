@@ -10,9 +10,9 @@ T = lambda **kw: kw  # noqa: E731  (multilingual text helper: T(en=..., ar=...))
 
 DEFAULTS: dict = {
     "general": {
-        "app_name": "AW WALLET",
+        "app_name": "ZOHRA WALLET",
         "maintenance": False,
-        "maintenance_msg": T(en="We are upgrading AW Wallet. Your funds are safe.", ar="نقوم بتحديث AW Wallet. أموالك في أمان."),
+        "maintenance_msg": T(en="We are upgrading Zohra Wallet. Your funds are safe.", ar="نقوم بتحديث Zohra Wallet. أموالك في أمان."),
         "support_username": "",
         "channel_url": "",
         "terms_url": "",
@@ -125,7 +125,7 @@ DEFAULTS: dict = {
     },
     "ai": {
         "enabled": True,
-        "name": "AW AI",
+        "name": "Zohra AI",
         "model": "",                 # empty = AI_MODEL from .env
         "effort": "medium",
         "daily_messages": 60,
@@ -141,12 +141,29 @@ DEFAULTS: dict = {
             {"key": "human", "text": T(en="Talk to a human", ar="التحدث مع موظف")},
         ],
     },
+    # Telegram bot profile — pushed to Telegram automatically (setMyName / setMyDescription / setMyShortDescription)
+    "bot": {
+        "name": "Zohra Wallet",
+        "short_description": T(
+            en="Your crypto wallet inside Telegram — send, swap, buy and gift on every major network.",
+            ar="محفظتك الرقمية داخل تيليجرام — أرسل وبدّل واشترِ وأهدِ العملات على كل الشبكات الكبرى.",
+            ru="Криптокошелёк в Telegram — отправляйте, обменивайте, покупайте и дарите на всех крупных сетях.",
+            tr="Telegram içindeki kripto cüzdanınız — tüm büyük ağlarda gönderin, takas edin, alın ve hediye edin.",
+            fa="کیف پول رمزارز شما در تلگرام — ارسال، تبدیل، خرید و هدیه در همه شبکه‌های بزرگ.",
+            fr="Votre portefeuille crypto dans Telegram — envoyez, échangez, achetez et offrez sur tous les grands réseaux.",
+            es="Tu billetera cripto en Telegram: envía, intercambia, compra y regala en todas las grandes redes.",
+        ),
+        "description": T(
+            en="ZOHRA WALLET — the crypto wallet that lives in Telegram.\n\n• Send money to any contact as easily as a message\n• Swap and buy coins at sharp rates\n• P2P with escrow protection\n• Gifts and red packets\n• PIN, biometrics and 24/7 monitoring\n\nTap Start to open your wallet.",
+            ar="ZOHRA WALLET — المحفظة الرقمية التي تعيش داخل تيليجرام.\n\n• أرسل الأموال لأي جهة اتصال بسهولة الرسالة\n• بدّل واشترِ العملات بأفضل الأسعار\n• تداول P2P بحماية الضمان\n• هدايا وظروف حمراء\n• رمز سري وبصمة ومراقبة على مدار الساعة\n\nاضغط «ابدأ» لفتح محفظتك.",
+        ),
+    },
     "branding": {
         "ember": "#FF8A00", "flame": "#FF5A00",
         "logo_url": "", "icon_url": "",
         "welcome_text": T(en="Your money. Every network. One tap.", ar="أموالك. كل الشبكات. بلمسة واحدة."),
     },
-    "ton_connect": {"enabled": True, "manifest_name": "AW Wallet"},
+    "ton_connect": {"enabled": True, "manifest_name": "Zohra Wallet"},
     "notifications": {"admin_alerts": True, "large_deposit_usd": 5000, "large_withdraw_usd": 5000},
 }
 

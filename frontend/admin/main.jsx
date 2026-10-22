@@ -1,5 +1,6 @@
 import '@fontsource/chakra-petch/500.css';
 import '@fontsource/chakra-petch/600.css';
+import '@fontsource/chakra-petch/700.css';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
@@ -7,7 +8,7 @@ import './admin.css';
 
 import { Component, lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import logo from '../src/assets/logo-wordmark.png';
+import Logo from '../src/components/Logo';
 import { Btn, can, errText, getSession, Loading, post, setSession, setUnauthorizedHandler, ToastHost, useLoad } from './lib.jsx';
 
 const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
@@ -63,7 +64,7 @@ function useHash() {
 function Login({ error }) {
   return (
     <div className="login">
-      <img src={logo} alt="AW WALLET" className="login-logo" />
+      <span className="login-logo"><Logo height={22} /></span>
       <h1>Admin panel</h1>
       {error && <div className="empty err">{errText(error)}</div>}
       <ol>
@@ -112,7 +113,7 @@ function App() {
   return (
     <div className="shell">
       <aside className={'side' + (menu ? ' open' : '')}>
-        <div className="side-logo"><img src={logo} alt="AW WALLET" /><span>ADMIN</span></div>
+        <div className="side-logo"><Logo height={14} /><span>ADMIN</span></div>
         <nav>
           {nav.map((n) => (
             <a key={n[0]} href={'#/' + n[0]} className={n[0] === cur[0] ? 'on' : ''} onClick={() => setMenu(false)}>

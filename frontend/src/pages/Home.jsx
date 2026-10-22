@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import logo from '../assets/logo-wordmark.png';
+import Logo from '../components/Logo';
 import { useConfirm } from '../components/Confirm';
 import Icon, { CoinIcon } from '../components/Icon';
 import { Avatar, Badge, Card, Skeleton } from '../components/ui';
@@ -45,7 +45,7 @@ export default function Home() {
           <Avatar src={me.photo} name={me.name} size={36} />
           <span className="me-text"><b>{me.first_name || me.name}</b>{me.vip?.level > 0 ? <small className="vip">★ {t('vip_level', { name: me.vip.name })}</small> : <small>@{me.username || me.id}</small>}</span>
         </button>
-        <img src={logo} alt="AW WALLET" className="home-logo" />
+        <Logo height={15} className="home-logo" />
         <div className="top-icons">
           <button type="button" className="icon-btn" onClick={() => go('/history')} aria-label={t('history')}><Icon name="history" /></button>
           <button type="button" className="icon-btn" onClick={() => go('/notifications')} aria-label={t('notifications')}>
