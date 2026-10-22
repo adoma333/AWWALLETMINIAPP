@@ -3,6 +3,7 @@
 Crediting is idempotent: each on-chain transfer is one row in chain_deposits keyed by (network, txid, idx) and moves
 seen → credited exactly once inside an IMMEDIATE transaction.
 """
+import json
 import logging
 import re
 
@@ -119,7 +120,7 @@ def _process_one(ev: dict) -> bool:
             row = db.one("SELECT * FROM chain_deposits WHERE network=? AND txid=? AND idx=?", (nid, ev["txid"], ev["idx"]))
             if status == "seen" and not confirmed:
                 ref = ledger.add_tx(uid, "deposit", asset, amount, status="pending", network=nid, txid=ev["txid"],
-                                    address=ev["address"], usd_value=prices.to_usd(asset, amount), meta={"confirmations": ev.get("confirmations")})
+                                    address=ev["address"], usd_value=prices.to_usd(asset, amount), meta={"confirmations": ev.get("confirmations"), "required": need})
                 db.update("chain_deposits", {"id": row["id"]}, {"tx_ref": ref})
                 pending_notice = True
             else:
@@ -130,6 +131,9 @@ def _process_one(ev: dict) -> bool:
                 admin_alert(f"Deposit needs attention ({status}): {s(amount)} {asset or ev['contract']} on {nid} tx {ev['txid']}", "warn", "deposit")
         else:
             db.update("chain_deposits", {"id": row["id"]}, {"confirmations": ev.get("confirmations") or 0})
+            if row.get("tx_ref"):  # keep the live counter on the activity screen moving
+                db.x("UPDATE txs SET meta=?, updated_at=? WHERE id=? AND status='pending'",
+                     (json.dumps({"confirmations": ev.get("confirmations") or 0, "required": need}), db.now(), row["tx_ref"]))
             pending_notice = False
         if row["status"] != "seen" or not confirmed:
             if pending_notice:

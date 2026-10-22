@@ -1,5 +1,6 @@
 """Zohra Wallet API (FastAPI). Users authenticate with Telegram initData on every request (header X-Init-Data)."""
 import asyncio
+import calendar
 import json
 import logging
 import time
@@ -180,8 +181,12 @@ def _me(u: dict) -> dict:
         "ton_wallet": ton_connect.connected(u["id"]),
         "vouchers": db.q("SELECT kind, kinds, value, uses_left, source, expires_at FROM vouchers WHERE user_id=? AND uses_left>0 "
                          "AND (expires_at IS NULL OR expires_at>?) ORDER BY expires_at LIMIT 10", (u["id"], db.now())),
-        "anti_phishing": bool((u.get("flags") or {}).get("anti_phishing")) if isinstance(u.get("flags"), dict) else False,
+        "anti_phishing": _mask((u.get("flags") or {}).get("anti_phishing")) if isinstance(u.get("flags"), dict) else None,
     }
+
+
+def _mask(code):
+    return (code[0] + "•" * (len(code) - 2) + code[-1]) if code and len(code) > 2 else (code or None)
 
 
 @app.post("/api/auth")
@@ -709,6 +714,40 @@ def _tx_out(t: dict, u: dict) -> dict:
     return t
 
 
+IN_TYPES = {"deposit", "receive", "gift_in", "gift_refund", "referral", "reward", "p2p_buy", "earn_interest"}
+OUT_TYPES = {"withdraw", "send", "gift_out", "p2p_sell"}
+
+
+@app.get("/api/insights")
+def insights(u: dict = Depends(current_user)):
+    """Money in / out per month (last 12 months, USD at the time of each transaction) for the activity chart."""
+    import time as _t
+
+    now = _t.gmtime()
+    months = []
+    y, m = now.tm_year, now.tm_mon
+    for _ in range(12):
+        months.append(f"{y:04d}-{m:02d}")
+        y, m = (y - 1, 12) if m == 1 else (y, m - 1)
+    months.reverse()
+    agg = {k: {"month": k, "in": Decimal(0), "out": Decimal(0)} for k in months}
+    by_type: dict[str, Decimal] = {}
+    since = calendar.timegm((int(months[0][:4]), int(months[0][5:]), 1, 0, 0, 0))
+    for r in db.q("SELECT type, usd_value, created_at FROM txs WHERE user_id=? AND status='completed' AND created_at>=?", (u["id"], since)):
+        k = _t.strftime("%Y-%m", _t.gmtime(r["created_at"]))
+        v = D(r["usd_value"] or 0)
+        if k not in agg:
+            continue
+        if r["type"] in IN_TYPES:
+            agg[k]["in"] += v
+        elif r["type"] in OUT_TYPES:
+            agg[k]["out"] += v
+            if k == months[-1]:
+                by_type[r["type"]] = by_type.get(r["type"], Decimal(0)) + v
+    return {"months": [{"month": a["month"], "in": s(a["in"].quantize(Decimal("0.01"))), "out": s(a["out"].quantize(Decimal("0.01")))} for a in agg.values()],
+            "out_by_type": {k: s(v.quantize(Decimal("0.01"))) for k, v in by_type.items()}}
+
+
 @app.get("/api/txs/{tid}")
 def tx_detail(tid: str, u: dict = Depends(current_user)):
     t = db.one("SELECT * FROM txs WHERE id=? AND user_id=?", (tid.upper(), u["id"]))
@@ -716,8 +755,9 @@ def tx_detail(tid: str, u: dict = Depends(current_user)):
         raise AppError("not_found", 404)
     out = _tx_out(t, u)
     if t["type"] == "withdraw":
-        w = db.one("SELECT status, risk, error, txid FROM withdrawals WHERE id=?", (t["id"],))
-        out["withdrawal"] = {"status": w["status"], "txid": w["txid"]} if w else None
+        w = db.one("SELECT status, risk, error, txid, reviewer, created_at, updated_at, sent_at, done_at FROM withdrawals WHERE id=?", (t["id"],))
+        out["withdrawal"] = {"status": w["status"], "txid": w["txid"], "created_at": w["created_at"], "sent_at": w["sent_at"],
+                             "done_at": w["done_at"], "reviewed": "manual" if w["reviewer"] else "auto", "updated_at": w["updated_at"]} if w else None
     if t["network"]:
         net = catalog.network(t["network"])
         if net and t["txid"] and not str(t["txid"]).startswith(("bal:", "seqno:")):
@@ -771,6 +811,17 @@ def biometric(body: dict = Body(...), u: dict = Depends(current_user)):
 def request_phone(u: dict = Depends(current_user)):
     bot.ask_phone(u["id"], u.get("lang") or "en")
     return {"ok": True, "bot": config.BOT_USERNAME}
+
+
+@app.post("/api/security/anti-phishing")
+def set_anti_phishing(body: dict = Body(...), u: dict = Depends(current_user)):
+    """A private word shown at the top of every bot message, so the user can tell real messages from fakes."""
+    code = str(body.get("code") or "").strip()
+    if code and (not 3 <= len(code) <= 20 or any(c in code for c in "<>&\n")):
+        raise AppError("bad_request")
+    guard.confirm(u, "security", body.get("pin"), body.get("bio"))
+    users.set_flag(u["id"], "anti_phishing", code or None)
+    return _me(users.must(u["id"]))
 
 
 @app.get("/api/security/activity")
@@ -1052,8 +1103,11 @@ def notifications(u: dict = Depends(current_user)):
 
 
 @app.post("/api/notifications/read")
-def notifications_read(u: dict = Depends(current_user)):
-    db.x("UPDATE notifications SET read=1 WHERE user_id=? AND read=0", (u["id"],))
+def notifications_read(body: dict = Body(default={}), u: dict = Depends(current_user)):
+    if body.get("id"):
+        db.x("UPDATE notifications SET read=1 WHERE user_id=? AND id=?", (u["id"], int(body["id"])))
+    else:
+        db.x("UPDATE notifications SET read=1 WHERE user_id=? AND read=0", (u["id"],))
     return {"ok": True}
 
 

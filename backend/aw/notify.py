@@ -27,6 +27,9 @@ def notify(user_id: int, key: str, path: str = "", button: str | None = "open", 
     dm_ok = db.val("SELECT dm_ok FROM users WHERE id=?", (user_id,), 1)
     if not dm_ok:
         return
+    flags = db.jl(db.val("SELECT flags FROM users WHERE id=?", (user_id,), None)) or {}
+    if flags.get("anti_phishing"):
+        text = f"🔐 <b>{html.escape(flags['anti_phishing'])}</b>\n{text}"
     kb = buttons
     if kb is None and button and config.WEBAPP_URL:
         kb = [[tg.webapp_button(t(lang, button), path)]]

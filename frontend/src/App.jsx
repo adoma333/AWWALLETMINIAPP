@@ -33,6 +33,8 @@ const Rewards = lazy(() => import('./pages/Rewards'));
 const Support = lazy(() => import('./pages/Support'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
+const PinSetup = lazy(() => import('./pages/Onboarding').then((m) => ({ default: m.PinSetup })));
+const Earn = lazy(() => import('./pages/Earn'));
 
 const ROOTS = ['/', '/trade', '/pay', '/swap', '/p2p', '/rewards', '/profile'];
 
@@ -66,9 +68,11 @@ function Router({ path, query }) {
   if (path.startsWith('/p2p')) return <P2P path={path} query={query} />;
   if (path === '/referral') return <Referral />;
   if (path === '/rewards') return <Rewards />;
-  if (path.startsWith('/support')) return <Support path={path} />;
+  if (path.startsWith('/support')) return <Support path={path} query={query} />;
   if (path === '/profile' || path.startsWith('/settings') || path === '/fees' || path === '/notifications') return <Profile path={path} />;
   if (path === '/welcome') return <Onboarding />;
+  if (path === '/security/pin') return <PinSetup query={query} />;
+  if (path === '/earn') return <Earn query={query} />;
   return <Home />;
 }
 

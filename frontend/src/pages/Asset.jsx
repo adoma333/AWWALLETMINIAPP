@@ -62,7 +62,8 @@ export default function Asset({ id }) {
           <span className="dim" style={{ fontSize: 13 }}>{t('your_balance')}</span>
           <b className="disp" style={{ fontSize: 20 }} dir="ltr">{amt(bal, a?.display ?? 4)} {id}</b>
           <span className="dim" style={{ fontSize: 13 }} dir="ltr">{fiat(a?.value_usd || 0)}{bal > 0 && <> · <span className={valueDelta >= 0 ? 'ok' : 'bad'}>{valueDelta >= 0 ? '+' : '−'}{fiat(Math.abs(valueDelta))}</span></>}</span>
-          {Number(a?.locked) > 0 && <span className="dim xs">{t('in_orders')}: {amt(a.locked)} {id}</span>}
+          {Number(a?.locked) - Number(a?.earning || 0) > 0 && <span className="dim xs">{t('in_orders')}: {amt(Number(a.locked) - Number(a.earning || 0))} {id}</span>}
+          {Number(a?.earning) > 0 && <button type="button" className="ok xs b" style={{ textAlign: 'start' }} onClick={() => go('/earn')}>{t('in_earn')}: {amt(a.earning)} {id}</button>}
         </span>
         {earn && f.earn !== false && <button type="button" onClick={() => go(`/earn?asset=${id}`)}><Pill icon="percent">{t('earn_apy', { apy: earn })}</Pill></button>}
       </div>

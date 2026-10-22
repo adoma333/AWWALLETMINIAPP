@@ -5,9 +5,9 @@ import { go } from '../router';
 import Icon, { CoinIcon } from './Icon';
 import { Pill } from './ui';
 
-export const IN_TYPES = new Set(['deposit', 'receive', 'gift_in', 'gift_refund', 'referral', 'reward', 'p2p_buy', 'earn_interest', 'earn_redeem', 'request_in']);
+export const IN_TYPES = new Set(['deposit', 'receive', 'gift_in', 'gift_refund', 'referral', 'reward', 'p2p_buy', 'earn_interest', 'earn_out']);
 const KIND_ICON = { deposit: 'down', withdraw: 'up', send: 'send', receive: 'down', swap: 'swap', p2p_buy: 'p2p', p2p_sell: 'p2p', gift_out: 'gift',
-  gift_in: 'gift', gift_refund: 'refresh', referral: 'users', reward: 'star', adjust: 'edit', earn_subscribe: 'earn', earn_redeem: 'earn', earn_interest: 'percent' };
+  gift_in: 'gift', gift_refund: 'refresh', referral: 'users', reward: 'star', adjust: 'edit', earn_in: 'earn', earn_out: 'earn', earn_interest: 'percent' };
 const PENDING = { pending: 'y', processing: 'y', review: 'y', failed: 'r', rejected: 'r', cancelled: 'n', expired: 'n' };
 
 /** One activity row: coin with a small action badge, title + time/detail, signed amount (sheet 05 "Activity"). */
