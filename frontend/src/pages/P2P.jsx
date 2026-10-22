@@ -414,7 +414,7 @@ function CreateAd() {
   const bal = wallet?.assets?.find((a) => a.id === f.asset)?.available;
   const eff = f.price_type === 'fixed' ? Number(f.price || 0) : mp * (1 + Number(f.margin_pct || 0) / 100);
   if (meta && me.kyc_level < (meta.min_kyc_to_post || 0)) {
-    return <Page title={t('post_ad')}><Empty icon="idCard" title={t('kyc_to_post')} sub={t('kyc_to_post_sub')} action={<Btn size="sm" onClick={() => go('/settings/kyc')}>{t('verify_now')}</Btn>} /></Page>;
+    return <Page title={t('post_ad')}><Empty icon="phone" title={t('kyc_to_post')} action={<Btn size="sm" onClick={() => go('/settings/security')}>{t('verify_now')}</Btn>} /></Page>;
   }
   const publish = async () => {
     setBusy(true);

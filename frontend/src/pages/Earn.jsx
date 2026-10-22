@@ -24,7 +24,7 @@ export default function Earn({ query = {} }) {
     }
   }).catch(() => setData(false));
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  if (data === false) return <Page title={t('earn')}><Empty icon="alert" title={t('err_generic')} /></Page>;
+  if (data === false) return <Page title={t('earn')}><Empty icon="alert" title={t('error_generic')} /></Page>;
   const pos = data?.positions || [];
   const products = (data?.products || []).filter((p) => (tab === 'flex' ? !p.term_days : p.term_days));
   const avg = pos.length ? pos.reduce((s, p) => s + Number(p.apy) * Number(p.amount), 0) / pos.reduce((s, p) => s + Number(p.amount), 0) : 0;

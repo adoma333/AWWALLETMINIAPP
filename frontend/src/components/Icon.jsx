@@ -78,11 +78,11 @@ const ICONS = {
 export default function Icon({ name, size = 22, className = '', style, weight, stroke }) {
   const { icons } = useApp();
   const custom = icons?.[`ui:${name}`];
-  if (custom) return <img className={`ic ic-img ${className}`} src={custom} width={size} height={size} alt="" style={style} />;
+  if (custom) return <img className={`ic-img ${className}`} src={custom} width={size} height={size} alt="" style={style} />;
   const C = ICONS[name] || Coins;
   // "bold" (primary actions) and "fill" (active tab) map to a slightly heavier stroke in the line family
   const sw = stroke || (weight === 'bold' || weight === 'fill' ? 2.3 : 2);
-  return <C className={`ic ${className}`} size={size} strokeWidth={sw} style={style} aria-hidden="true" />;
+  return <C className={className || undefined} size={size} strokeWidth={sw} style={style} aria-hidden="true" />;
 }
 
 const COINS = { USDT: usdt, USDC: usdc, BTC: btc, ETH: eth, TON: ton, BNB: bnb, SOL: sol, TRX: trx, POL: pol, AVAX: avax, ARB: arb, DAI: dai,

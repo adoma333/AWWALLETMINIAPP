@@ -87,7 +87,7 @@ export default function Home() {
           <span className="col" style={{ minWidth: 0 }}>
             <b className="ellipsis" style={{ fontSize: 15 }}>{me.first_name || me.name}</b>
             {me.vip?.level > 0 ? <span className="badge-z"><Icon name="crown" size={11} stroke={2.4} /> VIP {String(me.vip.name).toUpperCase()}</span>
-              : <span className="dim xs">{me.username ? `@${me.username}` : t(`kyc_level_${me.kyc_level}`)}</span>}
+              : <span className="dim xs" dir="ltr">{me.username ? `@${me.username}` : t(`kyc_level_${me.kyc_level}`)}</span>}
           </span>
         </button>
         <div className="row g6">

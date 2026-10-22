@@ -57,7 +57,7 @@ export default function Referral() {
       <div className="h2"><span>{t('how_it_works')}</span></div>
       <div className="list">
         {[['share', t('ref_step1')], ['gift', t('ref_step2', { uses: r.referee_bonus?.uses || 1 })], ['coins', t('ref_step3')]].map(([i, s], k) => (
-          <Li key={k} icon={i} title={s} className="sm" />
+          <div key={k} className="li sm"><span className="ic"><Icon name={i} size={18} /></span><span className="grow" style={{ fontSize: 14, lineHeight: 1.45 }}>{s}</span></div>
         ))}
       </div>
       {r.recent?.length > 0 && (

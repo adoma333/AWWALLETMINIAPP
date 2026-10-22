@@ -89,7 +89,8 @@ html[lang='ar'] .head h1, html[lang='fa'] .head h1 { font-family: var(--f-body);
 .nav button:active .zbtn { transform: scale(.94); }
 
 /* ─────────────── surfaces ─────────────── */
-.card { background: var(--s1); border-radius: var(--r); padding: 16px; display: block; width: 100%; text-align: start; color: inherit; }
+.card { background: var(--s1); border-radius: var(--r); padding: 16px; width: 100%; text-align: start; color: inherit; }
+.card:not(.row):not(.col) { display: block; } .card.row { display: flex; } .card.col { display: flex; }
 .card.s2 { background: var(--s2); } .card.tight { padding: 6px 16px; } .card.pad12 { padding: 12px 16px; }
 button.card:active, .card.tap:active { transform: scale(.985); background: var(--s2); }
 .card.glow, .glow { background: radial-gradient(120% 100% at 50% 0%, rgba(255, 110, 0, .22), transparent 60%), var(--s1); }

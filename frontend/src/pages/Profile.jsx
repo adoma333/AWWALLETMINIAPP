@@ -24,6 +24,9 @@ export default function Profile({ path }) {
   return <Home />;
 }
 
+const PLATFORM = { ios: 'iPhone', android: 'Android', tdesktop: 'Desktop', macos: 'Mac', web: 'Web', weba: 'Web', webk: 'Web', unigram: 'Windows' };
+const platformName = (p) => PLATFORM[String(p || '').toLowerCase()] || p || 'Telegram';
+
 const Row = ({ icon, tone = '', label, value, onClick, danger }) => (
   <Li icon={icon} tone={danger ? 'r' : tone} title={<span style={{ fontSize: 15 }} className={danger ? 'bad' : ''}>{label}</span>}
     right={value !== undefined && value !== null && value !== '' ? <span className="dim" style={{ fontSize: 13.5 }}>{value}</span> : null} chev={!!onClick} onClick={onClick} className="sm" />
@@ -64,7 +67,7 @@ function Home() {
       <div className="col center g6" style={{ padding: '8px 0 2px' }}>
         <Avatar src={me.photo} name={me.first_name || me.name} size={76} seed={me.id} />
         <b className="disp" style={{ fontSize: 22 }}>{me.first_name || me.name}</b>
-        <span className="dim xs">{me.username ? `@${me.username}` : `ID ${me.id}`}</span>
+        <span className="dim xs" dir="ltr">{me.username ? `@${me.username}` : `ID ${me.id}`}</span>
         <span className="row g6">
           <button type="button" onClick={() => go('/settings/kyc')}><Pill tone={me.kyc_level ? 'g' : 'n'} icon={me.kyc_level ? 'shieldok' : 'idCard'}>{me.kyc_level ? t('verified') : t('not_verified')}</Pill></button>
           {me.vip && <button type="button" onClick={() => go('/fees')}><Pill tone="y" icon="crown">VIP {me.vip.name}</Pill></button>}
@@ -209,7 +212,7 @@ function Security() {
         haptic.success(); toast(t('device_signed_out'), 'ok'); loadSessions();
       }}>{t('end_others')}</button>}</div>
       <div className="list">
-        <Li icon="device" tone="n" className="sm" title={inTelegram ? `Telegram · ${(window.Telegram?.WebApp?.platform || '').replace('tdesktop', 'Desktop')}` : t('this_device')} sub={t('now')} right={<Pill tone="g">{t('this_device')}</Pill>} />
+        <Li icon="device" tone="n" className="sm" title={inTelegram ? `Telegram · ${platformName(window.Telegram?.WebApp?.platform)}` : t('this_device')} sub={t('now')} right={<Pill tone="g">{t('this_device')}</Pill>} />
         {(sessions?.items || []).filter((d) => d.id !== sessions.current).map((d) => (
           <Li key={d.id} icon="device" tone="n" className="sm" title={d.device || '—'} sub={timeAgo(d.last_seen, t)}
             right={<button type="button" onClick={async () => { await api.post(`/api/me/sessions/${d.id}/revoke`).catch(() => {}); toast(t('device_signed_out'), 'ok'); loadSessions(); }}><Pill tone="r">{t('end')}</Pill></button>} />
@@ -218,7 +221,7 @@ function Security() {
       {activity.length > 0 && (
         <>
           <div className="h2"><span>{t('login_activity')}</span></div>
-          <div className="list">{activity.slice(0, 6).map((a, i) => <Li key={i} icon="activity" tone="n" className="sm" title={a.platform || 'Telegram'} sub={dateTime(a.created_at)} />)}</div>
+          <div className="list">{activity.slice(0, 6).map((a, i) => <Li key={i} icon="activity" tone="n" className="sm" title={`Telegram · ${platformName(a.platform)}`} sub={dateTime(a.created_at)} />)}</div>
         </>
       )}
       <Sheet open={sheet === 'pin'} onClose={() => setSheet('')} title={t('change_pin')}>

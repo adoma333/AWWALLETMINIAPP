@@ -1,0 +1,27 @@
+// Landing page strings added with the 2026 redesign (merged over ./i18n.js; missing languages fall back to English).
+export const R2 = {
+  en: {
+    nav_features: 'Features', nav_security: 'Security', nav_download: 'Download', open_tg: 'Open in Telegram',
+    badge: 'New · Z Pay, Earn and Auto-invest', hero_a: 'Money that moves', hero_b: 'at the speed of chat',
+    hero_lead: 'Hold, send, swap and grow crypto on 20+ networks. Inside Telegram, on your phone and on your desktop — one account, one balance.',
+    stat_nets: 'networks', stat_langs: 'languages', stat_ai: 'AI help', stat_fee: 'fee between users',
+    live: 'Live prices', feat_title: 'Everything your money needs', feat_sub: 'Built like a bank app. Fast like a chat.',
+    b1t: 'Firm-rate swap', b1d: 'The rate is locked while you decide. What you see is what you get — no slippage, no network fee.',
+    b2t: 'Z Pay', b2d: 'Your own QR and pay link. Request money, split a bill, send a gift that only the right person can open.',
+    b3t: 'Earn every day', b3d: 'Flexible and locked savings with daily payouts. Withdraw flexible savings any time.',
+    b4t: 'P2P with escrow', b4d: 'Set your own price, pay with local methods. Coins stay locked until the payment is confirmed.',
+    b5t: 'Zohra AI', b5d: 'Knows your account. Finds a late deposit, explains a fee, and calls a human when it should.',
+    b6t: 'Auto-invest & alerts', b6d: 'Buy a little every week, get a message when a price hits your target.',
+    sec_title: 'Security you can see', sec_sub: 'Every payout is checked twice: by you, and by us.',
+    s1: 'PIN or Face ID for every payout', s2: 'Withdraw only to trusted addresses', s3: 'Anti-phishing code in every bot message',
+    s4: 'Scam-list and contract checks before coins leave', s5: 'Camera ID check only above your limits', s6: 'Self-auditing ledger, reviewed withdrawals',
+    how_title: 'Start in a minute', h1t: 'Open the bot', h1d: 'Your wallet is created instantly. No seed phrase to lose.',
+    h2t: 'Add money', h2d: 'Deposit on any network, or buy with P2P using your local payment method.', h3t: 'Use it everywhere', h3d: 'Pay friends, swap, save — and log in on phone and desktop with the same account.',
+    dl_title: 'Get Zohra Wallet', dl_sub: 'Free on every platform. Your account follows you.', scan_phone: 'Scan with your phone',
+    faq_title: 'Questions', q1: 'Is Zohra Wallet free?', a1: 'Opening an account, receiving and sending to other Zohra users is free. Network withdrawals show the exact fee before you confirm.',
+    q2: 'Which networks are supported?', a2: 'Bitcoin, Ethereum, TON, TRON, Solana, BNB Chain, Polygon, Arbitrum, Base and more. One address works on every EVM chain.',
+    q3: 'Do I need to verify my identity?', a3: 'Only when you go above the everyday limits. Verification takes about two minutes with your phone camera.',
+    q4: 'Can I use it outside Telegram?', a4: 'Yes. Install the app on Android, Windows or Mac, or open the web app, and sign in with Telegram or Google.',
+    cta_title: 'Your wallet is one tap away', cta_sub: 'Open it in Telegram — nothing to install.',
+  },
+};

@@ -255,7 +255,7 @@ export function AutoInvest({ query = {} }) {
     try {
       const r = await withConfirm(ask, t, (f) => api.post('/api/autoinvest', { from, to, amount, freq, ...f }), {
         title: t('autoinvest'), cta: t('start_autoinvest'),
-        head: <div className="col center g6"><CoinIcon asset={to} size={52} /><b className="disp" style={{ fontSize: 20 }}>{t('every_x', { amount: fiat(usd), freq: t(`freq_${freq}`) })}</b></div>,
+        head: <div className="col center g6"><CoinIcon asset={to} size={52} /><b className="disp" style={{ fontSize: 20 }}>{t('every_x', { amount: fiat(usd), freq: t(`unit_${freq}`) })}</b></div>,
         rows: [[t('buy'), to], [t('pay_with'), from], [t('frequency'), t(`freq_${freq}`)]],
       });
       if (r) { haptic.success(); toast(t('autoinvest_started'), 'ok'); load(); }
@@ -266,7 +266,7 @@ export function AutoInvest({ query = {} }) {
     <Page title={t('autoinvest')} bar={<Btn w loading={busy} disabled={!(Number(usd) > 0)} onClick={start}>{t('start_autoinvest')}</Btn>}>
       <button type="button" className="card glow col center g6" style={{ padding: '20px 16px' }} onClick={() => setPick('to')}>
         <CoinIcon asset={to} size={52} />
-        <b className="disp" style={{ fontSize: 22 }}>{t('every_x', { amount: fiat(usd || 0), freq: t(`freq_${freq}`) })}</b>
+        <b className="disp" style={{ fontSize: 22 }}>{t('every_x', { amount: fiat(usd || 0), freq: t(`unit_${freq}`) })}</b>
         <span className="dim" style={{ fontSize: 13.5 }}>{t('buy_x_with_y', { to, from })} · <span className="em">{t('change')}</span></span>
       </button>
       <div className="h2"><span>{t('amount')}</span></div>

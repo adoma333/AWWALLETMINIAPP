@@ -248,7 +248,7 @@ function SplitNew({ query }) {
     } catch (e) { toast(errText(t, e), 'error'); } finally { setBusy(false); }
   };
   return (
-    <Page title={t('split_bill')} right={n > 0 ? <Pill>{t('n_people', { n })}</Pill> : null}
+    <Page title={t('split_bill')} right={n > 0 ? <Pill icon="users">{n}</Pill> : null}
       bar={<Btn w loading={busy} disabled={!(Number(total) > 0) || !people.length} onClick={create} icon="split">{t('split_send')}</Btn>}>
       <div className="card glow col g8" style={{ padding: 16 }}>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('split_title_ph')} maxLength={80}
@@ -317,7 +317,7 @@ function SplitView({ id }) {
   const known = pending.filter((r) => r.payer);
   const names = pending.map((r) => r.payer?.name || r.payer_name || '—');
   return (
-    <Page title={t('split_bill')} right={<Pill>{t('n_people', { n: sp.people })}</Pill>}
+    <Page title={t('split_bill')} right={<Pill icon="users">{sp.people}</Pill>}
       bar={known.length ? <Btn w icon="bell" loading={busy} onClick={async () => {
         setBusy(true);
         try { const r = await api.post(`/api/splits/${id}/remind`); haptic.success(); toast(t('reminded_n', { n: r.sent }), 'ok'); } catch (e) { toast(errText(t, e), 'error'); } finally { setBusy(false); }

@@ -1,8 +1,14 @@
 import '@fontsource/chakra-petch/600.css';
 import './get.css';
-import { LANGS, dict } from './i18n';
+import QRCode from 'qrcode';
+import { LANGS, dict as dict1 } from './i18n';
+import { R2 } from './i18n2';
 
-// Download page: picks the right build for this device, links every platform, explains iPhone / macOS / Windows installs.
+const COINS = import.meta.glob('../src/assets/coins/*.svg', { eager: true, import: 'default' });
+const coin = (id) => COINS[`../src/assets/coins/${id.toLowerCase()}.svg`];
+const dict = (l) => ({ ...dict1(l), ...R2.en, ...(R2[l] || {}) });
+
+// Landing + download page: live prices, real app screens, features, security, every platform build, FAQ.
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const ua = navigator.userAgent;
@@ -34,6 +40,7 @@ let lang = (() => {
 })();
 let rel = { files: {} };
 let cfg = {};
+let ticker = null;
 
 function cards(t) {
   const f = rel.files || {};
@@ -49,54 +56,132 @@ function cards(t) {
   ];
 }
 
+const L = {
+  swap: '<path d="M7 7h11l-3-3M17 17H6l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  qr: '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2M14 18v2M18 18h2v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  pig: '<path d="M19 9.5a6 6 0 0 0-6-4.5H9a6 6 0 0 0-5.6 8.2L5 17v2h3v-1.5h5V19h3v-2.2a5 5 0 0 0 2.5-2.8H21v-4.5zM9 5V3M16 10h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  hand: '<path d="M11 17l2 2a1 1 0 0 0 3-3M14 14l2.5 2.5a1 1 0 0 0 3-3l-3.9-3.9a3 3 0 0 0-4.2 0l-.9.9a1 1 0 0 1-3-3l2.8-2.8a5 5 0 0 1 6 .8L21 7M3 7l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  bot: '<path d="M12 8V4H8M4 12h16v8H4zM2 14h2M20 14h2M9 13v2M15 13v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="8" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  check: '<path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  plus: '<path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+};
+const line = (n, s = 22) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true">${L[n]}</svg>`;
+const fmtP = (v) => { const n = Number(v); return n >= 1000 ? `$${n.toLocaleString('en', { maximumFractionDigits: 0 })}` : n >= 1 ? `$${n.toFixed(2)}` : `$${n.toPrecision(3)}`; };
+
+function tickerHtml() {
+  const p = ticker?.p || {};
+  const ids = ['BTC', 'ETH', 'TON', 'SOL', 'BNB', 'TRX', 'XRP', 'DOGE', 'NOT', 'DOGS', 'USDT', 'USDC'].filter((x) => p[x]);
+  if (!ids.length) return '';
+  const item = (id) => { const [usd, ch] = p[id]; const up = Number(ch) >= 0;
+    return `<span class="tk">${coin(id) ? `<img src="${coin(id)}" alt="" width="22" height="22">` : ''}<b>${id}</b><span>${fmtP(usd)}</span><i class="${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(Number(ch)).toFixed(2)}%</i></span>`; };
+  const row = ids.map(item).join('');
+  return `<div class="ticker" aria-label="live"><div class="tk-track">${row}${row}</div></div>`;
+}
+
 function render() {
   const t = dict(lang);
   document.documentElement.lang = lang;
   document.documentElement.dir = ['ar', 'fa'].includes(lang) ? 'rtl' : 'ltr';
   const list = cards(t);
   const mine = list.find((c) => c.id === OS) || list.find((c) => c.id === 'web');
-  const features = [1, 2, 3, 4, 5, 6].map((i) => `<article class="feat"><span class="feat-ic">${svg('f' + i, 22)}</span><h3>${esc(t['f' + i + 't'])}</h3><p>${esc(t['f' + i + 'd'])}</p></article>`).join('');
-  const card = (c) => {
+  const tgUrl = cfg.bot ? `https://t.me/${cfg.bot}` : null;
+  const card = (c, extra = '') => {
     const inner = `<span class="dl-ic">${svg(c.icon, 26)}</span><span class="dl-txt"><b>${esc(c.title)}</b><small>${esc(c.sub)}</small></span>${c.href || c.action ? `<span class="dl-go">${svg('dl', 20)}</span>` : ''}`;
-    const cls = `dl ${c.id === mine.id ? 'mine' : ''} ${!c.href && !c.action ? 'off' : ''}`;
+    const cls = `dl ${extra} ${c.id === mine.id ? 'mine' : ''} ${!c.href && !c.action ? 'off' : ''}`;
     const main = c.action ? `<button type="button" class="${cls}" data-action="${c.action}">${inner}</button>`
       : c.href ? `<a class="${cls}" href="${esc(c.href)}" ${c.id === 'telegram' ? 'target="_blank" rel="noopener"' : ''}>${inner}</a>` : `<div class="${cls}">${inner}</div>`;
     const alt = c.alt ? `<a class="dl-alt" href="${esc(c.alt.href)}">${esc(c.alt.label)}</a>` : '';
     return `<div class="dl-wrap">${main}${alt}</div>`;
   };
+  const bento = [['swap', 'b1', 'wide', 'swap'], ['qr', 'b2', '', null], ['pig', 'b3', '', null], ['hand', 'b4', '', null], ['bell', 'b6', '', null], ['bot', 'b5', 'full', 'ai']]
+    .map(([ic, k, cls, shot]) => `<article class="bento ${cls} reveal">${shot ? `<img class="bento-shot" src="/get/${shot}.webp" alt="" loading="lazy" width="270" height="584">` : ''}
+      <span class="feat-ic">${line(ic)}</span><h3>${esc(t[k + 't'])}</h3><p>${esc(t[k + 'd'])}</p></article>`).join('');
+  const secs = [1, 2, 3, 4, 5, 6].map((i) => `<li class="reveal"><span class="ck">${line('check', 15)}</span>${esc(t['s' + i])}</li>`).join('');
+  const steps = [1, 2, 3].map((i) => `<li class="step reveal"><span class="num">${i}</span><h3>${esc(t[`h${i}t`])}</h3><p>${esc(t[`h${i}d`])}</p></li>`).join('');
+  const faq = [1, 2, 3, 4].map((i) => `<details class="qa reveal"><summary>${esc(t['q' + i])}<span>${line('plus', 18)}</span></summary><p>${esc(t['a' + i])}</p></details>`).join('');
   $('#get').innerHTML = `
-    <header class="top">
+    <header class="top"><div class="wrap top-in">
       <a class="brand" href="/get/">${MARK}<span class="word"><b>ZOHRA</b><span>WALLET</span></span></a>
+      <nav class="links"><a href="#features">${esc(t.nav_features)}</a><a href="#security">${esc(t.nav_security)}</a><a href="#download">${esc(t.nav_download)}</a></nav>
       <div class="top-r">
         <select id="lang" aria-label="Language">${Object.entries(LANGS).map(([c, n]) => `<option value="${c}" ${c === lang ? 'selected' : ''}>${n}</option>`).join('')}</select>
-        <a class="btn ghost" href="/">${esc(t.open_web)}</a>
-      </div>
+        <a class="btn grad sm" href="${tgUrl || '/'}" ${tgUrl ? 'target="_blank" rel="noopener"' : ''}>${tgUrl ? svg('telegram', 16) : ''}<span class="bt">${esc(tgUrl ? t.open_tg : t.open_web)}</span></a>
+      </div></div>
     </header>
     <main>
-      <section class="hero">
-        <div class="glow"></div>
-        <h1>${esc(t.hero_title)}</h1>
-        <p class="lead">${esc(t.hero_sub)}</p>
-        <div class="hero-cta">${card({ ...mine, title: `${mine.title}`, sub: `${t.recommended} · ${mine.sub}` })}</div>
-        ${rel.version ? `<p class="ver">${esc(t.version.replace('{v}', rel.version))}</p>` : ''}
+      <section class="hero wrap">
+        <div class="aurora"></div>
+        <div class="hero-txt">
+          <span class="badge"><i></i>${esc(t.badge)}</span>
+          <h1><span>${esc(t.hero_a)}</span> <em>${esc(t.hero_b)}</em></h1>
+          <p class="lead">${esc(t.hero_lead)}</p>
+          <div class="hero-cta">${card({ ...mine, sub: `${t.recommended} · ${mine.sub}` }, 'hero-dl')}
+            ${tgUrl && mine.id !== 'telegram' ? `<a class="btn ghost lg" href="${tgUrl}" target="_blank" rel="noopener">${svg('telegram', 18)}${esc(t.open_tg)}</a>` : ''}</div>
+          <div class="stats">
+            <div><b data-count="20">20+</b><small>${esc(t.stat_nets)}</small></div>
+            <div><b>14</b><small>${esc(t.stat_langs)}</small></div>
+            <div><b>24/7</b><small>${esc(t.stat_ai)}</small></div>
+            <div><b>$0</b><small>${esc(t.stat_fee)}</small></div>
+          </div>
+        </div>
+        <div class="phones" aria-hidden="true">
+          <figure class="phone p2"><img src="/get/swap.webp" alt="" width="270" height="584"></figure>
+          <figure class="phone p1"><img src="/get/home.webp" alt="" width="270" height="584"></figure>
+          <figure class="phone p3"><img src="/get/zpay.webp" alt="" width="270" height="584"></figure>
+          <span class="chip-float c1">${coin('BTC') ? `<img src="${coin('BTC')}" width="22" height="22" alt="">` : ''}+1.50%</span>
+          <span class="chip-float c2">${coin('TON') ? `<img src="${coin('TON')}" width="22" height="22" alt="">` : ''}+4.82%</span>
+          <span class="chip-float c3">${line('check', 14)} ${esc(t.s1)}</span>
+        </div>
       </section>
-      <section class="grid">${list.map(card).join('')}</section>
-      ${mine.note ? `<p class="note">${esc(mine.note)}</p>` : ''}
-      <section class="feats">${features}</section>
+      <section class="live"><div class="wrap"><span class="live-dot"></span><small>${esc(t.live)}</small></div>${tickerHtml()}</section>
+      <section class="wrap sec" id="features">
+        <h2 class="reveal">${esc(t.feat_title)}</h2><p class="sub reveal">${esc(t.feat_sub)}</p>
+        <div class="bentos">${bento}</div>
+      </section>
+      <section class="wrap sec split" id="security">
+        <div class="sec-txt"><h2 class="reveal">${esc(t.sec_title)}</h2><p class="sub reveal">${esc(t.sec_sub)}</p><ul class="checks">${secs}</ul></div>
+        <div class="shield reveal"><div class="ring"><svg viewBox="0 0 120 120"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A1A"/><stop offset="1" stop-color="#FF4D00"/></linearGradient></defs>
+          <circle cx="60" cy="60" r="52" stroke="rgba(255,255,255,.08)" stroke-width="9" fill="none"/><circle class="ring-arc" cx="60" cy="60" r="52" stroke="url(#rg)" stroke-width="9" fill="none" stroke-linecap="round" transform="rotate(-90 60 60)"/></svg>
+          <span>${MARK}</span></div><img class="sec-shot" src="/get/asset.webp" alt="" loading="lazy" width="270" height="584"></div>
+      </section>
+      <section class="wrap sec"><h2 class="reveal">${esc(t.how_title)}</h2><ol class="steps">${steps}</ol></section>
+      <section class="wrap sec" id="download">
+        <h2 class="reveal">${esc(t.dl_title)}</h2><p class="sub reveal">${esc(t.dl_sub)}</p>
+        <div class="dl-area"><div class="grid">${list.map((c) => card(c)).join('')}</div>
+          <div class="qr-box reveal"><canvas id="qr" width="168" height="168"></canvas><small>${esc(t.scan_phone)}</small></div></div>
+        ${mine.note ? `<p class="note">${esc(mine.note)}</p>` : ''}
+        ${rel.version ? `<p class="note">${esc(t.version.replace('{v}', rel.version))}</p>` : ''}
+      </section>
+      <section class="wrap sec"><h2 class="reveal">${esc(t.faq_title)}</h2><div class="faq">${faq}</div></section>
+      <section class="wrap"><div class="cta reveal"><div class="aurora small"></div>${MARK.replace('width="36" height="36"', 'width="64" height="64"')}
+        <h2>${esc(t.cta_title)}</h2><p>${esc(t.cta_sub)}</p>
+        <a class="btn grad lg" href="${tgUrl || '/'}" ${tgUrl ? 'target="_blank" rel="noopener"' : ''}>${tgUrl ? svg('telegram', 18) : ''}${esc(tgUrl ? t.open_tg : t.open_web)}</a></div></section>
     </main>
-    <footer class="foot"><span>© ${new Date().getFullYear()} Zohra Wallet</span>
-      ${cfg.terms_url ? `<a href="${esc(cfg.terms_url)}">${esc(t.terms)}</a>` : ''}${cfg.privacy_url ? `<a href="${esc(cfg.privacy_url)}">${esc(t.privacy)}</a>` : ''}</footer>
+    <footer class="foot wrap"><span class="brand small">${MARK.replace('width="36" height="36"', 'width="22" height="22"')}© ${new Date().getFullYear()} Zohra Wallet</span>
+      <span class="foot-l">${cfg.terms_url ? `<a href="${esc(cfg.terms_url)}">${esc(t.terms)}</a>` : ''}${cfg.privacy_url ? `<a href="${esc(cfg.privacy_url)}">${esc(t.privacy)}</a>` : ''}<a href="/">${esc(t.open_web)}</a></span></footer>
     <div class="sheet" id="ios" hidden><div class="sheet-card">
       <h2>${esc(t.ios_title)}</h2><ol><li>${esc(t.ios1)}</li><li>${esc(t.ios2)}</li><li>${esc(t.ios3)}</li></ol>
-      <button type="button" class="btn primary" data-close>${esc(t.close)}</button></div></div>`;
+      <button type="button" class="btn grad full" data-close>${esc(t.close)}</button></div></div>`;
   $('#lang').onchange = (e) => { lang = e.target.value; try { localStorage.setItem('aw_lang', lang); } catch { /* */ } render(); };
   document.querySelectorAll('[data-action="ios"]').forEach((b) => { b.onclick = () => { $('#ios').hidden = false; }; });
   $('#ios').onclick = (e) => { if (e.target.id === 'ios' || e.target.hasAttribute('data-close')) $('#ios').hidden = true; };
+  QRCode.toCanvas($('#qr'), location.origin + '/get/', { width: 168, margin: 1, color: { dark: '#000000', light: '#ffffff' } }).catch(() => {});
+  reveal();
 }
 
+function reveal() {
+  const els = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return; }
+  const io = new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }), { threshold: 0.12 });
+  els.forEach((e) => io.observe(e));
+}
+
+window.addEventListener('scroll', () => document.body.classList.toggle('scrolled', window.scrollY > 10), { passive: true });
 render();
-Promise.allSettled([fetch('/api/releases/latest').then((r) => r.json()), fetch('/api/config').then((r) => r.json())]).then(([a, b]) => {
+Promise.allSettled([fetch('/api/releases/latest').then((r) => r.json()), fetch('/api/config').then((r) => r.json()), fetch('/api/prices').then((r) => r.json())]).then(([a, b, c]) => {
   if (a.status === 'fulfilled' && a.value) rel = a.value;
   if (b.status === 'fulfilled' && b.value) cfg = b.value;
+  if (c.status === 'fulfilled' && c.value) ticker = c.value;
   render();
 });
