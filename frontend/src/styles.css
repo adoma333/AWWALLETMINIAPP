@@ -683,3 +683,33 @@ html[lang='ar'] .btn, html[lang='fa'] .btn { font-family: var(--font-body); font
 @keyframes indet { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
 .err-text { color: var(--danger); margin: 0; font-size: 14px; }
 .block { display: block; }
+
+/* nav centre button (Z Pay) */
+.bn-item.center { position: relative; }
+.bn-fab { width: 48px; height: 48px; margin-top: -22px; border-radius: 17px; display: grid; place-items: center; background: var(--grad); color: #160800;
+  box-shadow: 0 8px 22px rgba(255, 106, 0, .35), 0 0 0 4px var(--void); transition: transform .15s; }
+.bn-item.center:active .bn-fab { transform: scale(.94); }
+.bn-item.center.on { color: var(--ember); }
+
+/* trade hub */
+.trade-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.trade-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; border: 0; border-radius: var(--radius);
+  background: var(--surface); color: inherit; text-align: start; }
+.trade-card:active { background: var(--surface-2); transform: scale(.985); }
+.trade-card b { font-size: 16px; margin-top: 8px; } .trade-card small { color: var(--ash); font-size: 12.5px; line-height: 1.35; }
+.tc-ic, .pt-ic { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--fill); color: var(--ember); }
+.search-box { display: flex; align-items: center; gap: 8px; padding: 0 14px; height: 44px; border-radius: 999px; background: var(--surface); color: var(--ash); margin-bottom: 10px; }
+.search-box input { flex: 1; border: 0; background: none; color: var(--bone); font: inherit; outline: none; height: 100%; }
+.market-list { margin-top: 10px; }
+.chg { font-weight: 600; }
+
+/* z pay */
+.pay-hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 4px 8px 18px; }
+.pay-hero p { margin: 0; max-width: 300px; }
+.pay-mark { width: 60px; height: 60px; border-radius: 20px; display: grid; place-items: center; background: var(--grad); color: #160800; }
+.pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pay-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px; min-height: 132px; border: 0; border-radius: var(--radius);
+  background: var(--surface); color: inherit; text-align: start; }
+.pay-tile:active { background: var(--surface-2); transform: scale(.985); }
+.pay-tile b { font-size: 15.5px; margin-top: 8px; } .pay-tile small { color: var(--ash); font-size: 12.5px; line-height: 1.35; }
+.ar-right small.up { color: var(--ok); } .ar-right small.down { color: var(--danger); }

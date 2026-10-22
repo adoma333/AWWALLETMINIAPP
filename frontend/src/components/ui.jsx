@@ -6,14 +6,16 @@ import { back } from '../router';
 import Icon, { CoinIcon, NetIcon } from './Icon';
 import { amt, fiat } from '../format';
 
-export function Page({ title, children, right, className = '', onBack }) {
+export function Page({ title, children, right, className = '', onBack, root = false }) {
   return (
     <main className={`page ${className}`}>
       {title !== undefined && (
         <header className="page-head">
-          <button type="button" className="icon-btn" onClick={() => (onBack ? onBack() : back())} aria-label="back">
-            <Icon name="chevron" className="flip-rtl rot180" />
-          </button>
+          {root ? <span className="icon-btn" aria-hidden="true" /> : (
+            <button type="button" className="icon-btn" onClick={() => (onBack ? onBack() : back())} aria-label="back">
+              <Icon name="chevron" className="flip-rtl rot180" />
+            </button>
+          )}
           <h1>{title}</h1>
           <div className="page-head-right">{right}</div>
         </header>

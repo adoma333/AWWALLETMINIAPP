@@ -24,6 +24,8 @@ const Send = lazy(() => import('./pages/Send'));
 const Withdraw = lazy(() => import('./pages/Withdraw'));
 const Gift = lazy(() => import('./pages/Gift'));
 const Swap = lazy(() => import('./pages/Swap'));
+const Trade = lazy(() => import('./pages/Trade'));
+const Pay = lazy(() => import('./pages/Pay'));
 const History = lazy(() => import('./pages/History'));
 const P2P = lazy(() => import('./pages/P2P'));
 const Referral = lazy(() => import('./pages/Referral'));
@@ -32,7 +34,7 @@ const Support = lazy(() => import('./pages/Support'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 
-const ROOTS = ['/', '/swap', '/p2p', '/rewards', '/profile'];
+const ROOTS = ['/', '/trade', '/pay', '/swap', '/p2p', '/rewards', '/profile'];
 
 function routeFromStartParam(p) {
   if (!p) return null;
@@ -54,6 +56,8 @@ function Router({ path, query }) {
   if (path === '/withdraw') return <Withdraw query={query} />;
   if (path.startsWith('/gift')) return <Gift path={path} query={query} />;
   if (path === '/swap') return <Swap query={query} />;
+  if (path === '/trade') return <Trade />;
+  if (path === '/pay') return <Pay />;
   if (path === '/history' || path.startsWith('/tx/') || path.startsWith('/verify/')) return <History path={path} query={query} />;
   if (path.startsWith('/p2p')) return <P2P path={path} query={query} />;
   if (path === '/referral') return <Referral />;
