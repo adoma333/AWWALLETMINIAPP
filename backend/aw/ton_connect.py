@@ -1,6 +1,6 @@
 """TON Connect: link Telegram Wallet / Tonkeeper / MyTonWallet… and build ready-to-sign deposit transactions.
 
-Deposits from a connected wallet are pre-filled with the user's personal memo, so they can never be lost.
+Deposits from a connected wallet go straight to the user's personal TON address (no memo needed).
 Withdrawals can target the connected address in one tap (still PIN-protected server-side).
 """
 
@@ -54,18 +54,15 @@ def deposit_message(user: dict, asset: str, amount, sender: str) -> dict:
     info = deposits.get_address(user, "ton")
     amt = amount_in(amount, min(a["precision"], an["decimals"]))
     units = to_units(amt, an["decimals"])
-    treasury = info["address"]
+    dest = info["address"]
     if not an["contract"]:
-        return {"messages": [{"address": treasury, "amount": str(units), "payload": _comment_boc(info["memo"])}],
-                "memo": info["memo"], "valid_until": db.now() + 300}
+        return {"messages": [{"address": dest, "amount": str(units)}], "valid_until": db.now() + 300}
     from tonsdk.contract.token.ft import JettonWallet
     from tonsdk.utils import Address, bytes_to_b64str
 
     sender = normalize("ton", sender)
     jw = ton_chain.jetton_wallet(sender, an["contract"])
-    body = JettonWallet().create_transfer_body(to_address=Address(treasury), jetton_amount=units, forward_amount=1,
-                                               forward_payload=b"\x00\x00\x00\x00" + info["memo"].encode(),
+    body = JettonWallet().create_transfer_body(to_address=Address(dest), jetton_amount=units, forward_amount=1,
                                                response_address=Address(sender), query_id=db.now())
     return {"messages": [{"address": ton_chain.friendly(jw, True), "amount": str(ton_chain.JETTON_FWD_NANO),
-                          "payload": bytes_to_b64str(body.to_boc(False))}], "memo": info["memo"], "valid_until": db.now() + 300}
-
+                          "payload": bytes_to_b64str(body.to_boc(False))}], "valid_until": db.now() + 300}

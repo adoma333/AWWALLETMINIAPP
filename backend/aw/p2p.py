@@ -140,9 +140,10 @@ def create_ad(user: dict, data: dict) -> dict:
     total = amount_in(data.get("total"), a["precision"])
     price_type = data.get("price_type", "fixed")
     market = market_price(asset, fiat)
+    band = D(cfg.get("price_guard_pct", "0"))  # 0 = sellers set any price they like (admin can add a band)
     if price_type == "float":
         margin = D(data.get("margin_pct", "0"))
-        if abs(margin) > D(cfg.get("price_guard_pct", "20")):
+        if band > 0 and abs(margin) > band:
             raise AppError("p2p_price_out_of_range")
         price = None
     else:
@@ -150,7 +151,7 @@ def create_ad(user: dict, data: dict) -> dict:
         price = D(data.get("price"))
         if price <= 0:
             raise AppError("bad_price")
-        if market > 0 and abs(price / market - 1) * 100 > D(cfg.get("price_guard_pct", "20")):
+        if band > 0 and market > 0 and abs(price / market - 1) * 100 > band:
             raise AppError("p2p_price_out_of_range")
         margin = None
     mn, mx = D(data.get("min_fiat")), D(data.get("max_fiat"))

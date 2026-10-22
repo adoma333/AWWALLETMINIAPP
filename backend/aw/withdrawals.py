@@ -12,6 +12,7 @@ from decimal import Decimal
 from . import addresses, catalog, db, events, fees, guard, keys, ledger, prices, settings, users
 from .chains import adapter
 from .money import ZERO, AppError, D, amount_in, q_up, ref_id, s, to_units
+from .chains import ton as ton_chain
 from .notify import admin_alert, notify
 
 log = logging.getLogger("aw.withdrawals")
@@ -19,6 +20,9 @@ log = logging.getLogger("aw.withdrawals")
 
 def _internal_owner(fam: str, addr: str, memo: str | None) -> int | None:
     if fam == "ton":
+        uid = ton_chain.owner_of(addr)
+        if uid:
+            return uid
         if not addresses.same("ton", addr, keys.treasury("ton")):
             return None
         m = "".join(ch for ch in (memo or "") if ch.isdigit())

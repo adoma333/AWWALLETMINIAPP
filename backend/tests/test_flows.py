@@ -32,10 +32,10 @@ def test_deposit_addresses_shared_evm_and_ton_memo(api):
     eth = a.ok("post", "/api/deposit/address", {"network": "eth", "asset": "USDT"})
     assert bsc["address"] == eth["address"] and set(bsc["same_address_networks"]) >= {"eth", "bsc", "polygon", "arbitrum", "base", "avax"}
     ton = a.ok("post", "/api/deposit/address", {"network": "ton", "asset": "TON"})
-    assert ton["memo_required"] and ton["memo"].isdigit() and ton["address"] == keys.treasury("ton")
+    assert not ton["memo_required"] and ton["memo"] is None and ton["address"] != keys.treasury("ton")
     b = api(111)
     assert b.ok("post", "/api/deposit/address", {"network": "bsc"})["address"] != bsc["address"]
-    assert b.ok("post", "/api/deposit/address", {"network": "ton"})["memo"] != ton["memo"]
+    assert b.ok("post", "/api/deposit/address", {"network": "ton"})["address"] != ton["address"]
 
 
 def _ev(network, txid, idx, address, raw, contract=None, **kw):
@@ -72,19 +72,33 @@ def test_deposit_processing_confirmations_and_idempotency(api, monkeypatch):
     assert ledger.audit() == []
 
 
-def test_ton_memo_deposit_and_missing_memo(api):
+def test_ton_personal_address_and_legacy_memo(api):
     a = api(130)
     info = a.ok("post", "/api/deposit/address", {"network": "ton"})
     tre = keys.treasury("ton")
-    deposits.process([_ev("ton", "hash1", "ton", tre, 3 * 10 ** 9, None, memo=info["memo"], final=True)])
-    assert bal(130, "TON") == Decimal("3")
+    # deposit to the personal wallet — no memo needed
+    deposits.process([_ev("ton", "hash0", "ton", info["address"], 2 * 10 ** 9, None, final=True)])
+    assert bal(130, "TON") == Decimal("2")
+    # a user who still has an old memo keeps receiving through the shared address
+    db.x("UPDATE deposit_addresses SET memo='123456789' WHERE user_id=130 AND family='ton'")
+    deposits.process([_ev("ton", "hash1", "ton", tre, 3 * 10 ** 9, None, memo="123456789", final=True)])
+    assert bal(130, "TON") == Decimal("5")
     deposits.process([_ev("ton", "hash2", "ton", tre, 10 ** 9, None, memo=None, final=True)])
     row = db.one("SELECT * FROM chain_deposits WHERE txid='hash2'")
     assert row["status"] == "no_owner"
     admin = admin_auth.session_for(999)
     r = a.c.post(f"/api/admin/deposits/{row['id']}/credit", json={"user_id": 130}, headers={"Authorization": "Bearer " + admin["token"]})
     assert r.status_code == 200 and r.json()["ok"]
-    assert bal(130, "TON") == Decimal("4")
+    assert bal(130, "TON") == Decimal("6")
+
+
+def test_ton_legacy_rows_are_migrated(api):
+    a = api(131)
+    a.ok("post", "/api/deposit/address", {"network": "ton"})
+    db.x("UPDATE deposit_addresses SET address=?, hd_index=NULL, memo='555000111' WHERE user_id=131 AND family='ton'", (keys.treasury("ton"),))
+    assert deposits.migrate_ton_addresses() == 1
+    row = db.one("SELECT * FROM deposit_addresses WHERE user_id=131 AND family='ton'")
+    assert row["hd_index"] is not None and row["address"] != keys.treasury("ton") and row["memo"] == "555000111"
 
 
 def test_evm_native_balance_accounting(api, monkeypatch):
@@ -272,9 +286,9 @@ def test_withdraw_to_other_users_deposit_address_is_internal(api):
     assert bal(201, "USDT") == Decimal("10")
     bad = a.post("/api/withdraw", {"asset": "USDT", "network": "tron", "address": keys.treasury("tron"), "amount": "5", "pin": "482917"})
     assert bad.json()["error"] == "bad_address_platform"
-    tmemo = b.ok("post", "/api/deposit/address", {"network": "ton"})["memo"]
+    taddr = b.ok("post", "/api/deposit/address", {"network": "ton"})["address"]
     fund(200, "TON", "5")
-    r = a.ok("post", "/api/withdraw", {"asset": "TON", "network": "ton", "address": keys.treasury("ton"), "memo": tmemo, "amount": "2", "pin": "482917"})
+    r = a.ok("post", "/api/withdraw", {"asset": "TON", "network": "ton", "address": taddr, "amount": "2", "pin": "482917"})
     assert r["internal"] and bal(201, "TON") == Decimal("2")
 
 

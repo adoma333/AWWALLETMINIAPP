@@ -50,7 +50,10 @@ def solvency() -> dict:
     for g in db.q("SELECT asset, remaining FROM gifts WHERE status='active'"):
         liab[g["asset"]] = liab.get(g["asset"], ZERO) + D(g["remaining"])
     unswept: dict[str, Decimal] = {}
-    for r in db.q("SELECT asset, amount FROM chain_deposits WHERE status='credited' AND (note IS NULL OR note<>'swept') AND network NOT IN ('ton','btc')"):
+    ton_hot = keys.treasury("ton") if keys.has_master() else ""
+    # BTC and old-style TON memo deposits already land in the hot wallet; everything else waits in personal addresses
+    for r in db.q("SELECT asset, amount FROM chain_deposits WHERE status='credited' AND (note IS NULL OR note<>'swept') AND network<>'btc' "
+                  "AND NOT (network='ton' AND address=?)", (ton_hot,)):
         if r["asset"]:
             unswept[r["asset"]] = unswept.get(r["asset"], ZERO) + D(r["amount"])
     rows = []

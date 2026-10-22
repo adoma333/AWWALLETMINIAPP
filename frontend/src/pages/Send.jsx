@@ -47,7 +47,7 @@ function SendHub() {
         {opts.filter((o) => o.on).map((o) => (
           <Card key={o.to} className="option" onClick={() => go(o.to)}>
             <span className="opt-ic"><Icon name={o.icon} /></span>
-            <span className="nudge-text"><b>{o.title}{o.hot && <span className="mini-badge ok">{t('free')}</span>}</b><small>{o.sub}</small></span>
+            <span className="nudge-text"><b>{o.title}</b><small>{o.sub}</small></span>
             <Icon name="chevron" size={18} className="flip-rtl" />
           </Card>
         ))}
@@ -103,7 +103,7 @@ function Transfer({ query }) {
   if (done) {
     return (
       <Page title="">
-        <Success title={t('sent_success', { name: rcpt.name })} sub={`${amt(done.amount)} ${done.asset} · ${t('instant_free')}`}>
+        <Success title={t('sent_success', { name: rcpt.name })} sub={`${amt(done.amount)} ${done.asset}`}>
           <Btn className="wide" onClick={() => go('/', true)}>{t('done')}</Btn>
           <Btn kind="soft" className="wide" onClick={() => go(`/tx/${done.id}`)}>{t('details')}</Btn>
         </Success>
@@ -119,7 +119,7 @@ function Transfer({ query }) {
       )}
       {looking && <p className="dim small">{t('loading')}</p>}
       {rcpt && (
-        <Card className="person-card"><Avatar src={rcpt.photo} name={rcpt.name} size={44} /><span className="nudge-text"><b>{rcpt.name} {rcpt.verified && <Icon name="shield" size={14} />}</b><small>{rcpt.username ? `@${rcpt.username}` : t('user_found')}</small></span><span className="mini-badge ok">{t('instant_free')}</span></Card>
+        <Card className="person-card"><Avatar src={rcpt.photo} name={rcpt.name} size={44} /><span className="nudge-text"><b>{rcpt.name} {rcpt.verified && <Icon name="shield" size={14} />}</b><small>{rcpt.username ? `@${rcpt.username}` : t('user_found')}</small></span></Card>
       )}
       {!rcpt && !looking && to.length >= 3 && !query.to_id && (
         <Card className="warn-card"><Icon name="info" /><span>{t('err_recipient_not_found')}</span>

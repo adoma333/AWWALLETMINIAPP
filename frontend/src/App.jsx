@@ -10,6 +10,7 @@ import { go, match, useRoute } from './router';
 import { AppCtx } from './store';
 import { applyBrand } from './theme';
 import { hideSplash, splashProgress } from './splash';
+import TopBar, { PageLoading } from './components/TopBar';
 import { backButton, inTelegram, startParam, tg } from './telegram';
 import Home from './pages/Home';
 import Outside from './pages/Outside';
@@ -85,7 +86,7 @@ export default function App() {
 
   const loadWallet = useCallback(async () => {
     try {
-      const w = await api.get('/api/wallet');
+      const w = await api.get('/api/wallet', { silent: true });
       setWallet(w);
       setFx(w.fx);
     } catch (e) {
@@ -172,10 +173,11 @@ export default function App() {
     <I18n.Provider value={i18n}>
       <AppCtx.Provider value={ctx}>
         <ConfirmProvider>
+          <TopBar />
           {config?.maintenance && <div className="banner warn"><Icon name="alert" size={16} />{config.maintenance_msg?.[lang] || config.maintenance_msg?.en || t('maintenance_title')}</div>}
           {update && <button type="button" className="banner ember" onClick={() => location.reload()}><Icon name="refresh" size={16} />{t('update_ready')} · <b>{t('update_now')}</b></button>}
           <div className={`app ${showNav ? 'with-nav' : ''}`}>
-            <Suspense fallback={<div className="boot inline"><div className="boot-ring" /></div>}>
+            <Suspense fallback={<PageLoading />}>
               <Router path={path} query={query} />
             </Suspense>
           </div>

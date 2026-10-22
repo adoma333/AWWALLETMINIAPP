@@ -7,7 +7,7 @@ from . import db
 # id, name, short, kind/family, chain_id, native, confirmations, explorer tx, explorer addr, eta, color, memo_mode
 NETWORKS = [
     ("tron", "TRON", "TRC20", "tron", None, "TRX", 19, "https://tronscan.org/#/transaction/{tx}", "https://tronscan.org/#/address/{addr}", "~1 min", "#FF060A", "none"),
-    ("ton", "TON", "TON", "ton", None, "TON", 1, "https://tonviewer.com/transaction/{tx}", "https://tonviewer.com/{addr}", "~10 sec", "#0098EA", "required"),
+    ("ton", "TON", "TON", "ton", None, "TON", 1, "https://tonviewer.com/transaction/{tx}", "https://tonviewer.com/{addr}", "~10 sec", "#0098EA", "none"),
     ("bsc", "BNB Smart Chain", "BEP20", "evm", 56, "BNB", 15, "https://bscscan.com/tx/{tx}", "https://bscscan.com/address/{addr}", "~1 min", "#F0B90B", "none"),
     ("eth", "Ethereum", "ERC20", "evm", 1, "ETH", 12, "https://etherscan.io/tx/{tx}", "https://etherscan.io/address/{addr}", "~3 min", "#627EEA", "none"),
     ("sol", "Solana", "SPL", "sol", None, "SOL", 1, "https://solscan.io/tx/{tx}", "https://solscan.io/account/{addr}", "~30 sec", "#14F195", "none"),

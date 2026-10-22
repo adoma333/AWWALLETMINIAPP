@@ -13,6 +13,7 @@
     "@fontsource/chakra-petch": "^5.1.0",
     "@fontsource/ibm-plex-sans-arabic": "^5.1.0",
     "@fontsource/inter": "^5.1.0",
+    "@phosphor-icons/react": "^2.1.7",
     "@tonconnect/ui": "^2.4.4",
     "canvas-confetti": "^1.9.3",
     "qrcode": "^1.5.4",

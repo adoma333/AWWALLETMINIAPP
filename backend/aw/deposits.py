@@ -23,24 +23,42 @@ def get_address(user: dict, network_id: str) -> dict:
     with db.tx():
         r = db.one("SELECT * FROM deposit_addresses WHERE user_id=? AND family=?", (user["id"], fam))
         if not r:
-            if fam == "ton":
-                addr, memo, idx = keys.treasury("ton"), ton_chain.new_memo(), None
-            else:
-                idx = keys.next_index(fam)
-                addr, memo = keys.derive(fam, idx)[0], None
+            idx = keys.next_index(fam)
+            addr, memo = keys.derive(fam, idx)[0], None
             db.insert("deposit_addresses", {"user_id": user["id"], "family": fam, "address": addr, "memo": memo,
                                             "hd_index": idx, "created_at": db.now(), "watch_until": db.now() + WATCH_SECONDS})
             r = db.one("SELECT * FROM deposit_addresses WHERE user_id=? AND family=?", (user["id"], fam))
         else:
             db.x("UPDATE deposit_addresses SET watch_until=? WHERE user_id=? AND family=?", (db.now() + WATCH_SECONDS, user["id"], fam))
     shared = [n["id"] for n in db.q("SELECT id FROM networks WHERE kind=? AND enabled=1 ORDER BY sort", (fam,))]
-    return {"network": network_id, "family": fam, "address": r["address"], "memo": r["memo"], "memo_required": fam == "ton",
+    if fam == "ton" and r["hd_index"] is None:  # an old memo-style row that was not migrated yet
+        migrate_ton_addresses()
+        r = db.one("SELECT * FROM deposit_addresses WHERE user_id=? AND family=?", (user["id"], fam))
+    return {"network": network_id, "family": fam, "address": r["address"], "memo": None, "memo_required": False,
             "same_address_networks": shared if fam == "evm" else [network_id]}
+
+
+def migrate_ton_addresses() -> int:
+    """Give every user who had the old shared TON address + memo a personal TON wallet.
+    The old memo is kept so deposits still sent with it are credited to the same user."""
+    if not keys.has_master():
+        return 0
+    n = 0
+    for r in db.q("SELECT user_id FROM deposit_addresses WHERE family='ton' AND hd_index IS NULL"):
+        idx = keys.next_index("ton")
+        addr = keys.derive("ton", idx)[0]
+        n += db.x("UPDATE deposit_addresses SET address=?, hd_index=?, watch_until=? WHERE family='ton' AND user_id=? AND hd_index IS NULL",
+                  (addr, idx, db.now() + WATCH_SECONDS, r["user_id"])).rowcount
+    db.x("UPDATE networks SET memo_mode='none' WHERE id='ton' AND memo_mode<>'none'")
+    return n
 
 
 def _owner(ev: dict, fam: str) -> int | None:
     if fam == "ton":
-        memo = re.sub(r"\D", "", ev.get("memo") or "")
+        uid = ton_chain.owner_of(ev["address"])
+        if uid:
+            return uid
+        memo = re.sub(r"\D", "", ev.get("memo") or "")  # old-style deposit to the shared address with a memo
         if not memo:
             return None
         r = db.one("SELECT user_id FROM deposit_addresses WHERE family='ton' AND memo=?", (memo,))

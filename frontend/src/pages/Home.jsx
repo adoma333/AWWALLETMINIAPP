@@ -72,7 +72,7 @@ export default function Home() {
         <div className="actions">
           {actions.filter((a) => a.on).map((a) => (
             <button key={a.k} type="button" className={`act ${a.main ? 'main' : ''}`} onClick={() => { haptic.tap(); go(a.to); }}>
-              <span className="act-ic"><Icon name={a.icon} size={24} /></span><span>{a.label}</span>
+              <span className="act-ic"><Icon name={a.icon} size={24} weight="bold" /></span><span>{a.label}</span>
             </button>
           ))}
         </div>

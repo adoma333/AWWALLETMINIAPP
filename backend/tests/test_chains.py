@@ -248,12 +248,13 @@ def test_ton_withdraw_message_builds(monkeypatch):
 
 
 def test_ton_connect_deposit_payload(monkeypatch):
-    from aw import ton_connect, users
+    from aw import deposits, ton_connect, users
 
     u, _ = users.upsert_from_telegram({"id": 77, "first_name": "T"})
+    mine = deposits.get_address(u, "ton")["address"]
     msg = ton_connect.deposit_message(u, "TON", "1.5", keys.derive("ton", 5)[0])
     m = msg["messages"][0]
-    assert m["amount"] == "1500000000" and ton.comment_from_boc(m["payload"]) == msg["memo"]
+    assert m["amount"] == "1500000000" and m["address"] == mine and "payload" not in m  # personal address, no memo
     monkeypatch.setattr(ton, "jetton_wallet", lambda owner, master: "0:" + "44" * 32)
     j = ton_connect.deposit_message(u, "USDT", "10", keys.derive("ton", 5)[0])
-    assert j["messages"][0]["amount"] == str(ton.JETTON_FWD_NANO) and j["memo"] == msg["memo"]
+    assert j["messages"][0]["amount"] == str(ton.JETTON_FWD_NANO) and j["messages"][0]["payload"]

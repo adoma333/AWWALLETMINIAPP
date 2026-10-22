@@ -27,10 +27,10 @@ export default function Asset({ id }) {
         ) : <Skeleton h={120} />}
       </section>
       <div className="actions inline">
-        <button type="button" className="act" onClick={() => go(`/deposit?asset=${id}`)}><span className="act-ic"><Icon name="arrowDown" /></span><span>{t('action_deposit')}</span></button>
-        <button type="button" className="act" onClick={() => go(`/withdraw?asset=${id}`)}><span className="act-ic"><Icon name="arrowUp" /></span><span>{t('action_withdraw')}</span></button>
-        <button type="button" className="act" onClick={() => go(`/send/user?asset=${id}`)}><span className="act-ic"><Icon name="send" /></span><span>{t('action_send')}</span></button>
-        {a?.swap && <button type="button" className="act" onClick={() => go(`/swap?from=${id}`)}><span className="act-ic"><Icon name="swap" /></span><span>{t('action_swap')}</span></button>}
+        <button type="button" className="act" onClick={() => go(`/deposit?asset=${id}`)}><span className="act-ic"><Icon name="arrowDown" size={22} weight="bold" /></span><span>{t('action_deposit')}</span></button>
+        <button type="button" className="act" onClick={() => go(`/withdraw?asset=${id}`)}><span className="act-ic"><Icon name="arrowUp" size={22} weight="bold" /></span><span>{t('action_withdraw')}</span></button>
+        <button type="button" className="act" onClick={() => go(`/send/user?asset=${id}`)}><span className="act-ic"><Icon name="send" size={22} weight="bold" /></span><span>{t('action_send')}</span></button>
+        {a?.swap && <button type="button" className="act" onClick={() => go(`/swap?from=${id}`)}><span className="act-ic"><Icon name="swap" size={22} weight="bold" /></span><span>{t('action_swap')}</span></button>}
       </div>
       {a?.networks?.length > 0 && (
         <>

@@ -126,7 +126,7 @@ function Claim({ code }) {
     } catch (e) { haptic.error(); toast(errText(t, e), 'error'); } finally { setBusy(false); }
   };
   if (err) return <Page title={t('gift_title')}><Empty icon="gift" title={errText(t, err)} /></Page>;
-  if (!g) return <Page title={t('gift_title')}><div className="boot inline"><div className="boot-ring" /></div></Page>;
+  if (!g) return <Page title={t('gift_title')}><div className="page-loading" /></Page>;
   if (done) {
     return (
       <Page title="">

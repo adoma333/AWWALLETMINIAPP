@@ -821,7 +821,7 @@ def system(authorization: str = Header(default="")):
         "db_bytes": size, "wallet_ready": keys.has_master(), "ai": bool(config.ANTHROPIC_API_KEY), "bot": config.BOT_USERNAME,
         "webapp": config.WEBAPP_URL, "worker_heartbeat": int(db.val("SELECT value FROM scan_state WHERE key='worker:heartbeat'", (), 0) or 0),
         "outbox": {r["status"]: r["n"] for r in db.q("SELECT status, COUNT(*) AS n FROM outbox GROUP BY status")},
-        "scan_state": db.q("SELECT key, value, updated_at FROM scan_state WHERE key NOT LIKE 'holdings:%' AND key NOT LIKE 'tron:ts:%' AND key NOT LIKE 'sol:sig:%' ORDER BY key LIMIT 200"),
+        "scan_state": db.q("SELECT key, value, updated_at FROM scan_state WHERE key NOT LIKE 'holdings:%' AND key NOT LIKE 'tron:ts:%' AND key NOT LIKE 'sol:sig:%' AND key NOT LIKE 'ton:lt:%' AND key NOT LIKE 'ton:jlt:%' AND key NOT LIKE 'ton:sweep:%' ORDER BY key LIMIT 200"),
         "prices_updated": db.val("SELECT MAX(updated_at) FROM prices", (), 0), "hot_addresses": treasury.hot_addresses(),
     }
 

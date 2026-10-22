@@ -19,6 +19,7 @@ log = logging.getLogger("aw.api")
 async def lifespan(_app):
     db.conn()
     catalog.seed()
+    deposits.migrate_ton_addresses()  # personal TON wallets for users who had a memo
     try:
         bot.setup_webhook()
     except Exception as e:  # pragma: no cover

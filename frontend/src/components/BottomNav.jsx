@@ -22,7 +22,7 @@ export default function BottomNav({ path }) {
       {ITEMS.filter((i) => !i.feature || f[i.feature] !== false).map((i) => (
         <button key={i.path} type="button" className={`bn-item ${path === i.path ? 'on' : ''}`}
           onClick={() => { haptic.select(); go(i.path, true); }} aria-current={path === i.path ? 'page' : undefined}>
-          <Icon name={i.icon} size={22} />
+          <Icon name={i.icon} size={24} weight={path === i.path ? 'fill' : 'regular'} />
           <span>{t(i.label)}</span>
         </button>
       ))}

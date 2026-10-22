@@ -32,6 +32,9 @@ def fresh_db(monkeypatch):
     db.reset_for_tests()
     settings.invalidate()
     keys._seed.cache_clear()
+    from aw.chains import ton as _ton
+
+    _ton._OURS.update(at=0.0, map={})
     keys.derive.cache_clear()
     if config.KEY_FILE.exists():
         config.KEY_FILE.unlink()

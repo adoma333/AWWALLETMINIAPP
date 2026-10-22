@@ -81,6 +81,7 @@ def _heartbeat():
 def main():
     db.conn()
     catalog.seed()
+    deposits.migrate_ton_addresses()  # personal TON wallets for users who had a memo
     signal.signal(signal.SIGTERM, lambda *_: STOP.set())
     signal.signal(signal.SIGINT, lambda *_: STOP.set())
     loop("outbox", 1, tg.flush)

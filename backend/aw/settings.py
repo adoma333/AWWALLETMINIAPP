@@ -93,7 +93,7 @@ DEFAULTS: dict = {
         "appeal_after_min": 10,
         "auto_release_hours": 0,          # 0 = never auto release (seller must confirm)
         "merchant_min_orders": 30, "merchant_min_completion_pct": 90,
-        "price_guard_pct": "20",          # ad price must be within ±20% of market
+        "price_guard_pct": "0",           # 0 = free pricing; e.g. "20" keeps ads within ±20% of market
     },
     "referral": {
         "enabled": True,

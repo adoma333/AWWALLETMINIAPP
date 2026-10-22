@@ -1,3 +1,4 @@
+import { loader } from './loader';
 import { initData } from './telegram';
 
 export class ApiError extends Error {
@@ -9,7 +10,16 @@ export class ApiError extends Error {
   }
 }
 
-async function request(method, path, body) {
+async function request(method, path, body, silent = false) {
+  if (!silent) loader.start();
+  try {
+    return await send(method, path, body);
+  } finally {
+    if (!silent) loader.done();
+  }
+}
+
+async function send(method, path, body) {
   let res;
   try {
     res = await fetch(path, {
@@ -27,7 +37,7 @@ async function request(method, path, body) {
 }
 
 export const api = {
-  get: (p) => request('GET', p),
+  get: (p, opts) => request('GET', p, undefined, opts?.silent),
   post: (p, b = {}) => request('POST', p, b),
   patch: (p, b = {}) => request('PATCH', p, b),
   del: (p) => request('DELETE', p),
