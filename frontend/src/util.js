@@ -15,6 +15,10 @@ export function parseScan(raw) {
   const s = String(raw || '').trim();
   const gift = s.match(/startapp=g_([A-Za-z0-9]+)/);
   if (gift) return { route: `/gift/${gift[1]}` };
+  const req = s.match(/startapp=r_([A-Za-z0-9]+)/);
+  if (req) return { route: `/request/${req[1]}` };
+  const payme = s.match(/startapp=u_([A-Za-z0-9_]+)/) || s.match(/#\/send\/user\?to=([A-Za-z0-9_]+)/);
+  if (payme) return { route: `/send/user?to=${payme[1]}` };
   const tonUri = s.match(/^ton:\/\/transfer\/([^?]+)(\?.*)?$/);
   if (tonUri) {
     const q = new URLSearchParams(tonUri[2] || '');

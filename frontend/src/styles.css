@@ -359,3 +359,4 @@ html[data-theme='light'] .pin i { border-color: #cfc6bb; } html[data-theme='ligh
 .star { color: var(--ash); } .star.on { color: #FFC24A; }
 .sources .li { padding: 10px 14px; animation: fadein .4s both; }
 @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.ms-auto { margin-inline-start: auto; }

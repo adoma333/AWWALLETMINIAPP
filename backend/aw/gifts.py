@@ -154,6 +154,20 @@ def view(code: str, viewer: dict | None = None) -> dict:
             out["can_claim"] = True
         except AppError as e:
             out["reason"] = e.code
+        # group packets: who got what (visible to the sender and to anyone who already opened it)
+        if g["shares"] > 1 and (viewer["id"] == g["sender_id"] or mine):
+            rows = db.q("SELECT user_id, amount, created_at FROM gift_claims WHERE gift_id=? ORDER BY created_at", (g["id"],))
+            top = max((D(r["amount"]) for r in rows), default=None)
+            claims = []
+            for r in rows:
+                u = users.get(r["user_id"])
+                claims.append({"id": r["user_id"], "name": users.display_name(u) if u else "—", "photo": (u or {}).get("photo_url"),
+                               "amount": r["amount"], "at": r["created_at"], "me": r["user_id"] == viewer["id"],
+                               "luckiest": g["split"] == "random" and len(rows) > 1 and D(r["amount"]) == top})
+            out["claims"] = claims
+            out["split"] = g["split"]
+            if rows:
+                out["took_sec"] = rows[-1]["created_at"] - g["created_at"]
     return out
 
 
@@ -247,7 +261,7 @@ def expire_due() -> int:
 def mine(user_id: int) -> list[dict]:
     rows = db.q("SELECT * FROM gifts WHERE sender_id=? ORDER BY created_at DESC LIMIT 50", (user_id,))
     return [{"id": g["id"], "code": g["code"], "link": link(g["code"]), "asset": g["asset"], "amount": g["amount"],
-             "remaining": g["remaining"], "lock": g["lock_type"], "recipient": g["recipient_name"], "status": g["status"],
+             "remaining": g["remaining"], "lock": g["lock_type"], "theme": g["theme"], "recipient": g["recipient_name"], "status": g["status"],
              "shares": g["shares"], "claimed_shares": g["claimed_shares"], "created_at": g["created_at"],
              "expires_at": g["expires_at"]} for g in rows]
 

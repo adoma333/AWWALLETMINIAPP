@@ -42,6 +42,7 @@ function routeFromStartParam(p) {
   if (p.startsWith('tx_')) return `/tx/${p.slice(3)}`;
   if (p.startsWith('p2p_')) return `/p2p/order/${p.slice(4)}`;
   if (p.startsWith('r_')) return `/request/${p.slice(2)}`;
+  if (p.startsWith('u_')) return `/send/user?to=${encodeURIComponent(p.slice(2))}`;
   if (p === 'deposit') return '/deposit';
   if (p === 'referral') return '/referral';
   return null;
@@ -60,7 +61,7 @@ function Router({ path, query }) {
   if (path === '/trade') return <Trade tab="markets" query={query} />;
   if (path === '/p2p') return <Trade tab="p2p" query={query} />;
   if (path === '/autoinvest') return <AutoInvest query={query} />;
-  if (path === '/pay') return <Pay />;
+  if (path === '/pay' || path.startsWith('/request') || path.startsWith('/split')) return <Pay path={path} query={query} />;
   if (path === '/history' || path.startsWith('/tx/') || path.startsWith('/verify/')) return <History path={path} query={query} />;
   if (path.startsWith('/p2p')) return <P2P path={path} query={query} />;
   if (path === '/referral') return <Referral />;
