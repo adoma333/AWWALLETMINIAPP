@@ -8,8 +8,9 @@ import { amt, dateTime, fiat, setFx, shortAddr, timeAgo } from '../format';
 import { LANGS, errText, useI18n } from '../i18n';
 import { go } from '../router';
 import { useApp } from '../store';
-import { bioAvailable, bioClear, bioEnable, haptic, openLink, openTelegramLink } from '../telegram';
+import { bioAvailable, bioClear, bioEnable, haptic, inTelegram, openLink, openTelegramLink } from '../telegram';
 import { getThemePref, setThemePref } from '../theme';
+import { loadGoogle, setToken, shell } from '../session';
 
 const KycPage = lazy(() => import('./Kyc'));
 
@@ -20,6 +21,7 @@ export default function Profile({ path }) {
   if (path === '/settings/kyc') return <Suspense fallback={null}><KycPage /></Suspense>;
   if (path === '/fees') return <Fees />;
   if (path === '/notifications') return <Notifications />;
+  if (path === '/settings/devices') return <Devices />;
   return <Home />;
 }
 
@@ -157,6 +159,7 @@ function Security() {
           openTelegramLink(`https://t.me/${r.bot}`);
         }} />
         <Item icon="user" label={t('verify_identity')} value={t(`kyc_level_${me.kyc_level}`)} onClick={() => go('/settings/kyc')} />
+        <Item icon="phone" label={t('devices_title')} onClick={() => go('/settings/devices')} />
       </div>
       <div className="menu"><div className="menu-item"><span className="mi-ic"><Icon name="shield" size={20} /></span>
         <Toggle label={t('whitelist_only')} sub={t('whitelist_only_sub')} checked={me.settings?.whitelist_only} onChange={setWl} /></div></div>
@@ -255,6 +258,70 @@ function Fees() {
             <span dir="ltr">{Number(w.fee) ? `${amt(w.fee)}` : t('free')}{Number(w.pct) ? ` + ${w.pct}%` : ''}</span><small className="dim">min {w.min}</small></div>
         ))}
       </div>
+    </Page>
+  );
+}
+
+function GoogleLink({ onLinked }) {
+  const { config } = useApp();
+  const { t, lang } = useI18n();
+  const toast = useToast();
+  const box = React.useRef(null);
+  const cid = config?.auth?.google_client_id;
+  useEffect(() => {
+    if (!cid || inTelegram || shell) return undefined;
+    let off = false;
+    loadGoogle().then((g) => {
+      if (off || !box.current) return;
+      g.accounts.id.initialize({ client_id: cid, ux_mode: 'popup', callback: async (r) => {
+        try { await api.post('/api/me/link/google', { credential: r.credential }); toast(t('google_linked'), 'ok'); onLinked(); } catch (e) { toast(errText(t, e), 'error'); }
+      } });
+      g.accounts.id.renderButton(box.current, { theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', locale: lang });
+    }).catch(() => {});
+    return () => { off = true; };
+  }, [cid, lang, onLinked, t, toast]);
+  if (!cid) return null;
+  if (inTelegram || shell) return <p className="dim small">{t('link_google_hint')}</p>;
+  return <div ref={box} className="gis-btn" />;
+}
+
+function Devices() {
+  const { t } = useI18n();
+  const toast = useToast();
+  const [data, setData] = useState(null);
+  const load = React.useCallback(() => api.get('/api/me/sessions').then(setData).catch(() => setData({ items: [], identities: [] })), []);
+  useEffect(() => { load(); }, [load]);
+  const google = data?.identities?.find((i) => i.provider === 'google');
+  return (
+    <Page title={t('devices_title')}>
+      <h2 className="h2">{t('connected_accounts')}</h2>
+      <div className="menu">
+        <div className="menu-item"><span className="mi-ic"><Icon name="telegram" size={20} /></span><span className="mi-label">Telegram</span>
+          <span className="mi-value">{inTelegram || data ? t('connected') : ''}</span></div>
+        <div className="menu-item"><span className="mi-ic"><Icon name="globe" size={20} /></span><span className="mi-label">Google</span>
+          <span className="mi-value">{google ? google.email : ''}</span></div>
+      </div>
+      {!google && data && <GoogleLink onLinked={load} />}
+      <h2 className="h2">{t('signed_in_devices')}</h2>
+      {data?.items?.length === 0 && <p className="dim small">{t('no_other_devices')}</p>}
+      <div className="menu">
+        {data?.items?.map((d) => (
+          <div key={d.id} className="menu-item">
+            <span className="mi-ic"><Icon name="phone" size={20} /></span>
+            <span className="mi-label">{d.device || '—'}<small className="dim block">{d.id === data.current ? t('this_device') : timeAgo(d.last_seen, t)}</small></span>
+            {d.id !== data.current && <button type="button" className="btn ghost small" onClick={async () => {
+              await api.post(`/api/me/sessions/${d.id}/revoke`).catch(() => {}); toast(t('device_signed_out'), 'ok'); load();
+            }}>{t('sign_out')}</button>}
+          </div>
+        ))}
+      </div>
+      {!inTelegram && (
+        <Btn kind="danger" className="wide" onClick={async () => {
+          await api.post('/api/logout').catch(() => {});
+          setToken('');
+          window.dispatchEvent(new Event('aw:signed-out'));
+        }}>{t('sign_out')}</Btn>
+      )}
     </Page>
   );
 }

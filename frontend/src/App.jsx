@@ -11,6 +11,7 @@ import { AppCtx } from './store';
 import { applyBrand } from './theme';
 import { hideSplash, splashProgress } from './splash';
 import { applyPrices, streamPrices } from './live';
+import { getToken, setToken } from './session';
 import TopBar, { PageLoading } from './components/TopBar';
 import { Btn, Sheet } from './components/ui';
 import { backButton, inTelegram, startParam, tg } from './telegram';
@@ -101,6 +102,28 @@ export default function App() {
     if (m) setMe(m);
   }, [loadWallet]);
 
+  // standalone apps (web / Android / desktop): a bearer session instead of Telegram initData
+  const [signIn, setSignIn] = useState(!inTelegram && !getToken());
+  const bootStandalone = useCallback(async (first) => {
+    try {
+      const m = await api.get('/api/me');
+      setMe(m);
+      setFx(null, m.settings?.currency || 'USD');
+      const l = detectLang(m.lang);
+      if (first && l !== first) await switchLang(l);
+      setSignIn(false);
+      await loadWallet();
+    } catch (e) {
+      if (e.status === 401 || e.status === 403) { setToken(''); setSignIn(true); } else setFatal(e);
+    }
+    hideSplash();
+  }, [loadWallet, switchLang]);
+  useEffect(() => {
+    const out = () => { setToken(''); setMe(null); setWallet(null); setSignIn(true); };
+    window.addEventListener('aw:signed-out', out);
+    return () => window.removeEventListener('aw:signed-out', out);
+  }, []);
+
   useEffect(() => {
     (async () => {
       const first = detectLang();
@@ -112,7 +135,11 @@ export default function App() {
         applyBrand(cfg.branding);
       } catch { /* shown below */ }
       splashProgress(55);
-      if (!inTelegram) return;
+      if (!inTelegram) {
+        if (getToken()) await bootStandalone(first);
+        else hideSplash();
+        return;
+      }
       try {
         const res = await api.post('/api/auth');
         splashProgress(80);
@@ -133,7 +160,7 @@ export default function App() {
     const onVis = () => { if (document.visibilityState === 'visible') loadWallet(); };
     document.addEventListener('visibilitychange', onVis);
     const id = setInterval(() => { if (document.visibilityState === 'visible') loadWallet(); }, 30000);
-    const stop = inTelegram ? streamPrices((snap) => setWallet((w) => applyPrices(w, snap))) : () => {};
+    const stop = streamPrices((snap) => setWallet((w) => applyPrices(w, snap)));
     return () => { document.removeEventListener('visibilitychange', onVis); clearInterval(id); stop(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -166,7 +193,10 @@ export default function App() {
   const i18n = useMemo(() => ({ lang, t, setLang: (c) => switchLang(c, true) }), [lang, t, switchLang]);
 
   if (!dict) return null; // the splash in index.html is still showing
-  if (!inTelegram) { hideSplash(); return <I18n.Provider value={i18n}><AppCtx.Provider value={ctx}><Outside /></AppCtx.Provider></I18n.Provider>; }
+  if (!inTelegram && (signIn || path === '/signin')) {
+    hideSplash();
+    return <I18n.Provider value={i18n}><AppCtx.Provider value={ctx}><Outside onSignedIn={() => { go('/', true); bootStandalone(lang); }} /></AppCtx.Provider></I18n.Provider>;
+  }
   if (fatal) {
     return (
       <I18n.Provider value={i18n}>

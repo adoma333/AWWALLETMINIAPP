@@ -1,4 +1,5 @@
 import { loader } from './loader';
+import { getToken } from './session';
 import { initData } from './telegram';
 
 export class ApiError extends Error {
@@ -24,7 +25,8 @@ async function send(method, path, body) {
   try {
     res = await fetch(path, {
       method,
-      headers: { 'Content-Type': 'application/json', 'X-Init-Data': initData, 'X-Tg-Platform': window.Telegram?.WebApp?.platform || 'web' },
+      headers: { 'Content-Type': 'application/json', 'X-Tg-Platform': window.Telegram?.WebApp?.platform || 'web',
+        ...(initData ? { 'X-Init-Data': initData } : getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
@@ -34,6 +36,7 @@ async function send(method, path, body) {
   try { data = await res.json(); } catch { /* empty */ }
   if (!res.ok) {
     // a limit that identity verification would raise → the app offers verification (see App.jsx)
+    if (res.status === 401 && data?.error === 'session_expired') window.dispatchEvent(new Event('aw:signed-out'));
     if (data?.params?.kyc === 'True') window.dispatchEvent(new CustomEvent('aw:kyc-offer', { detail: data.params }));
     throw new ApiError(data?.error || 'server_error', res.status, data?.params || {});
   }

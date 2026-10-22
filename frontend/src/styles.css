@@ -670,3 +670,16 @@ html[lang='ar'] .btn, html[lang='fa'] .btn { font-family: var(--font-body); font
 .id-card b { font-size: 19px; }
 .id-card span { font-size: 17px; font-weight: 600; letter-spacing: .3px; }
 .id-card small { opacity: .75; }
+
+/* sign-in */
+.signin-actions { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; align-items: stretch; margin-top: 6px; }
+.signin-actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.tg-btn { background: #2AABEE !important; color: #fff !important; }
+.gis-btn { display: flex; justify-content: center; min-height: 44px; }
+.signin-wait { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.signin-wait p { margin: 0; color: var(--ash); }
+.fill-bar.indeterminate { width: 160px; }
+.fill-bar.indeterminate i { width: 40%; animation: indet 1.2s ease-in-out infinite; }
+@keyframes indet { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+.err-text { color: var(--danger); margin: 0; font-size: 14px; }
+.block { display: block; }
