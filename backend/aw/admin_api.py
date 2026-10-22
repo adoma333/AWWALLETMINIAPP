@@ -744,28 +744,29 @@ def form_update(fid: int, body: dict = Body(...), authorization: str = Header(de
 
 @router.get("/kyc")
 def kyc_list(status: str = "pending", authorization: str = Header(default="")):
-    _admin(authorization, "users")
-    rows = db.q("SELECT k.*, u.username, u.first_name FROM kyc_requests k LEFT JOIN users u ON u.id=k.user_id WHERE k.status=? ORDER BY k.id DESC LIMIT 200", (status,))
+    from . import kyc
+
+    a = _admin(authorization, "users")
+    rows = db.q("SELECT k.*, u.username, u.first_name, u.last_name, u.created_at AS user_created FROM kyc_requests k "
+                "LEFT JOIN users u ON u.id=k.user_id WHERE k.status=? ORDER BY k.id DESC LIMIT 200", (status,))
     for r in rows:
-        r["data"] = db.jl(r["data"])
-        r["files"] = [files.url(p) for p in db.jl(r["files"], [])]
+        r["data"] = kyc.record(r)
+        r["flags"] = db.jl(r.get("flags"), [])
+        paths = db.jl(r["files"], [])
+        r["files"] = ({k: kyc.signed_url(v) for k, v in paths.items()} if isinstance(paths, dict)
+                      else {f"file{i + 1}": kyc.signed_url(p) for i, p in enumerate(paths)})
+        r.pop("doc_hash", None)
+    admin_auth.audit(a, "kyc.view", status, {"count": len(rows)}, None)
     return {"items": rows}
 
 
 @router.post("/kyc/{kid}/{action}")
 def kyc_action(kid: int, action: str, request: Request, body: dict = Body(default={}), authorization: str = Header(default="")):
+    from . import kyc
+
     a = _admin(authorization, "users")
-    r = db.one("SELECT * FROM kyc_requests WHERE id=?", (kid,))
-    if not r or r["status"] != "pending" or action not in ("approve", "reject"):
-        raise AppError("bad_state")
-    db.update("kyc_requests", {"id": kid}, {"status": "approved" if action == "approve" else "rejected", "note": (body.get("note") or "")[:300],
-                                            "reviewed_at": db.now(), "reviewer": a["id"]})
-    if action == "approve":
-        db.x("UPDATE users SET kyc_level=MAX(kyc_level, 2) WHERE id=?", (r["user_id"],))
-        notify(r["user_id"], "kyc_approved", path="/settings/security")
-    else:
-        notify(r["user_id"], "kyc_rejected", path="/settings/security", reason=body.get("note", ""))
-    admin_auth.audit(a, f"kyc.{action}", str(kid), body, _ip(request))
+    kyc.review(kid, action, a["id"], body.get("note") or "")
+    admin_auth.audit(a, f"kyc.{action}", str(kid), {"note": body.get("note", "")}, _ip(request))
     return {"ok": True}
 
 

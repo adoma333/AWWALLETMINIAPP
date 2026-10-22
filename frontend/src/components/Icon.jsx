@@ -36,7 +36,7 @@ import sonic from '../assets/coins/sonic.svg';
 import unichain from '../assets/coins/unichain.svg';
 
 import {
-  AddressBook, ArrowClockwise, ArrowDown, ArrowRight, ArrowSquareOut, ArrowUp, ArrowsLeftRight, Bank, Bell, BookOpen, Calculator, CalendarBlank,
+  AddressBook, Camera, Car, IdentificationCard, SealCheck, UserFocus, ArrowClockwise, ArrowDown, ArrowRight, ArrowSquareOut, ArrowUp, ArrowsLeftRight, Bank, Bell, BookOpen, Calculator, CalendarBlank,
   CaretDown, CaretRight, ChartBar, ChartLineUp, ChatCircleText, Check, ClipboardText, ClockCountdown, ClockCounterClockwise, Cloud, Coin, Coins,
   Copy, CreditCard, Crown, DeviceMobile, Diamond, DotsThree, DownloadSimple, Export, Eye, EyeSlash, Fingerprint, Fire, Flag, Funnel, GearSix, Gift,
   Globe, Handshake, Headset, Heart, House, Image, Info, Key, Lifebuoy, Lightning, Link, List, LockSimple, MagnifyingGlass, Megaphone, Minus, Moon,
@@ -57,7 +57,7 @@ const ICONS = {
   history: ClockCounterClockwise, grid: SquaresFour, layers: Stack, palette: Palette, phone: DeviceMobile, qr: QrCode, telegram: TelegramLogo,
   key: Key, lifebuoy: Lifebuoy, flag: Flag, list: List, trend: TrendUp, link: Link, power: Power, lock: LockSimple, card: CreditCard, user: User,
   megaphone: Megaphone, arrowDown: ArrowDown, arrowUp: ArrowUp, arrowRight: ArrowRight, swap: ArrowsLeftRight, plus: Plus, minus: Minus,
-  scan: Scan, contacts: AddressBook, users: Users, chevron: CaretRight, chevronDown: CaretDown, search: MagnifyingGlass, filter: Funnel,
+  scan: Scan, idCard: IdentificationCard, camera: Camera, face: UserFocus, car: Car, verified: SealCheck, contacts: AddressBook, users: Users, chevron: CaretRight, chevronDown: CaretDown, search: MagnifyingGlass, filter: Funnel,
   paste: ClipboardText, external: ArrowSquareOut, receipt: Receipt, handshake: Handshake, bank: Bank, fingerprint: Fingerprint, trash: Trash,
   edit: PencilSimple, more: DotsThree, logout: SignOut, attach: Paperclip,
 };

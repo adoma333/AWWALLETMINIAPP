@@ -9,7 +9,7 @@ from decimal import Decimal
 from fastapi import Body, Depends, FastAPI, Header, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
-from . import (admin_api, admin_auth, bot, catalog, coinmeta, config, db, deposits, fees, files, gifts, guard, ledger, p2p, prices, referral,
+from . import (admin_api, admin_auth, bot, catalog, coinmeta, config, db, deposits, fees, files, gifts, guard, kyc, ledger, p2p, prices, referral,
                rewards, settings, support, swap, transfers, ton_connect, users, withdrawals)
 from .money import AppError, D, s
 from .security import limiter, receipt_sig, verify_init_data
@@ -122,6 +122,8 @@ def tc_manifest():
 
 @app.get("/api/files/{folder}/{name}")
 def get_file(folder: str, name: str):
+    if folder == "kyc":  # identity documents are only reachable through short-lived signed admin links
+        raise AppError("not_found", 404)
     p = files.path_for(f"{folder}/{name}")
     ext = name.rsplit(".", 1)[-1]
     return FileResponse(p, media_type=files.MIME.get(ext, "application/octet-stream"),
@@ -764,23 +766,31 @@ def form_submit(body: dict = Body(...), u: dict = Depends(current_user)):
 @app.post("/api/kyc")
 def kyc_submit(body: dict = Body(...), u: dict = Depends(current_user)):
     guard.feature("kyc")
-    if db.one("SELECT 1 FROM kyc_requests WHERE user_id=? AND status='pending'", (u["id"],)):
-        raise AppError("kyc_pending")
-    paths = [files.save(f, "kyc", allow_pdf=True) for f in (body.get("files") or [])[:4]]
-    if not paths:
-        raise AppError("bad_request")
-    data = {k: str(v)[:120] for k, v in (body.get("data") or {}).items() if k in ("full_name", "country", "doc_type", "doc_number", "birth_date")}
-    db.insert("kyc_requests", {"user_id": u["id"], "level": 2, "data": data, "files": paths, "created_at": db.now()})
-    from .notify import admin_alert
-
-    admin_alert(f"New identity verification request from {users.display_name(u)}", "info", "kyc")
-    return {"ok": True}
+    limiter.check(f"kyc:{u['id']}", 5)
+    return kyc.submit(u, body)
 
 
 @app.get("/api/kyc")
 def kyc_status(u: dict = Depends(current_user)):
-    r = db.one("SELECT status, note, created_at FROM kyc_requests WHERE user_id=? ORDER BY id DESC LIMIT 1", (u["id"],))
-    return {"level": u["kyc_level"], "request": r}
+    return kyc.status(u)
+
+
+@app.post("/api/kyc/mrz")
+def kyc_check_mrz(body: dict = Body(...), u: dict = Depends(current_user)):
+    """Server-side check of what the phone read, so the user sees exactly what will be submitted."""
+    limiter.check(f"kyc-mrz:{u['id']}", 60)
+    m = kyc.parse(str(body.get("mrz") or "")[:200])
+    m.pop("lines", None)
+    return m
+
+
+@app.get("/api/kyc-file/{name}")
+def kyc_file(name: str, e: int = 0, s: str = ""):
+    rel = kyc.check_signed(name, e, s)
+    p = files.path_for(rel)
+    ext = name.rsplit(".", 1)[-1]
+    return FileResponse(p, media_type=files.MIME.get(ext, "application/octet-stream"),
+                        headers={"Cache-Control": "private, no-store", "Content-Security-Policy": "sandbox; default-src 'none'"})
 
 
 # ───────────────────────── notifications ─────────────────────────

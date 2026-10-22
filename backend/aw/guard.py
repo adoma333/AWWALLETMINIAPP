@@ -98,19 +98,24 @@ def limits_for(user: dict) -> dict:
     return out
 
 
+def _kyc_can_raise(user: dict) -> bool:
+    """True when identity verification would give this user a higher limit (the app then offers it)."""
+    return (user.get("kyc_level") or 0) < 2 and bool(settings.get("kyc").get("enabled", True))
+
+
 def check_limit(user: dict, kind: str, usd: Decimal):
     lim = limits_for(user)
     if kind == "withdraw":
         if usd > lim["withdraw_single"]:
-            raise AppError("limit_single", max_usd=str(lim["withdraw_single"]))
+            raise AppError("limit_single", max_usd=str(lim["withdraw_single"]), kyc=_kyc_can_raise(user))
         if _used_usd(user["id"], ("withdraw",)) + usd > lim["withdraw_daily"]:
-            raise AppError("limit_daily", max_usd=str(lim["withdraw_daily"]))
+            raise AppError("limit_daily", max_usd=str(lim["withdraw_daily"]), kyc=_kyc_can_raise(user))
     elif kind == "transfer":
         if _used_usd(user["id"], ("send", "gift_out")) + usd > lim["transfer_daily"]:
-            raise AppError("limit_daily", max_usd=str(lim["transfer_daily"]))
+            raise AppError("limit_daily", max_usd=str(lim["transfer_daily"]), kyc=_kyc_can_raise(user))
     elif kind == "p2p":
         if _used_usd(user["id"], ("p2p_buy", "p2p_sell")) + usd > lim["p2p_daily"]:
-            raise AppError("limit_daily", max_usd=str(lim["p2p_daily"]))
+            raise AppError("limit_daily", max_usd=str(lim["p2p_daily"]), kyc=_kyc_can_raise(user))
 
 
 def usage(user: dict) -> dict:

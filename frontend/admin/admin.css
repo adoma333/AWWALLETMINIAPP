@@ -234,3 +234,7 @@ fieldset.plain { border: none; padding: 0; margin: 0; min-width: 0; }
 .toast.err { border-color: rgba(255, 107, 94, 0.6); color: var(--danger); }
 @keyframes tin { from { opacity: 0; transform: translateY(6px); } }
 .bad { color: var(--danger); }
+pre.mrz { margin: 10px 0; padding: 10px 12px; border-radius: 10px; background: var(--surface-2, rgba(255,255,255,.04)); font: 12px/1.5 ui-monospace, monospace; overflow-x: auto; }
+.doc-wrap { position: relative; display: inline-block; }
+.doc-wrap span { position: absolute; left: 6px; bottom: 6px; padding: 2px 8px; border-radius: 8px; background: rgba(0,0,0,.65); color: #fff; font-size: 11px; text-transform: capitalize; }
+td.bad { color: var(--danger); font-weight: 600; }

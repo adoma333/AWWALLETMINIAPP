@@ -484,6 +484,11 @@ SCHEMA = [
         id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT, kind TEXT, text TEXT, seen INTEGER DEFAULT 0, created_at INTEGER
     );
     """,
+    """
+    ALTER TABLE kyc_requests ADD COLUMN doc_hash TEXT;
+    ALTER TABLE kyc_requests ADD COLUMN flags TEXT;
+    CREATE INDEX IF NOT EXISTS ix_kyc_doc ON kyc_requests(doc_hash);
+    """,
 ]
 
 

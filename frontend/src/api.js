@@ -32,7 +32,11 @@ async function send(method, path, body) {
   }
   let data = null;
   try { data = await res.json(); } catch { /* empty */ }
-  if (!res.ok) throw new ApiError(data?.error || 'server_error', res.status, data?.params || {});
+  if (!res.ok) {
+    // a limit that identity verification would raise → the app offers verification (see App.jsx)
+    if (data?.params?.kyc === 'True') window.dispatchEvent(new CustomEvent('aw:kyc-offer', { detail: data.params }));
+    throw new ApiError(data?.error || 'server_error', res.status, data?.params || {});
+  }
   return data;
 }
 

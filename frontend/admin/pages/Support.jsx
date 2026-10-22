@@ -89,6 +89,16 @@ function Forms() {
   );
 }
 
+const FLAG_TEXT = {
+  mrz_invalid: 'MRZ check digits do not match — data may be mistyped or the document altered',
+  document_expired: 'Document has expired', underage: 'Under the minimum age', blocked_country: 'Country is on the blocked list',
+  document_used_by_another_account: 'The same document is already used by another account',
+  no_selfie: 'No selfie', edited_doc_number: 'User changed the document number read from the MRZ',
+  edited_surname: 'User changed the surname read from the MRZ', edited_birth_date: 'User changed the birth date read from the MRZ',
+};
+const KYC_ROWS = [['surname', 'Surname'], ['given_names', 'Given names'], ['doc_number', 'Document no.'], ['nationality', 'Nationality'],
+  ['birth_date', 'Birth date'], ['expiry_date', 'Expiry'], ['sex', 'Sex']];
+
 function Kyc() {
   const [st, setSt] = useState('pending');
   const { data, error, reload } = useLoad('/kyc' + qs({ status: st }));
@@ -96,26 +106,50 @@ function Kyc() {
   return (
     <div className="stack">
       <Tabs value={st} onChange={setSt} items={[['pending', 'Pending'], ['approved', 'Approved'], ['rejected', 'Rejected']]} />
+      <p className="dim small">Document images open through private links that expire after 15 minutes. Each view is recorded in the audit log.</p>
       {error && <Loading error={error} reload={reload} />}
       {data && !data.items.length && <div className="empty">Nothing to review</div>}
-      {data?.items.map((k) => (
-        <Card key={k.id} title={<>{k.data?.full_name || userName({ ...k, id: k.user_id })} <span className="dim small">#{k.id}</span></>}
-          right={<a href={'#/users/' + k.user_id}>User {k.user_id} →</a>}>
-          <div className="kv">
-            {Object.entries(k.data || {}).map(([a, b]) => <div key={a}><span>{a.replace(/_/g, ' ')}</span><b>{String(b)}</b></div>)}
-            <div><span>Submitted</span><b>{fmtDate(k.created_at)}</b></div>
-          </div>
-          <div className="row gap wrap">{k.files.map((f) => (
-            <a key={f} href={f} target="_blank" rel="noreferrer">{f.endsWith('.pdf') ? <span className="badge">PDF</span> : <img src={f} alt="document" className="doc" />}</a>
-          ))}</div>
-          {k.status === 'pending' && <div className="row gap">
-            <Input value={note[k.id] || ''} onChange={(v) => setNote((x) => ({ ...x, [k.id]: v }))} placeholder="Note (shown to the user if rejected)" />
-            <ActBtn kind="primary" run={() => post(`/kyc/${k.id}/approve`, { note: note[k.id] || '' })} ok="Approved" onDone={reload}>Approve</ActBtn>
-            <ActBtn kind="danger" run={() => post(`/kyc/${k.id}/reject`, { note: note[k.id] || '' })} ok="Rejected" onDone={reload}>Reject</ActBtn>
-          </div>}
-          {k.note && <div className="dim small">Note: {k.note}</div>}
-        </Card>
-      ))}
+      {data?.items.map((k) => {
+        const d = k.data || {};
+        const m = d.mrz || {};
+        const f = d.fields || {};
+        return (
+          <Card key={k.id} title={<>{[m.given_names, m.surname].filter(Boolean).join(' ') || d.full_name || userName({ ...k, id: k.user_id })}
+            <span className="dim small"> #{k.id} · {(d.doc_type || '').replace(/_/g, ' ')}</span></>}
+            right={<a href={'#/users/' + k.user_id}>User {k.user_id} →</a>}>
+            <div className="row gap wrap">
+              {m.format ? <Badge tone={m.valid ? 'ok' : 'bad'}>{m.valid ? `MRZ ${m.format} valid` : 'MRZ invalid'}</Badge> : <Badge tone="warn">no MRZ</Badge>}
+              {(k.flags || []).length === 0 && <Badge tone="ok">no flags</Badge>}
+              {(k.flags || []).map((x) => <Badge key={x} tone="bad">{FLAG_TEXT[x] || x}</Badge>)}
+            </div>
+            {d.mrz ? (
+              <table className="tbl small" style={{ marginTop: 10 }}>
+                <thead><tr><th /><th>Read from MRZ</th><th>Confirmed by user</th></tr></thead>
+                <tbody>{KYC_ROWS.map(([key, label]) => {
+                  const a = m[key] || ''; const b = f[key] || '';
+                  const diff = b && a && a.replace(/\W/g, '').toUpperCase() !== b.replace(/\W/g, '').toUpperCase();
+                  return <tr key={key}><td className="dim">{label}</td><td><code>{a || '—'}</code></td><td className={diff ? 'bad' : ''}>{b || '—'}</td></tr>;
+                })}</tbody>
+              </table>
+            ) : (
+              <div className="kv">{Object.entries(d).map(([a, b]) => <div key={a}><span>{a.replace(/_/g, ' ')}</span><b>{String(b)}</b></div>)}</div>
+            )}
+            {d.mrz_lines && <pre className="mrz">{d.mrz_lines.join('\n')}</pre>}
+            <div className="kv"><div><span>Submitted</span><b>{fmtDate(k.created_at)}</b></div>
+              <div><span>Account age</span><b>{k.user_created ? fmtAgo(k.user_created) : '—'}</b></div>
+              <div><span>Read automatically</span><b>{d.capture?.mrz_auto ? 'yes (camera)' : 'no (typed)'}</b></div></div>
+            <div className="row gap wrap">{Object.entries(k.files || {}).map(([side, url]) => (
+              <a key={side} href={url} target="_blank" rel="noreferrer" className="doc-wrap"><img src={url} alt={side} className="doc" /><span>{side}</span></a>
+            ))}</div>
+            {k.status === 'pending' && <div className="row gap">
+              <Input value={note[k.id] || ''} onChange={(v) => setNote((x) => ({ ...x, [k.id]: v }))} placeholder="Note (shown to the user if rejected)" />
+              <ActBtn kind="primary" run={() => post(`/kyc/${k.id}/approve`, { note: note[k.id] || '' })} ok="Approved" onDone={reload}>Approve</ActBtn>
+              <ActBtn kind="danger" run={() => post(`/kyc/${k.id}/reject`, { note: note[k.id] || '' })} ok="Rejected" onDone={reload}>Reject</ActBtn>
+            </div>}
+            {k.note && <div className="dim small">Note: {k.note}</div>}
+          </Card>
+        );
+      })}
     </div>
   );
 }

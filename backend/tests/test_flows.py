@@ -7,6 +7,7 @@ import pytest
 from aw import admin_auth, catalog, db, deposits, gifts, keys, ledger, p2p, referral, users, withdrawals
 from aw.chains import base as chain_base
 from aw.chains import evm
+from aw.money import AppError
 from conftest import fund, set_prices
 
 
@@ -565,3 +566,45 @@ def test_gemini_assistant_uses_tools_and_admin_keys_stay_secret(api, client, mon
     monkeypatch.setitem(support.GEMINI, "post", post)
     r = a.ok("post", "/api/ai/chat", {"text": "What is my balance?"})
     assert r["reply"] == "You have 42 USDT." and "gemini-flash-lite-latest" in calls
+
+
+def test_kyc_scan_submit_review_and_private_files(api, client, monkeypatch):
+    from aw import kyc, settings
+
+    png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    a = api(830)
+    fund(830, "USDT", "5000")
+    # level-0 limit reached → the error tells the app that verification raises it
+    from aw import guard
+
+    with pytest.raises(AppError) as e:
+        guard.check_limit(users.get(830), "withdraw", Decimal("1500"))
+    assert e.value.params["kyc"] is True
+    cd = kyc.check_digit
+    l2 = "L898902C3" + cd("L898902C3") + "UTO" + "740812" + cd("740812") + "F" + "320415" + cd("320415") + "ZE184226B<<<<<" + cd("ZE184226B<<<<<")
+    l2 += cd(l2[0:10] + l2[13:20] + l2[21:43])
+    mrz = "P<UTOERIKSSON<<ANNA<MARIA<<<<<<<<<<<<<<<<<<<\n" + l2
+    assert kyc.parse(mrz)["valid"], kyc.parse(mrz)["checks"]
+    chk = a.ok("post", "/api/kyc/mrz", {"mrz": mrz})
+    assert chk["valid"] and chk["doc_number"] == "L898902C3"
+    res = a.ok("post", "/api/kyc", {"doc_type": "passport", "mrz": mrz, "files": {"front": png, "selfie": png},
+                                    "fields": {"surname": "ERIKSSON", "doc_number": "L898902C3", "birth_date": "1974-08-12"}})
+    assert res["status"] == "pending" and res["mrz_valid"]
+    row = db.one("SELECT * FROM kyc_requests WHERE id=?", (res["id"],))
+    assert row["data"].startswith("enc:") and "ERIKSSON" not in row["data"] and db.jl(row["flags"], []) == []
+    # documents are never public
+    front = db.jl(row["files"])["front"]
+    assert client.get("/api/files/" + front).status_code == 404
+    h = {"Authorization": "Bearer " + admin_auth.session_for(999)["token"]}
+    item = client.get("/api/admin/kyc", headers=h).json()["items"][0]
+    assert item["data"]["mrz"]["surname"] == "ERIKSSON" and client.get(item["files"]["front"]).status_code == 200
+    assert client.get(item["files"]["front"].replace("&s=", "&s=0")).status_code == 404
+    assert client.post(f"/api/admin/kyc/{res['id']}/approve", json={}, headers=h).status_code == 200
+    st = a.ok("get", "/api/kyc")
+    assert st["level"] == 2 and st["identity"]["country"] == "UTO" and st["identity"]["name"].startswith("ANNA M")
+    # the same passport on another account is flagged; auto-approve never skips a flagged request
+    settings.put("kyc", {"auto_approve": True})
+    b = api(831)
+    res2 = b.ok("post", "/api/kyc", {"doc_type": "passport", "mrz": mrz, "files": {"front": png, "selfie": png}, "fields": {}})
+    assert res2["status"] == "pending"
+    assert "document_used_by_another_account" in db.jl(db.one("SELECT flags FROM kyc_requests WHERE id=?", (res2["id"],))["flags"])

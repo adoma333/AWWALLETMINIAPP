@@ -44,6 +44,16 @@ DEFAULTS: dict = {
         "require_phone_for_p2p": True,
         "min_account_age_hours_withdraw": 0,
     },
+    # Identity verification — only asked for when a user reaches the limits of levels 0/1 above
+    "kyc": {
+        "enabled": True,
+        "doc_types": ["passport", "id_card", "residence_permit", "driving_license"],
+        "require_selfie": True,
+        "require_back": True,             # ID cards: the back side carries the MRZ
+        "auto_approve": False,            # approve automatically when the MRZ is valid and nothing is flagged
+        "min_age": 18,
+        "blocked_countries": [],          # ISO 3166 alpha-3 codes as printed in the MRZ, e.g. ["PRK"]
+    },
     "security": {
         "pin_required": ["withdraw", "transfer", "gift", "p2p_release", "address_book", "export"],
         "transfer_pin_threshold_usd": 0,   # 0 = always ask for PIN on internal transfers

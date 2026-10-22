@@ -12,6 +12,7 @@ import { applyBrand } from './theme';
 import { hideSplash, splashProgress } from './splash';
 import { applyPrices, streamPrices } from './live';
 import TopBar, { PageLoading } from './components/TopBar';
+import { Btn, Sheet } from './components/ui';
 import { backButton, inTelegram, startParam, tg } from './telegram';
 import Home from './pages/Home';
 import Outside from './pages/Outside';
@@ -136,6 +137,14 @@ export default function App() {
     return () => { document.removeEventListener('visibilitychange', onVis); clearInterval(id); stop(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // a limit was reached that identity verification raises → offer it once per session screen
+  const [kycOffer, setKycOffer] = useState(false);
+  useEffect(() => {
+    const on = () => setKycOffer(true);
+    window.addEventListener('aw:kyc-offer', on);
+    return () => window.removeEventListener('aw:kyc-offer', on);
+  }, []);
+
   // Telegram back button on every non-root screen
   useEffect(() => {
     const isRoot = ROOTS.includes(path);
@@ -184,6 +193,15 @@ export default function App() {
             </Suspense>
           </div>
           {showNav && <BottomNav path={path} />}
+          <Sheet open={kycOffer && path !== '/settings/kyc'} onClose={() => setKycOffer(false)}>
+            <div className="kyc-hero">
+              <span className="kyc-hero-ic"><Icon name="idCard" size={32} /></span>
+              <h2>{t('kyc_offer_title')}</h2>
+              <p className="dim">{t('kyc_offer_sub')}</p>
+            </div>
+            <Btn className="wide" onClick={() => { setKycOffer(false); go('/settings/kyc'); }}>{t('kyc_start')}</Btn>
+            <Btn kind="ghost" className="wide" onClick={() => setKycOffer(false)}>{t('not_now')}</Btn>
+          </Sheet>
         </ConfirmProvider>
       </AppCtx.Provider>
     </I18n.Provider>

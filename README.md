@@ -99,6 +99,15 @@ A database backup runs every day at 03:17 and is kept for 14 days. **To restore 
 - Escalates to a human ticket.
 - Falls back to built-in FAQ mode without an API key.
 
+**Identity verification (KYC)**
+- Asked for only when a user reaches the limits of their level: the app then offers it in one tap.
+- The camera finds the passport or ID card and captures it automatically once the image is sharp and still.
+- The MRZ (the two or three code lines) is read on the phone, using on-device OCR served from your own server.
+- The form fills itself. The server re-checks every ICAO 9303 check digit, the expiry date and the minimum age, and whether the same document is already used by another account.
+- A selfie is added, and the request goes to the admin review queue.
+- Data is stored encrypted. Document images are never public: admins open them through 15-minute signed links.
+- Optional auto-approval applies only when nothing is flagged.
+
 **Security**
 - Telegram `initData` HMAC verification.
 - 6-digit PIN plus biometrics, with lockouts.

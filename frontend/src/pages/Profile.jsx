@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { api, fileToDataUrl } from '../api';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
+import { api } from '../api';
 import { useConfirm, withConfirm } from '../components/Confirm';
 import Icon, { CoinIcon, NetIcon } from '../components/Icon';
 import { useToast } from '../components/Toast';
@@ -11,11 +11,13 @@ import { useApp } from '../store';
 import { bioAvailable, bioClear, bioEnable, haptic, openLink, openTelegramLink } from '../telegram';
 import { getThemePref, setThemePref } from '../theme';
 
+const KycPage = lazy(() => import('./Kyc'));
+
 export default function Profile({ path }) {
   if (path === '/settings/security') return <Security />;
   if (path === '/settings/addressbook') return <AddressBook />;
   if (path === '/settings/limits') return <Limits />;
-  if (path === '/settings/kyc') return <Kyc />;
+  if (path === '/settings/kyc') return <Suspense fallback={null}><KycPage /></Suspense>;
   if (path === '/fees') return <Fees />;
   if (path === '/notifications') return <Notifications />;
   return <Home />;
@@ -253,34 +255,6 @@ function Fees() {
             <span dir="ltr">{Number(w.fee) ? `${amt(w.fee)}` : t('free')}{Number(w.pct) ? ` + ${w.pct}%` : ''}</span><small className="dim">min {w.min}</small></div>
         ))}
       </div>
-    </Page>
-  );
-}
-
-function Kyc() {
-  const { t } = useI18n();
-  const { me } = useApp();
-  const toast = useToast();
-  const [st, setSt] = useState(null);
-  const [data, setData] = useState({ full_name: '', country: '', doc_type: 'passport', doc_number: '' });
-  const [files, setFiles] = useState([]);
-  const [busy, setBusy] = useState(false);
-  useEffect(() => { api.get('/api/kyc').then(setSt).catch(() => {}); }, []);
-  const submit = async () => {
-    setBusy(true);
-    try { await api.post('/api/kyc', { data, files }); setSt({ request: { status: 'pending' } }); } catch (e) { toast(errText(t, e), 'error'); } finally { setBusy(false); }
-  };
-  if (me.kyc_level >= 2) return <Page title={t('kyc_title')}><Empty icon="shield" title={t('kyc_level_2')} /></Page>;
-  if (st?.request?.status === 'pending') return <Page title={t('kyc_title')}><Empty icon="clock" title={t('kyc_pending')} /></Page>;
-  return (
-    <Page title={t('kyc_title')}>
-      <Field label={t('kyc_full_name')}><input value={data.full_name} onChange={(e) => setData({ ...data, full_name: e.target.value })} /></Field>
-      <Field label={t('kyc_country')}><input value={data.country} onChange={(e) => setData({ ...data, country: e.target.value })} /></Field>
-      <Field label={t('kyc_doc_type')}><select value={data.doc_type} onChange={(e) => setData({ ...data, doc_type: e.target.value })}>
-        <option value="passport">{t('doc_passport')}</option><option value="id">{t('doc_id')}</option><option value="license">{t('doc_license')}</option></select></Field>
-      <Field label={t('kyc_doc_number')}><input value={data.doc_number} onChange={(e) => setData({ ...data, doc_number: e.target.value })} /></Field>
-      <Field label={t('kyc_upload')}><input type="file" accept="image/*,application/pdf" multiple onChange={async (e) => setFiles(await Promise.all([...e.target.files].slice(0, 4).map((f) => fileToDataUrl(f))))} /></Field>
-      <Btn className="wide" loading={busy} disabled={!files.length || !data.full_name} onClick={submit}>{t('submit')}</Btn>
     </Page>
   );
 }

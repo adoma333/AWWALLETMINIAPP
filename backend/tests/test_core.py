@@ -121,3 +121,23 @@ def test_catalog_seeded():
     assert catalog.by_contract("bsc", "0x55d398326f99059ff775485246999027b3197955")["asset"] == "USDT"
     assert catalog.by_contract("tron", None)["asset"] == "TRX"
     assert catalog.family("arbitrum") == "evm"
+
+
+# ───────────── identity documents (ICAO 9303 specimens) ─────────────
+TD3 = "P<UTOERIKSSON<<ANNA<MARIA<<<<<<<<<<<<<<<<<<<\nL898902C36UTO7408122F1204159ZE184226B<<<<<10"
+TD1 = "I<UTOD231458907<<<<<<<<<<<<<<<\n7408122F1204159UTO<<<<<<<<<<<6\nERIKSSON<<ANNA<MARIA<<<<<<<<<<"
+
+
+def test_mrz_passport_and_id_card_parse_with_check_digits():
+    from aw import kyc
+
+    p = kyc.parse(TD3)
+    assert p["valid"] and p["format"] == "TD3" and p["doc_number"] == "L898902C3" and p["surname"] == "ERIKSSON"
+    assert p["given_names"] == "ANNA MARIA" and p["birth_date"] == "1974-08-12" and p["expiry_date"] == "2012-04-15" and p["sex"] == "F"
+    c = kyc.parse(TD1)
+    assert c["valid"] and c["format"] == "TD1" and c["doc_number"] == "D23145890" and c["nationality"] == "UTO"
+    # typical OCR confusions in numeric fields are repaired; a wrong digit is caught
+    assert kyc.parse(TD3.replace("7408122F", "74O8122F"))["valid"]
+    bad = kyc.parse(TD3.replace("L898902C36", "L898902C46"))
+    assert not bad["valid"] and not bad["checks"]["number"]
+    assert kyc.parse("random text")["format"] is None
