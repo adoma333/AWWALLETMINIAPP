@@ -489,6 +489,21 @@ SCHEMA = [
     ALTER TABLE kyc_requests ADD COLUMN flags TEXT;
     CREATE INDEX IF NOT EXISTS ix_kyc_doc ON kyc_requests(doc_hash);
     """,
+    """
+    CREATE TABLE IF NOT EXISTS app_sessions (
+        token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL, device TEXT, ip TEXT, revoked INTEGER DEFAULT 0,
+        created_at INTEGER, last_seen INTEGER, expires_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS ix_app_sessions_user ON app_sessions(user_id);
+    CREATE TABLE IF NOT EXISTS login_codes (
+        code_hash TEXT PRIMARY KEY, kind TEXT, device TEXT, ip TEXT, status TEXT, user_id INTEGER, created_at INTEGER, expires_at INTEGER
+    );
+    CREATE TABLE IF NOT EXISTS identities (
+        provider TEXT NOT NULL, subject TEXT NOT NULL, user_id INTEGER NOT NULL, email TEXT, created_at INTEGER,
+        PRIMARY KEY (provider, subject)
+    );
+    CREATE INDEX IF NOT EXISTS ix_identities_user ON identities(user_id);
+    """,
 ]
 
 

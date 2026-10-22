@@ -44,6 +44,12 @@ DEFAULTS: dict = {
         "require_phone_for_p2p": True,
         "min_account_age_hours_withdraw": 0,
     },
+    # Sign-in outside Telegram (web / Android / desktop apps)
+    "auth": {
+        "web_login": True,               # allow the standalone apps to sign in (Telegram approval or Google)
+        "google_client_id": "",          # OAuth client ID (Web application) from console.cloud.google.com — enables Google sign-in
+        "google_signup": True,           # a Google account without a linked wallet may create a new one
+    },
     # Identity verification — only asked for when a user reaches the limits of levels 0/1 above
     "kyc": {
         "enabled": True,

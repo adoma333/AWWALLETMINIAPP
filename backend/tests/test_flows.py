@@ -608,3 +608,58 @@ def test_kyc_scan_submit_review_and_private_files(api, client, monkeypatch):
     res2 = b.ok("post", "/api/kyc", {"doc_type": "passport", "mrz": mrz, "files": {"front": png, "selfie": png}, "fields": {}})
     assert res2["status"] == "pending"
     assert "document_used_by_another_account" in db.jl(db.one("SELECT flags FROM kyc_requests WHERE id=?", (res2["id"],))["flags"])
+
+
+def test_sign_in_outside_telegram_with_bot_approval_and_google(api, client, monkeypatch):
+    from aw import appauth, settings
+
+    a = api(840)
+    fund(840, "USDT", "7")
+    hook = {"X-Telegram-Bot-Api-Secret-Token": "whsecret"}
+    st = client.post("/api/login/start", json={"kind": "telegram", "device": "Pixel 9 · Android app"}).json()
+    assert st["url"].endswith("start=login_" + st["code"])
+    assert client.post("/api/login/poll", json={"code": st["code"]}).json()["status"] == "pending"
+    upd = {"message": {"chat": {"type": "private", "id": 840}, "from": {"id": 840, "first_name": "Ama"}, "text": "/start login_" + st["code"]}}
+    assert client.post("/api/tg/webhook", json=upd, headers=hook).status_code == 200
+    prompt = db.one("SELECT payload FROM outbox WHERE method='sendMessage' ORDER BY id DESC LIMIT 1")["payload"]
+    assert "Pixel 9" in prompt and "la:" + st["code"] in prompt
+    cb = {"callback_query": {"id": "q1", "from": {"id": 840}, "data": "la:" + st["code"], "message": {"message_id": 5}}}
+    client.post("/api/tg/webhook", json=cb, headers=hook)
+    got = client.post("/api/login/poll", json={"code": st["code"]}).json()
+    assert got["status"] == "approved" and got["token"].startswith("zs_")
+    assert client.post("/api/login/poll", json={"code": st["code"]}).json()["status"] == "used"  # one session per code
+    bearer = {"Authorization": "Bearer " + got["token"]}
+    assert client.get("/api/me", headers=bearer).json()["id"] == 840
+    assert client.get("/api/wallet", headers=bearer).status_code == 200
+    assert client.get("/api/me", headers={"Authorization": "Bearer zs_forged"}).status_code == 401
+    # a denied code never yields a session
+    st2 = client.post("/api/login/start", json={"kind": "telegram"}).json()
+    client.post("/api/tg/webhook", json={"callback_query": {"id": "q2", "from": {"id": 840}, "data": "ld:" + st2["code"]}}, headers=hook)
+    assert client.post("/api/login/poll", json={"code": st2["code"]}).json()["status"] == "denied"
+    # sessions can be listed and revoked
+    sess = client.get("/api/me/sessions", headers=bearer).json()
+    assert sess["items"][0]["device"].startswith("Pixel 9")
+    client.post("/api/logout", headers=bearer)
+    assert client.get("/api/me", headers=bearer).status_code == 401
+
+    # Google: off until a client id is set; then link to the Telegram account and sign in with it
+    claims = {"aud": "cid.apps.googleusercontent.com", "iss": "accounts.google.com", "sub": "g-123", "email": "ama@example.com",
+              "email_verified": "true", "exp": str(db.now() + 600), "given_name": "Ama"}
+    monkeypatch.setitem(appauth.HTTP, "get", lambda url, params: dict(claims))
+    assert client.post("/api/login/google", json={"credential": "x"}).status_code == 400
+    settings.put("auth", {"google_client_id": "cid.apps.googleusercontent.com"})
+    assert a.ok("post", "/api/me/link/google", {"credential": "x"})["email"] == "ama@example.com"
+    g = client.post("/api/login/google", json={"credential": "x"}).json()
+    assert not g["created"] and client.get("/api/me", headers={"Authorization": "Bearer " + g["token"]}).json()["id"] == 840
+    # a token for another app (wrong audience) is refused; a new Google account gets a fresh wallet
+    claims["aud"] = "someone-else"
+    assert client.post("/api/login/google", json={"credential": "x"}).status_code == 400
+    claims.update(aud="cid.apps.googleusercontent.com", sub="g-999")
+    n = client.post("/api/login/google", json={"credential": "x"}).json()
+    me = client.get("/api/me", headers={"Authorization": "Bearer " + n["token"]}).json()
+    assert n["created"] and me["id"] > 10 ** 13
+    # device hand-off: an app's code approved by signing in with Google in the browser
+    dev = client.post("/api/login/start", json={"kind": "device", "device": "Windows app"}).json()
+    assert client.get("/api/login/device", params={"code": dev["code"]}).json()["device"] == "Windows app"
+    client.post("/api/login/google", json={"credential": "x", "approve": dev["code"]})
+    assert client.post("/api/login/poll", json={"code": dev["code"]}).json()["status"] == "approved"

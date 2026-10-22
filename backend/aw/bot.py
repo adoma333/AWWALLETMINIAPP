@@ -24,6 +24,8 @@ def handle(update: dict):
     try:
         if "message" in update:
             _message(update["message"])
+        elif "callback_query" in update:
+            _callback(update["callback_query"])
         elif "my_chat_member" in update:
             m = update["my_chat_member"]
             if m.get("chat", {}).get("type") == "private":
@@ -47,6 +49,9 @@ def _message(msg: dict):
         user, _created = users.upsert_from_telegram(frm, start_param=payload if payload.startswith("ref_") else None)
         db.x("UPDATE users SET dm_ok=1 WHERE id=?", (uid,))
         lang = user.get("lang") or "en"
+        if payload.startswith("login_"):
+            _login_prompt(uid, lang, payload[6:])
+            return
         path = ""
         if payload.startswith("g_"):
             path = f"/gift/{payload[2:]}"
@@ -87,6 +92,43 @@ def _message(msg: dict):
                                                                  [{"text": "📱 Telegram", "web_app": {"url": f"{config.WEBAPP_URL}/admin/"}}]]})
         return
     _send(uid, t(lang, "help"), _open_kb(lang))
+
+
+def _login_prompt(uid: int, lang: str, code: str):
+    from . import appauth
+
+    r = appauth.pending(code)
+    if not r:
+        _send(uid, t(lang, "login_expired"))
+        return
+    _send(uid, t(lang, "login_confirm", device=_esc(r["device"] or "?")),
+          {"inline_keyboard": [[{"text": "✅ " + t(lang, "login_yes"), "callback_data": f"la:{code}"},
+                                {"text": "✖️ " + t(lang, "login_no"), "callback_data": f"ld:{code}"}]]})
+
+
+def _callback(q: dict):
+    from . import appauth
+
+    uid = (q.get("from") or {}).get("id")
+    data = q.get("data") or ""
+    user = users.get(uid) if uid else None
+    lang = (user or {}).get("lang") or "en"
+    msg = q.get("message") or {}
+    answer = ""
+    if data.startswith(("la:", "ld:")) and user:
+        code = data[3:]
+        if data.startswith("la:"):
+            try:
+                appauth.approve(code, uid)
+                answer = t(lang, "login_ok")
+            except AppError:
+                answer = t(lang, "login_expired")
+        else:
+            appauth.deny(code)
+            answer = t(lang, "login_denied")
+        if msg.get("message_id"):
+            tg.queue("editMessageText", {"chat_id": uid, "message_id": msg["message_id"], "text": answer, "parse_mode": "HTML"}, priority=1)
+    tg.queue("answerCallbackQuery", {"callback_query_id": q.get("id"), "text": answer[:180]}, priority=1)
 
 
 def ask_phone(uid: int, lang: str):
@@ -131,7 +173,7 @@ def setup_webhook() -> dict:
     if not config.BOT_TOKEN or not config.WEBAPP_URL:
         return {"ok": False}
     res = tg.call("setWebhook", {"url": f"{config.WEBAPP_URL}/api/tg/webhook", "secret_token": config.WEBHOOK_SECRET,
-                                 "allowed_updates": ["message", "my_chat_member"], "drop_pending_updates": False})
+                                 "allowed_updates": ["message", "my_chat_member", "callback_query"], "drop_pending_updates": False})
     tg.call("setChatMenuButton", {"menu_button": {"type": "web_app", "text": "Zohra Wallet", "web_app": {"url": config.WEBAPP_URL}}})
     for lang in ["en", "ar", "ru", "tr", "fa", "fr", "es", "pt", "de", "id", "hi", "zh", "uk", "uz"]:
         cmds = [{"command": "start", "description": t(lang, "open")}, {"command": "phone", "description": t(lang, "phone_btn").replace("📱 ", "")}]

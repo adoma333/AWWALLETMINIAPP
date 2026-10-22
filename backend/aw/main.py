@@ -9,7 +9,7 @@ from decimal import Decimal
 from fastapi import Body, Depends, FastAPI, Header, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
-from . import (admin_api, admin_auth, bot, catalog, coinmeta, config, db, deposits, fees, files, gifts, guard, kyc, ledger, p2p, prices, referral,
+from . import (admin_api, admin_auth, appauth, bot, catalog, coinmeta, config, db, deposits, fees, files, gifts, guard, kyc, ledger, p2p, prices, referral,
                rewards, settings, support, swap, transfers, ton_connect, users, withdrawals)
 from .money import AppError, D, s
 from .security import limiter, receipt_sig, verify_init_data
@@ -59,7 +59,15 @@ def client_ip(request: Request) -> str:
 
 
 # ───────────────────────── auth ─────────────────────────
-def current_user(request: Request, x_init_data: str = Header(default="")) -> dict:
+def current_user(request: Request, x_init_data: str = Header(default=""), authorization: str = Header(default="")) -> dict:
+    if authorization.startswith("Bearer zs_") and not x_init_data:  # standalone apps (web / Android / desktop)
+        u = appauth.user_for(authorization[7:].strip())
+        if not u:
+            raise AppError("session_expired", 401)
+        limiter.check(f"u:{u['id']}", int(settings.get("security").get("rate_limit_per_minute", 90)))
+        if u["status"] == "banned":
+            raise AppError("account_banned", 403)
+        return u
     data = verify_init_data(x_init_data)
     tgu = data["user"]
     limiter.check(f"u:{tgu['id']}", int(settings.get("security").get("rate_limit_per_minute", 90)))
@@ -101,6 +109,7 @@ def public_config():
         "branding": br, "icons": icons_map(), "ai_name": settings.get("ai").get("name", "Zohra AI"),
         "networks": [_net_out(n) for n in db.q("SELECT * FROM networks WHERE enabled=1 ORDER BY sort")],
         "tonconnect_manifest": f"{config.WEBAPP_URL}/tonconnect-manifest.json",
+        "auth": {"web": bool(settings.get("auth").get("web_login", True)), "google_client_id": settings.get("auth").get("google_client_id") or None},
     }
 
 
@@ -175,6 +184,71 @@ def auth(request: Request, x_init_data: str = Header(default="")):
     if u["status"] == "banned":
         raise AppError("account_banned", 403)
     return {"me": _me(u), "created": created, "start_param": data.get("start_param")}
+
+
+# ───────────────────────── sign-in outside Telegram ─────────────────────────
+def _web_login_on():
+    if not settings.get("auth").get("web_login", True):
+        raise AppError("feature_disabled")
+
+
+@app.post("/api/login/start")
+def login_start(request: Request, body: dict = Body(default={})):
+    _web_login_on()
+    limiter.check(f"ip:{client_ip(request)}:login", 20)
+    return appauth.start(body.get("kind", "telegram"), str(body.get("device") or request.headers.get("user-agent", ""))[:80], client_ip(request))
+
+
+@app.post("/api/login/poll")
+def login_poll(request: Request, body: dict = Body(...)):
+    limiter.check(f"ip:{client_ip(request)}:poll", 120)
+    return appauth.poll(str(body.get("code") or ""), client_ip(request))
+
+
+@app.get("/api/login/device")
+def login_device_info(code: str = Query("")):
+    r = appauth.pending(code)
+    return {"pending": bool(r), "device": r["device"] if r else None}
+
+
+@app.post("/api/login/approve")
+def login_approve(body: dict = Body(...), u: dict = Depends(current_user)):
+    """A signed-in user (Mini App or browser) approves another device's sign-in code."""
+    return appauth.approve(str(body.get("code") or ""), u["id"])
+
+
+@app.post("/api/login/google")
+def login_google(request: Request, body: dict = Body(...)):
+    _web_login_on()
+    limiter.check(f"ip:{client_ip(request)}:google", 20)
+    res = appauth.google_login(str(body.get("credential") or ""), str(body.get("device") or request.headers.get("user-agent", ""))[:80],
+                               client_ip(request))
+    if body.get("approve"):  # browser hand-off for an app: approve its code with the new account
+        appauth.approve(str(body["approve"]), appauth.user_for(res["token"])["id"])
+    return res
+
+
+@app.post("/api/me/link/google")
+def link_google(body: dict = Body(...), u: dict = Depends(current_user)):
+    return appauth.link_google(u, str(body.get("credential") or ""))
+
+
+@app.get("/api/me/sessions")
+def my_sessions(u: dict = Depends(current_user)):
+    return {"items": appauth.list_sessions(u["id"]), "identities": appauth.identities(u["id"]), "current": u.get("_session")}
+
+
+@app.post("/api/me/sessions/{sid}/revoke")
+def revoke_session(sid: str, u: dict = Depends(current_user)):
+    appauth.revoke_id(u["id"], sid)
+    return {"ok": True}
+
+
+@app.post("/api/logout")
+def logout(authorization: str = Header(default="")):
+    if authorization.startswith("Bearer zs_"):
+        appauth.revoke(authorization[7:].strip())
+    return {"ok": True}
 
 
 @app.get("/api/me")
