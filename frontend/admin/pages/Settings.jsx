@@ -11,6 +11,9 @@ const SECTIONS = [
   ['transfers', 'Transfers', 'Internal transfers between users (free by default).'],
   ['gifts', 'Gifts', 'Gift links and group red packets.'],
   ['p2p', 'P2P', 'Fiat currencies, coins, maker/taker fees, payment windows, merchant criteria, cancellation bans.'],
+  ['earn', 'Earn (savings)', 'Savings products users can subscribe to: coin, APY, flexible or locked days, minimum and per-user maximum. Interest is paid daily and booked as a cost.'],
+  ['autoinvest', 'Auto-invest', 'Recurring buys: minimum amount per run and how many plans a user can have.'],
+  ['requests', 'Z Pay requests', 'Payment requests and split bills: how long a request stays open and the most people in one split.'],
   ['referral', 'Referral', 'Commission shares, tiers, duration and the welcome bonus for invited friends.'],
   ['rewards', 'Rewards', 'Daily check-in, first-transaction bonus, welcome voucher and missions.'],
   ['ai', 'Zohra AI assistant', 'Assistant name, effort, daily limit, extra instructions, known issues and suggestion chips.'],
@@ -21,6 +24,10 @@ const SECTIONS = [
 
 // short explanations shown next to well-known keys
 const HELP = {
+  products: 'List of products. Each: id, asset, apy (yearly %), term_days (0 = flexible), min, max_user, enabled, hot (shows a Popular badge).',
+  max_plans: 'Most auto-invest plans one user can keep.',
+  expire_days: 'Requests close automatically after this many days.',
+  max_split: 'Most people in one split bill.',
   maintenance: 'Shows a maintenance screen to all users (admins still get in).',
   spread_pct: 'Your margin built into every swap rate, in %. Users see one clean rate.',
   fee_pct: 'Optional fee on top, shown separately.',
