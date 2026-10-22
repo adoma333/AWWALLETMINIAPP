@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 _TMP = tempfile.mkdtemp(prefix="aw-test-")
 os.environ.update({
-    "AW_TESTING": "1", "AW_DATA_DIR": _TMP, "AW_DB_PATH": f"{_TMP}/test.db", "AW_UPLOAD_DIR": f"{_TMP}/uploads",
+    "AW_TESTING": "1", "AW_DATA_DIR": _TMP, "AW_DB_PATH": f"{_TMP}/test.db", "AW_UPLOAD_DIR": f"{_TMP}/uploads", "AW_RELEASES_DIR": f"{_TMP}/releases",
     "AW_KEY_FILE": f"{_TMP}/keys/master.enc", "BOT_TOKEN": "123456:TEST", "BOT_USERNAME": "aw_test_bot",
     "WEBAPP_URL": "https://wallet.test", "WEBHOOK_SECRET": "whsecret", "SESSION_SECRET": "sess", "SECRETS_KEY": "secret-key",
     "ADMIN_IDS": "999", "ANTHROPIC_API_KEY": "",

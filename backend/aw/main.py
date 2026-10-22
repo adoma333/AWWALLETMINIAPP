@@ -9,7 +9,7 @@ from decimal import Decimal
 from fastapi import Body, Depends, FastAPI, Header, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
-from . import (admin_api, admin_auth, appauth, bot, catalog, coinmeta, config, db, deposits, fees, files, gifts, guard, kyc, ledger, p2p, prices, referral,
+from . import (admin_api, admin_auth, appauth, bot, catalog, coinmeta, config, db, deposits, fees, files, gifts, guard, kyc, ledger, p2p, prices, referral, releases,
                rewards, settings, support, swap, transfers, ton_connect, users, withdrawals)
 from .money import AppError, D, s
 from .security import limiter, receipt_sig, verify_init_data
@@ -184,6 +184,38 @@ def auth(request: Request, x_init_data: str = Header(default="")):
     if u["status"] == "banned":
         raise AppError("account_banned", 403)
     return {"me": _me(u), "created": created, "start_param": data.get("start_param")}
+
+
+# ───────────────────────── app releases (built by GitHub Actions) ─────────────────────────
+@app.get("/api/releases/latest")
+def releases_latest():
+    m = releases.latest()
+    return {"version": m.get("version"), "notes": m.get("notes"), "files": m.get("files") or {}, "published_at": m.get("published_at")}
+
+
+@app.post("/api/releases/upload/{name}")
+async def releases_upload(name: str, request: Request, x_release_key: str = Header(default="")):
+    releases.check_key(x_release_key)
+    return await releases.upload(name, request.stream())
+
+
+@app.post("/api/releases/publish")
+def releases_publish(body: dict = Body(...), x_release_key: str = Header(default="")):
+    releases.check_key(x_release_key)
+    return releases.publish(str(body.get("version") or ""), str(body.get("notes") or ""))
+
+
+@app.get("/api/releases/keystore")
+def releases_keystore(x_release_key: str = Header(default="")):
+    releases.check_key(x_release_key)
+    return releases.keystore() or {}
+
+
+@app.post("/api/releases/keystore")
+def releases_keystore_store(body: dict = Body(...), x_release_key: str = Header(default="")):
+    releases.check_key(x_release_key)
+    releases.store_keystore(str(body.get("b64") or ""), str(body.get("password") or ""))
+    return {"ok": True}
 
 
 # ───────────────────────── sign-in outside Telegram ─────────────────────────

@@ -130,7 +130,7 @@ else
   say "Downloading Zohra Wallet ($BRANCH)…"
   git clone -q --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
 fi
-mkdir -p "$APP_DIR/data/keys" "$APP_DIR/data/uploads" "$APP_DIR/data/backups"
+mkdir -p "$APP_DIR/data/keys" "$APP_DIR/data/uploads" "$APP_DIR/data/backups" "$APP_DIR/releases"
 git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
 
 say "Installing Python 3.12 for Zohra Wallet (separate from the system Python) and dependencies…"
@@ -182,6 +182,7 @@ grep -q "^AW_PORT=" "$ENV_FILE" || echo "AW_PORT=$AW_PORT" >> "$ENV_FILE"
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 chmod 600 "$ENV_FILE"
 chmod 700 "$APP_DIR/data" "$APP_DIR/data/keys"
+chmod 755 "$APP_DIR/releases"
 
 run_cli() { sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR/backend' && '$APP_DIR/.venv/bin/python' -m aw.cli $*"; }
 run_cli seed-catalog >/dev/null

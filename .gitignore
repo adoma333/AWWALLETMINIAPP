@@ -16,3 +16,4 @@ __pycache__/
 .ruff_cache/
 .python/
 frontend/public/ocr/
+/releases/

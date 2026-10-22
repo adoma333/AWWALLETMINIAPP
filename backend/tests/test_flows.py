@@ -663,3 +663,24 @@ def test_sign_in_outside_telegram_with_bot_approval_and_google(api, client, monk
     assert client.get("/api/login/device", params={"code": dev["code"]}).json()["device"] == "Windows app"
     client.post("/api/login/google", json={"credential": "x", "approve": dev["code"]})
     assert client.post("/api/login/poll", json={"code": dev["code"]}).json()["status"] == "approved"
+
+
+def test_app_releases_upload_publish_and_signing_key(client):
+    from aw import releases
+
+    key = {"X-Release-Key": releases.release_key()}
+    assert client.post("/api/releases/upload/zohra-wallet.apk", content=b"PK\x03\x04apk", headers={"X-Release-Key": "zr_wrong"}).status_code == 401
+    assert client.post("/api/releases/upload/evil.sh", content=b"x", headers=key).status_code == 400
+    r = client.post("/api/releases/upload/zohra-wallet.apk", content=b"PK\x03\x04" + b"a" * 1000, headers=key).json()
+    assert r["size"] == 1004
+    m = client.post("/api/releases/publish", json={"version": "1.2.3", "notes": "First"}, headers=key).json()
+    assert m["files"]["android"]["url"] == "/dl/zohra-wallet.apk?v=1.2.3"
+    pub = client.get("/api/releases/latest").json()
+    assert pub["version"] == "1.2.3" and "windows" not in pub["files"]
+    assert client.get("/api/releases/keystore", headers=key).json() == {}
+    ks = {"b64": "A" * 200, "password": "p" * 24}
+    assert client.post("/api/releases/keystore", json=ks, headers=key).status_code == 200
+    assert client.get("/api/releases/keystore", headers=key).json()["password"] == "p" * 24
+    assert client.post("/api/releases/keystore", json=ks, headers=key).status_code == 400  # never replaced
+    h = {"Authorization": "Bearer " + admin_auth.session_for(999)["token"]}
+    assert client.get("/api/admin/releases", headers=h).json()["release_key"] == releases.release_key()

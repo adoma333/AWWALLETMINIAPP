@@ -20,7 +20,7 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 900,
     target: 'es2019',
-    // the admin panel is a second page of the same build → served at /admin/
-    rollupOptions: { input: { main: resolve(__dirname, 'index.html'), admin: resolve(__dirname, 'admin/index.html') } },
+    // the admin panel (/admin/) and the download page (/get/) are extra pages of the same build
+    rollupOptions: { input: { main: resolve(__dirname, 'index.html'), admin: resolve(__dirname, 'admin/index.html'), get: resolve(__dirname, 'get/index.html') } },
   },
 });

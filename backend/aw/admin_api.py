@@ -338,6 +338,17 @@ def _abi_string(hexdata: str) -> str:
     return raw.rstrip(b"\0").decode("utf-8", "replace")  # old tokens return bytes32
 
 
+@router.get("/releases")
+def admin_releases(authorization: str = Header(default="")):
+    """Everything the owner needs to connect GitHub Actions builds to this server."""
+    from . import releases
+
+    a = _admin(authorization, "settings")
+    owner = a.get("role") == "owner"
+    return {"latest": releases.latest(), "server_url": config.WEBAPP_URL, "release_key": releases.release_key() if owner else None,
+            "has_keystore": bool(releases.keystore()), "download_page": f"{config.WEBAPP_URL}/get/"}
+
+
 @router.post("/coins/sync")
 def sync_coins(request: Request, authorization: str = Header(default="")):
     """Fetch official names, logos and market data now (the worker also does this daily)."""
