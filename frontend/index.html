@@ -19,20 +19,63 @@
     <meta property="og:image" content="/og.png" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-      /* first paint — shown before any JavaScript runs */
+      /* first paint — before any JavaScript: the mark assembles itself, then breathes while the session is verified */
       html, body { margin: 0; background: #000; }
-      .splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; z-index: 999; background: #000; transition: opacity .25s; }
-      .splash svg { width: 76px; height: 76px; }
-      .splash .bar { width: 120px; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .1); overflow: hidden; }
-      .splash .bar i { display: block; height: 100%; width: var(--p, 8%); border-radius: 3px; background: linear-gradient(90deg, #FF8A00, #FF5A00); transition: width .35s ease-out; }
+      .splash { position: fixed; inset: 0; z-index: 999; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-family: 'Chakra Petch', system-ui, -apple-system, 'Segoe UI', sans-serif; color: #F5EFE8; transition: opacity .35s ease; overflow: hidden; }
+      .splash::before { content: ''; position: absolute; inset: 0; background: radial-gradient(60% 40% at 50% 42%, rgba(255, 100, 0, .3), transparent 70%); animation: sglow 2.4s ease-in-out infinite; }
+      .splash .mark { position: relative; width: 104px; height: 104px; filter: drop-shadow(0 18px 40px rgba(255, 90, 0, .55)); animation: sbreathe 2.4s ease-in-out 1.1s infinite; }
+      .splash .sq { transform-origin: 32px 32px; animation: spop .55s cubic-bezier(.2, 1.5, .4, 1) both; }
+      .splash .b1 { animation: sl .5s cubic-bezier(.2, .9, .3, 1) .25s both; } .splash .b2 { animation: sr .5s cubic-bezier(.2, .9, .3, 1) .35s both; }
+      .splash .pt { transform-origin: 18px 45px; animation: sbloom .6s cubic-bezier(.2, 1.4, .4, 1) .55s both; }
+      .splash .word { margin-top: 22px; display: flex; align-items: baseline; gap: 9px; animation: sup .5s ease-out .7s both; }
+      .splash .word b { font-weight: 700; font-size: 30px; letter-spacing: .08em; } .splash .word span { font-weight: 600; font-size: 16.5px; letter-spacing: .32em; color: #FF8A00; }
+      .splash .tag { margin-top: 10px; font: 400 14px Inter, system-ui, sans-serif; color: #8C8378; animation: sup .5s ease-out .85s both; }
+      .splash .foot { position: absolute; left: 60px; right: 60px; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column;
+        align-items: center; gap: 12px; animation: sup .4s ease-out 1s both; }
+      .splash .bar { width: 100%; max-width: 270px; height: 4px; border-radius: 3px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+      .splash .bar i { display: block; height: 100%; width: var(--p, 10%); border-radius: 3px; background: linear-gradient(90deg, #FF8A00, #FF5A00); transition: width .45s ease-out; }
+      .splash .st { display: flex; align-items: center; gap: 6px; font: 400 12.5px Inter, system-ui, sans-serif; color: #8C8378; }
       .splash.done { opacity: 0; pointer-events: none; }
+      [dir=rtl] .splash .tag, [dir=rtl] .splash .st { font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif; }
+      @keyframes spop { from { transform: scale(.4); opacity: 0; } }
+      @keyframes sl { from { transform: translateX(-30px); opacity: 0; } } @keyframes sr { from { transform: translateX(30px); opacity: 0; } }
+      @keyframes sbloom { from { transform: scale(0) rotate(-25deg); opacity: 0; } }
+      @keyframes sup { from { transform: translateY(10px); opacity: 0; } }
+      @keyframes sbreathe { 50% { transform: scale(1.045); filter: drop-shadow(0 18px 56px rgba(255, 90, 0, .8)); } }
+      @keyframes sglow { 50% { opacity: .65; } }
     </style>
   </head>
   <body>
     <div class="splash" id="splash">
-      <svg viewBox="0 0 64 64" aria-label="ZOHRA WALLET"><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A1A"/><stop offset="1" stop-color="#FF4D00"/></linearGradient></defs><rect width="64" height="64" rx="19.2" fill="url(#sg)"/><path d="M17 15.5h30a3.5 3.5 0 0 1 0 7H17a3.5 3.5 0 0 1 0-7zM17 41.5h30a3.5 3.5 0 0 1 0 7H17a3.5 3.5 0 0 1 0-7z" fill="#160800"/><path d="M18 45C21 32 31 22.5 46.5 19 43.5 32 33.5 41.5 18 45z" fill="#fff"/></svg>
-      <div class="bar"><i></i></div>
+      <svg class="mark" viewBox="0 0 64 64" aria-label="ZOHRA WALLET"><defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A1A"/><stop offset="1" stop-color="#FF4D00"/></linearGradient></defs>
+        <rect class="sq" width="64" height="64" rx="20.5" fill="url(#sg)"/>
+        <path class="b1" d="M17 15.5h30a3.5 3.5 0 0 1 0 7H17a3.5 3.5 0 0 1 0-7z" fill="#160800"/><path class="b2" d="M17 41.5h30a3.5 3.5 0 0 1 0 7H17a3.5 3.5 0 0 1 0-7z" fill="#160800"/>
+        <path class="pt" d="M18 45C21 32 31 22.5 46.5 19 43.5 32 33.5 41.5 18 45z" fill="#fff"/></svg>
+      <div class="word"><b>ZOHRA</b><span>WALLET</span></div>
+      <div class="tag" id="splash-tag">Your money. Every network. One tap.</div>
+      <div class="foot">
+        <div class="bar"><i></i></div>
+        <div class="st"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg><span id="splash-st">Securing your session…</span></div>
+      </div>
     </div>
+    <script>
+      // localise the two splash lines before the app loads (no flash of English)
+      (function () {
+        var L = { ar: ['أموالك. كل الشبكات. بلمسة واحدة.', 'جارٍ تأمين جلستك…'], ru: ['Ваши деньги. Все сети. Одно касание.', 'Защищаем сеанс…'],
+          tr: ['Paran. Her ağ. Tek dokunuş.', 'Oturumun güvenceye alınıyor…'], fa: ['پول شما. همه شبکه‌ها. با یک لمس.', 'در حال ایمن‌سازی نشست…'],
+          fr: ['Votre argent. Tous les réseaux. Une touche.', 'Sécurisation de la session…'], es: ['Tu dinero. Todas las redes. Un toque.', 'Protegiendo tu sesión…'],
+          pt: ['Seu dinheiro. Todas as redes. Um toque.', 'Protegendo sua sessão…'], de: ['Dein Geld. Jedes Netzwerk. Ein Tipp.', 'Sitzung wird gesichert…'],
+          id: ['Uangmu. Semua jaringan. Satu ketukan.', 'Mengamankan sesi…'], hi: ['आपका पैसा। हर नेटवर्क। एक टैप।', 'सत्र सुरक्षित किया जा रहा है…'],
+          zh: ['你的资产，所有网络，一触即达。', '正在保护你的会话…'], uk: ['Ваші гроші. Усі мережі. Один дотик.', 'Захищаємо сеанс…'], uz: ['Pulingiz. Har bir tarmoq. Bir teginish.', 'Seans himoyalanmoqda…'] };
+        var tgl = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user || {}).language_code;
+        var c = ''; try { c = localStorage.getItem('aw_lang') || ''; } catch (e) {}
+        c = (c || tgl || navigator.language || 'en').slice(0, 2).toLowerCase();
+        var v = L[c]; if (!v) return;
+        if (c === 'ar' || c === 'fa') document.documentElement.dir = 'rtl';
+        document.getElementById('splash-tag').textContent = v[0]; document.getElementById('splash-st').textContent = v[1];
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

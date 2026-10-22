@@ -10,7 +10,7 @@ import re
 
 import httpx
 
-from . import catalog, db, files
+from . import catalog, config, db, files
 
 log = logging.getLogger("aw.coinmeta")
 API = "https://api.coingecko.com/api/v3"
@@ -88,6 +88,26 @@ def _logo(aid: str, url: str, meta: dict) -> int:
          "updated_at=excluded.updated_at", (key, path, db.now()))
     meta.update({"logo_url": url, "logo_path": path})
     return 1
+
+
+def backfill_daily(limit: int = 6) -> int:
+    """Fill a year of daily prices for coins whose chart history is short (a few coins per run — the public API is rate-limited)."""
+    import time as _t
+
+    done = 0
+    for r in db.q("SELECT id, coingecko_id FROM assets WHERE enabled=1 AND coingecko_id IS NOT NULL AND coingecko_id<>''"):
+        have = db.val("SELECT COUNT(*) FROM price_daily WHERE asset=?", (r["id"],), 0)
+        if have >= 300:
+            continue
+        data = HTTP["get"](f"{API}/coins/{r['coingecko_id']}/market_chart", {"vs_currency": "usd", "days": 365, "interval": "daily"})
+        for ts, usd in (data or {}).get("prices", []):
+            day = _t.strftime("%Y-%m-%d", _t.gmtime(int(ts) // 1000))
+            db.x("INSERT OR IGNORE INTO price_daily(asset, day, usd) VALUES(?,?,?)", (r["id"], day, str(usd)))
+        done += 1
+        if done >= limit:
+            break
+        _t.sleep(0 if config.TESTING else 2.5)
+    return done
 
 
 def market(aid: str) -> dict:

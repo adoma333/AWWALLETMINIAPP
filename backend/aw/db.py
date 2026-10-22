@@ -504,6 +504,15 @@ SCHEMA = [
     );
     CREATE INDEX IF NOT EXISTS ix_identities_user ON identities(user_id);
     """,
+    """
+    CREATE TABLE IF NOT EXISTS price_ticks (asset TEXT, ts INTEGER, usd TEXT, PRIMARY KEY (asset, ts));
+    CREATE TABLE IF NOT EXISTS price_daily (asset TEXT, day TEXT, usd TEXT, PRIMARY KEY (asset, day));
+    CREATE TABLE IF NOT EXISTS price_alerts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, asset TEXT NOT NULL, op TEXT NOT NULL, price TEXT NOT NULL,
+        repeat INTEGER DEFAULT 0, active INTEGER DEFAULT 1, created_at INTEGER, fired_at INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS ix_alerts_asset ON price_alerts(asset, active);
+    """,
 ]
 
 

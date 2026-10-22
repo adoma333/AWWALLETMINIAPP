@@ -3,6 +3,7 @@
 Each source is optional; a price is usable when at least one fresh source agrees. Deviation between sources beyond
 `max_source_deviation_pct` halts swaps for that asset (protects against a single broken feed).
 """
+import calendar
 import logging
 import statistics
 import time
@@ -126,10 +127,63 @@ def refresh() -> dict:
             db.x("INSERT INTO prices(asset, usd, change24h, sources, updated_at) VALUES(?,?,?,?,?) "
                  "ON CONFLICT(asset) DO UPDATE SET usd=excluded.usd, change24h=excluded.change24h, sources=excluded.sources, updated_at=excluded.updated_at",
                  (aid, s(mid), s(change.quantize(Decimal("0.01"))), db._enc({k: s(p) for k, (p, _) in src.items()}), now))
-            bucket = now - now % 900  # 15-minute candles for sparklines
+            bucket = now - now % 900  # 15-minute candles for sparklines and 1D–1M charts
             db.x("INSERT OR REPLACE INTO price_history(asset, ts, usd) VALUES(?,?,?)", (aid, bucket, s(mid)))
-        db.x("DELETE FROM price_history WHERE ts < ?", (now - 8 * 86400,))
+            db.x("INSERT OR REPLACE INTO price_ticks(asset, ts, usd) VALUES(?,?,?)", (aid, now - now % 60, s(mid)))  # 1H chart
+            db.x("INSERT OR REPLACE INTO price_daily(asset, day, usd) VALUES(?,?,?)", (aid, time.strftime("%Y-%m-%d", time.gmtime(now)), s(mid)))
+        db.x("DELETE FROM price_history WHERE ts < ?", (now - 35 * 86400,))
+        db.x("DELETE FROM price_ticks WHERE ts < ?", (now - 2 * 86400,))
+    try:
+        check_alerts()
+    except Exception as e:  # an alert problem must never stop prices
+        log.warning("price alerts: %s", e)
     return {k: len(v) for k, v in per_asset.items()}
+
+
+RANGES = {"1H": 3600, "1D": 86400, "1W": 7 * 86400, "1M": 30 * 86400, "1Y": 365 * 86400}
+
+
+def chart(asset: str, rng: str) -> list:
+    """[[ts, usd], …] for a chart range, at most ~180 points."""
+    now = db.now()
+    if rng == "1H":
+        rows = db.q("SELECT ts, usd FROM price_ticks WHERE asset=? AND ts>=? ORDER BY ts", (asset, now - 3600))
+    elif rng in ("1D", "1W", "1M"):
+        rows = db.q("SELECT ts, usd FROM price_history WHERE asset=? AND ts>=? ORDER BY ts", (asset, now - RANGES[rng]))
+    else:
+        since = time.strftime("%Y-%m-%d", time.gmtime(now - RANGES["1Y"])) if rng == "1Y" else "0000"
+        rows = [{"ts": calendar.timegm(time.strptime(r["day"], "%Y-%m-%d")), "usd": r["usd"]}
+                for r in db.q("SELECT day, usd FROM price_daily WHERE asset=? AND day>=? ORDER BY day", (asset, since))]
+    pts = [[r["ts"], r["usd"]] for r in rows]
+    step = max(1, len(pts) // 180)
+    out = pts[::step]
+    if pts and out[-1] != pts[-1]:
+        out.append(pts[-1])
+    return out
+
+
+# ───────────── price alerts ─────────────
+def check_alerts():
+    """Fire alerts whose condition is met (once; `repeat` alerts re-arm after the price moves back)."""
+    from .notify import notify
+
+    live = {r["asset"]: D(r["usd"]) for r in db.q("SELECT asset, usd FROM prices")}
+    for a in db.q("SELECT * FROM price_alerts WHERE active=1"):
+        p = live.get(a["asset"])
+        if p is None or p <= 0:
+            continue
+        target = D(a["price"])
+        hit = p >= target if a["op"] == "above" else p <= target
+        if hit and not a["fired_at"]:
+            db.x("UPDATE price_alerts SET fired_at=?, active=? WHERE id=?", (db.now(), 1 if a["repeat"] else 0, a["id"]))
+            from .bot_texts import t as bt
+            from .notify import user_lang
+
+            word = bt(user_lang(a["user_id"]), "price_above" if a["op"] == "above" else "price_below")
+            notify(a["user_id"], "price_alert", path=f"/asset/{a['asset']}", asset=a["asset"], price=f"${s(target)}",
+                   now=f"${s(p.quantize(Decimal('0.0001')))}", direction_word=word)
+        elif not hit and a["fired_at"] and a["repeat"]:
+            db.x("UPDATE price_alerts SET fired_at=NULL WHERE id=?", (a["id"],))  # re-arm
 
 
 def refresh_fx():

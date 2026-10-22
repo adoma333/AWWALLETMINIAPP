@@ -4,49 +4,37 @@ import { errText, useI18n } from '../i18n';
 import { useApp } from '../store';
 import { bioAuth, haptic } from '../telegram';
 import Icon from './Icon';
-import { Sheet } from './ui';
+import { Btn, Keypad, PinDots, Sheet } from './ui';
 
-// Second-factor confirmation for money actions: biometrics when enabled, otherwise the 6-digit PIN.
-// If the user has no PIN yet, they create one here first (zero dead-ends).
+// Confirmation for money actions (design sheet "Confirm"): a clear summary first, then biometrics or the 6-digit PIN.
+// ask({ title, summary, head, rows, cta }) → { pin } | { bio } | null. Without a PIN yet, the user creates one here.
 const Ctx = createContext(null);
 export const useConfirm = () => useContext(Ctx);
-
-function PinPad({ value, onChange, onBio }) {
-  const press = (d) => { haptic.select(); if (value.length < 6) onChange(value + d); };
-  return (
-    <div className="pinpad">
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => <button key={d} type="button" onClick={() => press(String(d))}>{d}</button>)}
-      <button type="button" className="pp-alt" onClick={onBio} disabled={!onBio} aria-label="biometric">{onBio ? <Icon name="fingerprint" /> : null}</button>
-      <button type="button" onClick={() => press('0')}>0</button>
-      <button type="button" className="pp-alt" onClick={() => { haptic.select(); onChange(value.slice(0, -1)); }} aria-label="delete">⌫</button>
-    </div>
-  );
-}
-
-function Dots({ n, shake }) {
-  return <div className={`pin-dots ${shake ? 'shake' : ''}`}>{[0, 1, 2, 3, 4, 5].map((i) => <span key={i} className={i < n ? 'on' : ''} />)}</div>;
-}
 
 export function ConfirmProvider({ children }) {
   const { t } = useI18n();
   const { me, refresh } = useApp();
-  const [state, setState] = useState(null); // {title, summary, resolve, mode: 'enter'|'create'|'repeat'}
+  const [state, setState] = useState(null); // { ...opts, resolve, mode: 'review'|'enter'|'create'|'repeat' }
   const [pin, setPin] = useState('');
   const [first, setFirst] = useState('');
   const [err, setErr] = useState('');
   const [shake, setShake] = useState(false);
   const busy = useRef(false);
+  const bio = Boolean(me?.bio_enabled);
 
-  const ask = useCallback(async ({ title, summary } = {}) => {
-    if (me?.bio_enabled) {
-      const token = await bioAuth(t('biometric_reason'));
-      if (token) return { bio: token };
+  const pinMode = useCallback(() => (me?.pin_set ? 'enter' : 'create'), [me]);
+  const ask = useCallback((opts = {}) => new Promise((resolve) => {
+    setPin(''); setFirst(''); setErr('');
+    setState({ ...opts, resolve, mode: opts.rows || opts.head ? 'review' : pinMode() });
+  }), [pinMode]);
+
+  // the summary already showed everything and asked for no PIN yet; biometrics first when the user enabled them
+  useEffect(() => {
+    if (state?.mode === 'enter' && bio && !state.bioTried) {
+      setState((s) => ({ ...s, bioTried: true }));
+      bioAuth(t('biometric_reason')).then((tok) => { if (tok) finish({ bio: tok }); });
     }
-    return new Promise((resolve) => {
-      setPin(''); setFirst(''); setErr('');
-      setState({ title, summary, resolve, mode: me?.pin_set ? 'enter' : 'create' });
-    });
-  }, [me, t]);
+  }, [state?.mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const finish = (v) => { state?.resolve(v); setState(null); };
   const fail = (msg) => { setErr(msg); setShake(true); haptic.error(); setTimeout(() => setShake(false), 450); setPin(''); };
@@ -73,20 +61,45 @@ export function ConfirmProvider({ children }) {
     })();
   }, [pin]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const press = (k) => setPin((p) => (k === 'del' ? p.slice(0, -1) : p.length < 6 ? p + k : p));
   const heading = !state ? '' : state.mode === 'enter' ? t('enter_pin') : state.mode === 'create' ? t('new_pin') : t('confirm_pin');
+
   return (
     <Ctx.Provider value={ask}>
       {children}
       <Sheet open={Boolean(state)} onClose={() => finish(null)}>
-        <div className="confirm">
-          {state?.title && <div className="confirm-title">{state.title}</div>}
-          {state?.summary && <div className="confirm-summary">{state.summary}</div>}
-          <div className="confirm-head"><Icon name="lock" size={18} /> {heading}</div>
-          <Dots n={pin.length} shake={shake} />
-          <div className="confirm-err">{err}</div>
-          <PinPad value={pin} onChange={setPin}
-            onBio={me?.bio_enabled ? async () => { const tok = await bioAuth(t('biometric_reason')); if (tok) finish({ bio: tok }); } : null} />
-        </div>
+        {state?.mode === 'review' ? (
+          <>
+            {state.head}
+            {state.rows?.length > 0 && <div className="card s2 tight">{state.rows.map(([k, v], i) => <div key={i} className="kv"><span>{k}</span><b>{v}</b></div>)}</div>}
+            {bio && (
+              <div className="col center g8" style={{ padding: '8px 0 2px' }}>
+                <span className="ic lg"><Icon name="finger" size={32} /></span>
+                <span className="dim small">{t('confirm_with_bio')}</span>
+              </div>
+            )}
+            <Btn w onClick={async () => {
+              if (bio) { const tok = await bioAuth(t('biometric_reason')); if (tok) { finish({ bio: tok }); return; } }
+              setState((s) => ({ ...s, mode: pinMode(), bioTried: true }));
+            }}>{state.cta || t('confirm')}</Btn>
+            {bio && <Btn kind="ghost" w onClick={() => setState((s) => ({ ...s, mode: pinMode(), bioTried: true }))}>{t('use_pin')}</Btn>}
+          </>
+        ) : state && (
+          <div className="col center g12" style={{ paddingTop: 6 }}>
+            <span className="ic lg"><Icon name="lock" size={28} /></span>
+            <b className="disp" style={{ fontSize: 20 }}>{heading}</b>
+            {state.title && <span className="dim small">{state.title}</span>}
+            {state.summary && <span className="small" style={{ textAlign: 'center' }}>{state.summary}</span>}
+            <PinDots filled={pin.length} shake={shake} />
+            <span className="bad small" style={{ minHeight: 18 }}>{err}</span>
+            <div style={{ width: '100%', padding: '0 12px' }}>
+              <Keypad dot={false} onKey={press} small
+                left={state.mode === 'enter' && bio ? { node: <Icon name="finger" size={26} className="em" />, onClick: async () => {
+                  const tok = await bioAuth(t('biometric_reason')); if (tok) finish({ bio: tok });
+                } } : null} />
+            </div>
+          </div>
+        )}
       </Sheet>
     </Ctx.Provider>
   );
@@ -100,7 +113,7 @@ export async function withConfirm(ask, t, call, opts) {
     try {
       return await call(f);
     } catch (e) {
-      if (e.code === 'pin_wrong') { haptic.error(); opts = { ...opts, summary: errText(t, e) }; continue; } // eslint-disable-line no-param-reassign
+      if (e.code === 'pin_wrong') { haptic.error(); opts = { title: opts?.title, summary: errText(t, e) }; continue; } // eslint-disable-line no-param-reassign
       throw e;
     }
   }

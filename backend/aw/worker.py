@@ -81,6 +81,13 @@ def _coinmeta():
         log.warning("coin metadata sync failed: %s", e)
 
 
+def _chart_backfill():
+    try:
+        coinmeta.backfill_daily()
+    except Exception as e:
+        log.warning("chart backfill: %s", e)
+
+
 def _heartbeat():
     state_set("worker:heartbeat", db.now())
 
@@ -94,6 +101,7 @@ def main():
     loop("outbox", 1, tg.flush)
     loop("prices", max(5, int(settings.get("swap").get("refresh_sec", 15))), prices.refresh)
     loop("coinmeta", 86400, _coinmeta, 90)
+    loop("chart-backfill", 3600, _chart_backfill, 150)
     loop("fx", 3600, _fx)
     loop("withdrawals", 20, _withdrawals, 5)
     loop("expiries", 30, _expiries, 10)

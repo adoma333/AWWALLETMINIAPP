@@ -100,7 +100,7 @@ def public_config():
     g = settings.get("general")
     br = settings.get("branding")
     return {
-        "app_name": g["app_name"], "bot": config.BOT_USERNAME, "webapp": config.WEBAPP_URL, "maintenance": g["maintenance"],
+        "app_name": g["app_name"], "bot": config.BOT_USERNAME, "webapp": config.WEBAPP_URL, "maintenance": g["maintenance"], "maintenance_until": g.get("maintenance_until") or 0,
         "maintenance_msg": g["maintenance_msg"], "languages": g["languages"], "default_lang": g["default_lang"],
         "currencies": g["display_currencies"], "features": g["features"], "badges": [b for b in g["badges"] if b.get("enabled")],
         "banners": [b for b in g.get("banners", []) if b.get("enabled", True) and (not b.get("until") or b["until"] > db.now())],
@@ -172,6 +172,9 @@ def _me(u: dict) -> dict:
         "is_admin": bool(admin_auth.role_of(u["id"])),
         "unread": db.val("SELECT COUNT(*) FROM notifications WHERE user_id=? AND read=0", (u["id"],), 0),
         "ton_wallet": ton_connect.connected(u["id"]),
+        "vouchers": db.q("SELECT kind, kinds, value, uses_left, source, expires_at FROM vouchers WHERE user_id=? AND uses_left>0 "
+                         "AND (expires_at IS NULL OR expires_at>?) ORDER BY expires_at LIMIT 10", (u["id"], db.now())),
+        "anti_phishing": bool((u.get("flags") or {}).get("anti_phishing")) if isinstance(u.get("flags"), dict) else False,
     }
 
 
@@ -315,6 +318,13 @@ def _assets_out(u: dict) -> list[dict]:
             "deposit": bool(an["deposit_enabled"] and an["net_dep"]), "withdraw": bool(an["withdraw_enabled"] and an["net_wd"]),
             "min_deposit": an["min_deposit"], "min_withdraw": an["min_withdraw"], "memo": an["memo_mode"] == "required",
             "eta": an["eta"], "confirmations": an["confirmations"]})
+    # 24 h mini charts for every coin in one query (15-min candles → ≤24 points)
+    sparks: dict[str, list] = {}
+    for r in db.q("SELECT asset, usd FROM price_history WHERE ts>=? ORDER BY ts", (db.now() - 86400,)):
+        sparks.setdefault(r["asset"], []).append(float(r["usd"]))
+    for k, v in sparks.items():
+        step = max(1, len(v) // 24)
+        sparks[k] = [round(x, 10) for x in v[::step]][-24:]
     out = []
     for a in db.q("SELECT * FROM assets WHERE enabled=1 ORDER BY sort"):
         b = bals.get(a["id"], {"available": Decimal(0), "locked": Decimal(0)})
@@ -324,7 +334,7 @@ def _assets_out(u: dict) -> list[dict]:
                     "stable": bool(a["is_stable"]), "available": s(b["available"]), "locked": s(b["locked"]), "usd": s(usd),
                     "change24h": p.get("change24h") or "0", "value_usd": s(((b["available"] + b["locked"]) * usd).quantize(Decimal("0.01"))),
                     "swap": bool(a["swap_enabled"]), "transfer": bool(a["transfer_enabled"]), "p2p": bool(a["p2p_enabled"]),
-                    "badges": db.jl(a.get("badges"), []), "networks": nets.get(a["id"], [])})
+                    "badges": db.jl(a.get("badges"), []), "networks": nets.get(a["id"], []), "spark": sparks.get(a["id"], [])})
     return out
 
 
@@ -387,9 +397,43 @@ def asset_detail(asset: str, u: dict = Depends(current_user)):
         raise AppError("not_found", 404)
     a["chart"] = prices.history(asset.upper(), 24 * 7)
     a["market"] = coinmeta.market(asset.upper())
+    a["alerts"] = db.q("SELECT id, op, price, repeat FROM price_alerts WHERE user_id=? AND asset=? AND active=1", (u["id"], asset.upper()))
     a["txs"] = db.q("SELECT id,type,status,asset,amount,fee,asset2,amount2,network,counterparty,created_at FROM txs WHERE user_id=? "
                     "AND (asset=? OR asset2=?) ORDER BY created_at DESC LIMIT 20", (u["id"], asset.upper(), asset.upper()))
     return a
+
+
+@app.get("/api/assets/{asset}/chart")
+def asset_chart(asset: str, range: str = Query("1W"), u: dict = Depends(current_user)):  # noqa: A002
+    if range not in ("1H", "1D", "1W", "1M", "1Y", "ALL"):
+        raise AppError("bad_request")
+    return {"points": prices.chart(asset.upper(), range)}
+
+
+# ───────────────────────── price alerts ─────────────────────────
+@app.get("/api/alerts")
+def list_alerts(u: dict = Depends(current_user)):
+    return {"items": db.q("SELECT id, asset, op, price, repeat, active, fired_at, created_at FROM price_alerts WHERE user_id=? ORDER BY id DESC", (u["id"],))}
+
+
+@app.post("/api/alerts")
+def add_alert(body: dict = Body(...), u: dict = Depends(current_user)):
+    asset = str(body.get("asset") or "").upper()
+    op = body.get("op")
+    price = D(body.get("price"))
+    if not catalog.asset(asset) or op not in ("above", "below") or price <= 0:
+        raise AppError("bad_request")
+    if db.val("SELECT COUNT(*) FROM price_alerts WHERE user_id=? AND active=1", (u["id"],), 0) >= 30:
+        raise AppError("too_many")
+    aid = db.insert("price_alerts", {"user_id": u["id"], "asset": asset, "op": op, "price": s(price), "repeat": 1 if body.get("repeat") else 0,
+                                     "created_at": db.now()})
+    return {"id": aid}
+
+
+@app.delete("/api/alerts/{aid}")
+def delete_alert(aid: int, u: dict = Depends(current_user)):
+    db.x("DELETE FROM price_alerts WHERE id=? AND user_id=?", (aid, u["id"]))
+    return {"ok": True}
 
 
 # ───────────────────────── deposit ─────────────────────────

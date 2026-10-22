@@ -3,6 +3,9 @@ Placeholders use str.format; HTML is allowed (<b>, <code>). Missing keys fall ba
 
 TEXTS = {
     "en": {
+        "price_alert": '🔔 {asset} is {direction_word} {price}: now {now}.',
+        "price_above": 'above',
+        "price_below": 'below',
         "login_confirm": '🔐 Sign in to <b>Zohra Wallet</b> on another device?\n\nDevice: <code>{device}</code>\n\nApprove only if you started this sign-in yourself, just now. Never approve a code someone sent you.',
         "login_yes": 'Approve',
         "login_no": 'Deny',
@@ -58,6 +61,9 @@ TEXTS = {
         "pay": "Pay",
     },
     "ar": {
+        "price_alert": '🔔 سعر {asset} وصل {direction_word} {price}: الآن {now}.',
+        "price_above": 'فوق',
+        "price_below": 'تحت',
         "login_confirm": '🔐 تسجيل الدخول إلى <b>Zohra Wallet</b> من جهاز آخر؟\n\nالجهاز: <code>{device}</code>\n\nوافق فقط إن كنت أنت من بدأ تسجيل الدخول الآن. لا توافق أبدًا على رمز أرسله لك شخص آخر.',
         "login_yes": 'موافقة',
         "login_no": 'رفض',
@@ -113,6 +119,9 @@ TEXTS = {
         "pay": "ادفع",
     },
     "ru": {
+        "price_alert": '🔔 {asset} {direction_word} {price}: сейчас {now}.',
+        "price_above": 'выше',
+        "price_below": 'ниже',
         "login_confirm": '🔐 Войти в <b>Zohra Wallet</b> на другом устройстве?\n\nУстройство: <code>{device}</code>\n\nПодтверждайте, только если вход начали вы сами и только что. Никогда не подтверждайте код, присланный кем-то.',
         "login_yes": 'Подтвердить',
         "login_no": 'Отклонить',
@@ -168,6 +177,9 @@ TEXTS = {
         "pay": "Оплатить",
     },
     "tr": {
+        "price_alert": '🔔 {asset} {price} {direction_word}: şu an {now}.',
+        "price_above": 'üzerinde',
+        "price_below": 'altında',
         "login_confirm": "🔐 Başka bir cihazda <b>Zohra Wallet</b>'a giriş yapılsın mı?\n\nCihaz: <code>{device}</code>\n\nYalnızca girişi az önce kendiniz başlattıysanız onaylayın. Birinin gönderdiği kodu asla onaylamayın.",
         "login_yes": 'Onayla',
         "login_no": 'Reddet',
@@ -223,6 +235,9 @@ TEXTS = {
         "pay": "Öde",
     },
     "fa": {
+        "price_alert": '🔔 {asset} {direction_word} {price}: اکنون {now}.',
+        "price_above": 'بالای',
+        "price_below": 'زیر',
         "login_confirm": '🔐 ورود به <b>Zohra Wallet</b> در دستگاه دیگر؟\n\nدستگاه: <code>{device}</code>\n\nفقط اگر خودتان همین حالا ورود را شروع کرده\u200cاید تأیید کنید. هرگز کدی را که کسی برایتان فرستاده تأیید نکنید.',
         "login_yes": 'تأیید',
         "login_no": 'رد',
@@ -278,6 +293,9 @@ TEXTS = {
         "pay": "پرداخت",
     },
     "fr": {
+        "price_alert": '🔔 {asset} est {direction_word} {price} : maintenant {now}.',
+        "price_above": 'au-dessus de',
+        "price_below": 'en dessous de',
         "login_confirm": '🔐 Se connecter à <b>Zohra Wallet</b> sur un autre appareil ?\n\nAppareil : <code>{device}</code>\n\nApprouvez seulement si vous venez de lancer cette connexion vous-même. N’approuvez jamais un code envoyé par quelqu’un.',
         "login_yes": 'Approuver',
         "login_no": 'Refuser',
@@ -333,6 +351,9 @@ TEXTS = {
         "pay": "Payer",
     },
     "es": {
+        "price_alert": '🔔 {asset} está {direction_word} {price}: ahora {now}.',
+        "price_above": 'por encima de',
+        "price_below": 'por debajo de',
         "login_confirm": '🔐 ¿Iniciar sesión en <b>Zohra Wallet</b> en otro dispositivo?\n\nDispositivo: <code>{device}</code>\n\nAprueba solo si tú iniciaste este acceso ahora mismo. Nunca apruebes un código que alguien te envió.',
         "login_yes": 'Aprobar',
         "login_no": 'Rechazar',
@@ -388,6 +409,9 @@ TEXTS = {
         "pay": "Pagar",
     },
     "pt": {
+        "price_alert": '🔔 {asset} está {direction_word} {price}: agora {now}.',
+        "price_above": 'acima de',
+        "price_below": 'abaixo de',
         "login_confirm": '🔐 Entrar na <b>Zohra Wallet</b> em outro dispositivo?\n\nDispositivo: <code>{device}</code>\n\nAprove apenas se você mesmo iniciou este acesso agora. Nunca aprove um código que alguém lhe enviou.',
         "login_yes": 'Aprovar',
         "login_no": 'Recusar',
@@ -443,6 +467,9 @@ TEXTS = {
         "pay": "Pagar",
     },
     "de": {
+        "price_alert": '🔔 {asset} ist {direction_word} {price}: jetzt {now}.',
+        "price_above": 'über',
+        "price_below": 'unter',
         "login_confirm": '🔐 Auf einem anderen Gerät bei <b>Zohra Wallet</b> anmelden?\n\nGerät: <code>{device}</code>\n\nNur bestätigen, wenn du die Anmeldung gerade selbst gestartet hast. Bestätige nie einen Code, den dir jemand geschickt hat.',
         "login_yes": 'Bestätigen',
         "login_no": 'Ablehnen',
@@ -498,6 +525,9 @@ TEXTS = {
         "pay": "Bezahlen",
     },
     "id": {
+        "price_alert": '🔔 {asset} {direction_word} {price}: sekarang {now}.',
+        "price_above": 'di atas',
+        "price_below": 'di bawah',
         "login_confirm": '🔐 Masuk ke <b>Zohra Wallet</b> di perangkat lain?\n\nPerangkat: <code>{device}</code>\n\nSetujui hanya jika Anda sendiri yang baru saja memulai. Jangan pernah menyetujui kode yang dikirim orang lain.',
         "login_yes": 'Setujui',
         "login_no": 'Tolak',
@@ -553,6 +583,9 @@ TEXTS = {
         "pay": "Bayar",
     },
     "hi": {
+        "price_alert": '🔔 {asset} {price} से {direction_word}: अभी {now}।',
+        "price_above": 'ऊपर',
+        "price_below": 'नीचे',
         "login_confirm": '🔐 किसी दूसरे डिवाइस पर <b>Zohra Wallet</b> में साइन इन करें?\n\nडिवाइस: <code>{device}</code>\n\nतभी स्वीकृत करें जब आपने अभी ख़ुद साइन-इन शुरू किया हो। किसी के भेजे कोड को कभी स्वीकृत न करें।',
         "login_yes": 'स्वीकृत करें',
         "login_no": 'अस्वीकार करें',
@@ -608,6 +641,9 @@ TEXTS = {
         "pay": "भुगतान करें",
     },
     "zh": {
+        "price_alert": '🔔 {asset} 已{direction_word} {price}：现价 {now}。',
+        "price_above": '高于',
+        "price_below": '低于',
         "login_confirm": '🔐 要在另一台设备上登录 <b>Zohra Wallet</b> 吗？\n\n设备：<code>{device}</code>\n\n仅当这是您本人刚刚发起的登录时才批准。切勿批准他人发给您的代码。',
         "login_yes": '批准',
         "login_no": '拒绝',
@@ -663,6 +699,9 @@ TEXTS = {
         "pay": "付款",
     },
     "uk": {
+        "price_alert": '🔔 {asset} {direction_word} {price}: зараз {now}.',
+        "price_above": 'вище',
+        "price_below": 'нижче',
         "login_confirm": '🔐 Увійти в <b>Zohra Wallet</b> на іншому пристрої?\n\nПристрій: <code>{device}</code>\n\nПідтверджуйте, лише якщо вхід щойно почали ви самі. Ніколи не підтверджуйте код, надісланий кимось.',
         "login_yes": 'Підтвердити',
         "login_no": 'Відхилити',
@@ -718,6 +757,9 @@ TEXTS = {
         "pay": "Оплатити",
     },
     "uz": {
+        "price_alert": '🔔 {asset} {price} dan {direction_word}: hozir {now}.',
+        "price_above": 'yuqori',
+        "price_below": 'past',
         "login_confirm": '🔐 Boshqa qurilmada <b>Zohra Wallet</b>ga kirilsinmi?\n\nQurilma: <code>{device}</code>\n\nFaqat kirishni hozirgina o‘zingiz boshlagan bo‘lsangiz tasdiqlang. Birov yuborgan kodni hech qachon tasdiqlamang.',
         "login_yes": 'Tasdiqlash',
         "login_no": 'Rad etish',

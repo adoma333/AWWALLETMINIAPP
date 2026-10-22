@@ -13,7 +13,7 @@ import { hideSplash, splashProgress } from './splash';
 import { applyPrices, streamPrices } from './live';
 import { getToken, setToken } from './session';
 import TopBar, { PageLoading } from './components/TopBar';
-import { Btn, Sheet } from './components/ui';
+import { Btn, Countdown, Sheet, mmss } from './components/ui';
 import { backButton, inTelegram, startParam, tg } from './telegram';
 import Home from './pages/Home';
 import Outside from './pages/Outside';
@@ -91,15 +91,28 @@ export default function App() {
     }
   }, []);
 
+  const [offline, setOffline] = useState(typeof navigator !== 'undefined' && navigator.onLine === false);
   const loadWallet = useCallback(async () => {
     try {
       const w = await api.get('/api/wallet', { silent: true });
       setWallet(w);
       setFx(w.fx);
+      setOffline(false);
+      try { localStorage.setItem('zw_wallet', JSON.stringify({ ...w, cached_at: Date.now() })); } catch { /* quota */ }
     } catch (e) {
-      if (e.code !== 'offline') toast(errText(t, e), 'error');
+      if (e.code === 'offline') {
+        setOffline(true);
+        setWallet((cur) => cur || (() => { try { const c = JSON.parse(localStorage.getItem('zw_wallet') || 'null'); return c ? { ...c, cached: true } : null; } catch { return null; } })());
+      } else toast(errText(t, e), 'error');
     }
   }, [t, toast]);
+  useEffect(() => {
+    const on = () => { setOffline(false); loadWallet(); };
+    const off = () => setOffline(true);
+    window.addEventListener('online', on); window.addEventListener('offline', off);
+    const id = setInterval(() => { if (offline) loadWallet(); }, 5000);
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); clearInterval(id); };
+  }, [offline, loadWallet]);
 
   const refresh = useCallback(async () => {
     const [m] = await Promise.all([api.get('/api/me').catch(() => null), loadWallet()]);
@@ -132,7 +145,7 @@ export default function App() {
     (async () => {
       const first = detectLang();
       await switchLang(first);
-      splashProgress(30);
+      splashProgress(30, makeT(await loadLang(first))('splash_connecting'));
       try {
         const cfg = await api.get('/api/config');
         setConfig(cfg);
@@ -146,7 +159,7 @@ export default function App() {
       }
       try {
         const res = await api.post('/api/auth');
-        splashProgress(80);
+        splashProgress(80, t('splash_wallet'));
         setMe(res.me);
         setFx(null, res.me.settings?.currency || 'USD');
         const l = detectLang(res.me.lang);
@@ -192,8 +205,8 @@ export default function App() {
     return () => clearInterval(id);
   }, []);
 
-  const ctx = useMemo(() => ({ config, me, wallet, icons: config?.icons || {}, refresh, loadWallet, toast, setMe, lang }),
-    [config, me, wallet, refresh, loadWallet, toast, lang]);
+  const ctx = useMemo(() => ({ config, me, wallet, icons: config?.icons || {}, refresh, loadWallet, toast, setMe, lang, offline }),
+    [config, me, wallet, refresh, loadWallet, toast, lang, offline]);
   const i18n = useMemo(() => ({ lang, t, setLang: (c) => switchLang(c, true) }), [lang, t, switchLang]);
 
   if (!dict) return null; // the splash in index.html is still showing
@@ -204,23 +217,27 @@ export default function App() {
   if (fatal) {
     return (
       <I18n.Provider value={i18n}>
-        <main className="page center-screen">
-          <Icon name={fatal.code === 'account_banned' ? 'lock' : 'wifiOff'} size={44} />
-          <p>{errText(t, fatal)}</p>
-          <button type="button" className="btn primary" onClick={() => location.reload()}>{t('retry')}</button>
+        <main className="state-screen">
+          <div className="bgglow" />
+          <span className="ic xl"><Icon name={fatal.code === 'account_banned' ? 'lock' : 'wifiOff'} size={42} stroke={1.6} /></span>
+          <span className="h" style={{ fontSize: 22 }}>{t(fatal.code === 'account_banned' ? 'err_account_banned' : 'offline_title')}</span>
+          <span className="dim">{errText(t, fatal)}</span>
+          <Btn icon="refresh" onClick={() => location.reload()}>{t('retry')}</Btn>
         </main>
       </I18n.Provider>
     );
   }
   if (!me) return null;
+  if (config?.maintenance && !me.is_admin) return <I18n.Provider value={i18n}><Maintenance config={config} lang={lang} t={t} /></I18n.Provider>;
   const showNav = ROOTS.includes(path);
   return (
     <I18n.Provider value={i18n}>
       <AppCtx.Provider value={ctx}>
         <ConfirmProvider>
           <TopBar />
-          {config?.maintenance && <div className="banner warn"><Icon name="alert" size={16} />{config.maintenance_msg?.[lang] || config.maintenance_msg?.en || t('maintenance_title')}</div>}
-          {update && <button type="button" className="banner ember" onClick={() => location.reload()}><Icon name="refresh" size={16} />{t('update_ready')} · <b>{t('update_now')}</b></button>}
+          {offline && <div className="banner off"><Icon name="wifiOff" size={16} />{t('offline_reconnecting')}<span className="grow" /><Icon name="refresh" size={15} /></div>}
+          {config?.maintenance && me.is_admin && <div className="banner em"><Icon name="tool" size={16} />{t('maintenance_admin')}</div>}
+          {update && <button type="button" className="banner em" onClick={() => location.reload()}><Icon name="refresh" size={16} />{t('update_ready')} · <b>{t('update_now')}</b></button>}
           <div className={`app ${showNav ? 'with-nav' : ''}`}>
             <Suspense fallback={<PageLoading />}>
               <Router path={path} query={query} />
@@ -228,17 +245,42 @@ export default function App() {
           </div>
           {showNav && <BottomNav path={path} />}
           <Sheet open={kycOffer && path !== '/settings/kyc'} onClose={() => setKycOffer(false)}>
-            <div className="kyc-hero">
-              <span className="kyc-hero-ic"><Icon name="idCard" size={32} /></span>
-              <h2>{t('kyc_offer_title')}</h2>
-              <p className="dim">{t('kyc_offer_sub')}</p>
+            <div className="col center g8" style={{ textAlign: 'center', padding: '6px 6px 4px' }}>
+              <span className="ic lg"><Icon name="idCard" size={30} /></span>
+              <b className="disp" style={{ fontSize: 20 }}>{t('kyc_offer_title')}</b>
+              <span className="dim">{t('kyc_offer_sub')}</span>
             </div>
-            <Btn className="wide" onClick={() => { setKycOffer(false); go('/settings/kyc'); }}>{t('kyc_start')}</Btn>
-            <Btn kind="ghost" className="wide" onClick={() => setKycOffer(false)}>{t('not_now')}</Btn>
+            <Btn w onClick={() => { setKycOffer(false); go('/settings/kyc'); }}>{t('kyc_start')}</Btn>
+            <Btn kind="ghost" w onClick={() => setKycOffer(false)}>{t('not_now')}</Btn>
           </Sheet>
         </ConfirmProvider>
       </AppCtx.Provider>
     </I18n.Provider>
+  );
+}
+
+/** Maintenance (design sheet 01.7): friendly, funds-safe, countdown when an estimate is set. */
+function Maintenance({ config, lang, t }) {
+  const until = Number(config.maintenance_until || 0);
+  const start = Number(sessionStorage.getItem('zw_mt0') || (sessionStorage.setItem('zw_mt0', String(Date.now() / 1000)), Date.now() / 1000));
+  return (
+    <main className="state-screen">
+      <div className="bgglow" />
+      <span className="ic xl"><Icon name="tool" size={42} stroke={1.6} /></span>
+      <span className="h" style={{ fontSize: 24 }}>{t('maintenance_title')}</span>
+      <span className="dim" style={{ fontSize: 14.5 }}>{config.maintenance_msg?.[lang] || config.maintenance_msg?.en || t('maintenance_sub')}</span>
+      {until > Date.now() / 1000 && (
+        <div className="card s2" style={{ width: '100%', marginTop: 6 }}>
+          <Countdown until={until} onEnd={() => location.reload()} render={(left) => (
+            <>
+              <div className="row between" style={{ fontSize: 14 }}><span className="dim">{t('back_in_about')}</span><b className="disp em" style={{ fontSize: 22 }}>{mmss(left)}</b></div>
+              <div className="prog" style={{ marginTop: 10 }}><i style={{ width: `${Math.max(4, Math.min(100, 100 - (left / Math.max(1, until - start)) * 100))}%` }} /></div>
+            </>
+          )} />
+        </div>
+      )}
+      {config.channel_url && <a className="note" href={config.channel_url}><Icon name="mega" size={15} />{t('maintenance_channel')}</a>}
+    </main>
   );
 }
 

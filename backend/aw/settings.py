@@ -12,6 +12,7 @@ DEFAULTS: dict = {
     "general": {
         "app_name": "ZOHRA WALLET",
         "maintenance": False,
+        "maintenance_until": 0,           # unix time when you expect to be back (shows a countdown); 0 = no estimate
         "maintenance_msg": T(en="We are upgrading Zohra Wallet. Your funds are safe.", ar="نقوم بتحديث Zohra Wallet. أموالك في أمان."),
         "support_username": "",
         "channel_url": "",
@@ -70,6 +71,7 @@ DEFAULTS: dict = {
         "max_accounts_per_phone": 1,
         "rate_limit_per_minute": 90,
         "block_vpn_countries": [],
+        "blocked_addresses": [],           # known scam / sanctioned addresses: withdrawals to them are refused
     },
     "swap": {
         "spread_pct": "0.8",             # platform margin baked into the rate

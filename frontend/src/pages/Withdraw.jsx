@@ -3,25 +3,25 @@ import { api, idem } from '../api';
 import { useConfirm, withConfirm } from '../components/Confirm';
 import Icon, { CoinIcon, NetIcon } from '../components/Icon';
 import Success from '../components/Success';
-import { useToast } from '../components/Toast';
-import { AmountInput, AssetPicker, Btn, Card, Field, NetworkPicker, Page, Row, Sheet } from '../components/ui';
-import { amt, shortAddr } from '../format';
+import { AssetPicker, Btn, Input, Li, Page, Pill, Sheet } from '../components/ui';
+import { amt, fiat, shortAddr } from '../format';
 import { errText, useI18n } from '../i18n';
 import { go } from '../router';
 import { useApp } from '../store';
-import { readClipboard, scanQr } from '../telegram';
-import { FAMILY_NETWORKS, detectFamily, parseScan } from '../util';
+import { haptic, readClipboard, scanQr } from '../telegram';
+import { detectFamily, parseScan } from '../util';
+import { Addr } from './Deposit';
 
+/** Design sheet 02.8 — Withdraw: network detected from the address, first-time and scam-list checks, voucher fee, clear totals. */
 export default function Withdraw({ query }) {
   const { t } = useI18n();
-  const { wallet, me, loadWallet } = useApp();
+  const { wallet, me, config, loadWallet, toast } = useApp();
   const ask = useConfirm();
-  const toast = useToast();
   const [asset, setAsset] = useState(query.asset || '');
   const [network, setNetwork] = useState(query.network || '');
   const [address, setAddress] = useState(query.address || '');
   const [memo, setMemo] = useState(query.memo || '');
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState(query.amount || '');
   const [preview, setPreview] = useState(null);
   const [perr, setPerr] = useState('');
   const [sheet, setSheet] = useState('');
@@ -30,18 +30,20 @@ export default function Withdraw({ query }) {
   const [done, setDone] = useState(null);
   const key = useRef(idem());
   const a = wallet?.assets?.find((x) => x.id === asset);
-  const fam = query.family || detectFamily(address);
-  const nets = useMemo(() => (a?.networks || []).filter((n) => n.withdraw && (!fam || (FAMILY_NETWORKS[fam] || []).includes(n.network))), [a, fam]);
+  const fam = detectFamily(address);
+  const kindOf = (id) => config?.networks?.find((n) => n.id === id)?.kind;
+  const nets = useMemo(() => (a?.networks || []).filter((n) => n.withdraw && (!fam || kindOf(n.network) === fam)), [a, fam, config]); // eslint-disable-line react-hooks/exhaustive-deps
   const net = nets.find((n) => n.network === network);
 
-  useEffect(() => { if (nets.length === 1 && !network) setNetwork(nets[0].network); }, [nets, network]);
+  useEffect(() => { if (!asset && wallet) { const best = [...wallet.assets].filter((x) => Number(x.available) > 0).sort((x, y) => Number(y.value_usd) - Number(x.value_usd))[0]; if (best) setAsset(best.id); } }, [wallet]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (nets.length && !nets.some((n) => n.network === network)) setNetwork(nets[0].network); }, [nets]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { api.get('/api/addressbook').then((r) => setBook(r.items)).catch(() => {}); }, []);
   useEffect(() => {
     setPreview(null);
     setPerr('');
     if (!asset || !network || address.length < 20 || !Number(amount)) return undefined;
-    const id = setTimeout(() => api.post('/api/withdraw/preview', { asset, network, address: address.trim(), amount, memo })
-      .then(setPreview).catch((e) => setPerr(errText(t, e))), 450);
+    const id = setTimeout(() => api.post('/api/withdraw/preview', { asset, network, address: address.trim(), amount, memo }, { silent: true })
+      .then(setPreview).catch((e) => setPerr(errText(t, e))), 400);
     return () => clearTimeout(id);
   }, [asset, network, address, amount, memo]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -52,75 +54,109 @@ export default function Withdraw({ query }) {
   const submit = async () => {
     setBusy(true);
     try {
-      const summary = `${amt(preview.receive)} ${asset} → ${shortAddr(preview.address)} (${net?.short})`;
-      const r = await withConfirm(ask, t, (f) => api.post('/api/withdraw', { asset, network, address: address.trim(), memo, amount, idem: key.current, ...f }),
-        { title: t('confirm_withdraw'), summary });
+      const r = await withConfirm(ask, t, (f) => api.post('/api/withdraw', { asset, network, address: address.trim(), memo, amount, idem: key.current, ...f }), {
+        head: (
+          <div className="col center g6" style={{ padding: '4px 0 6px' }}>
+            <CoinIcon asset={asset} network={network} size={56} />
+            <span className="dim" style={{ fontSize: 13.5 }}>{t('you_are_withdrawing')}</span>
+            <span className="mid" dir="ltr">{amt(preview.amount)} {asset}</span>
+            <span className="dim small" dir="ltr">≈ {fiat(preview.usd)}</span>
+          </div>
+        ),
+        rows: preview.internal
+          ? [[t('to_label'), preview.recipient?.name], [t('fee'), <span className="ok">{t('free')}</span>]]
+          : [[t('to_label'), <span className="mono">{shortAddr(preview.address, 8)}</span>], [t('network'), net?.name], [t('network_fee'), Number(preview.fee) ? `${amt(preview.fee)} ${asset}` : <span className="ok">{t('free')}</span>],
+            [t('they_receive'), `${amt(preview.receive)} ${asset}`]],
+        cta: t('withdraw_x', { amount: amt(preview.amount), asset }),
+        title: t('confirm_withdraw'),
+      });
       if (r) { setDone(r); loadWallet(); }
-    } catch (e) { toast(errText(t, e), 'error'); } finally { setBusy(false); }
+    } catch (e) { toast(errText(t, e), 'error'); haptic.error(); } finally { setBusy(false); }
   };
 
   if (done) {
+    if (!done.internal) { go(`/tx/${done.id}`, true); return null; } // the processing screen follows the withdrawal live
     return (
-      <Page title="">
-        <Success title={done.internal ? t('sent_success', { name: preview?.recipient?.name || '' }) : t('withdraw_submitted')}
-          sub={done.status === 'review' ? t('withdraw_review_note') : `${amt(done.amount)} ${done.asset}`}>
-          <Btn className="wide" onClick={() => go(`/tx/${done.id}`, true)}>{t('details')}</Btn>
-          <Btn kind="soft" className="wide" onClick={() => go('/', true)}>{t('done')}</Btn>
-        </Success>
-      </Page>
+      <Success title={t('sent')} amount={<span dir="ltr">{amt(done.amount)} {done.asset}</span>} sub={t('sent_to_now', { name: preview?.recipient?.name || '' })}
+        actions={<Btn w onClick={() => go('/', true)}>{t('done')}</Btn>} />
     );
   }
   const hold = me.security_hold_until > Date.now() / 1000;
+  const avail = Number(a?.available || 0);
+  const over = Number(amount || 0) > avail;
+  const voucher = preview?.voucher && Number(preview?.list_fee) > 0;
+
   return (
-    <Page title={t('withdraw_title')}>
-      {hold && <Card className="warn-card strong"><Icon name="lock" />{t('hold_active', { date: new Date(me.security_hold_until * 1000).toLocaleString() })}</Card>}
-      <button type="button" className="asset-select" onClick={() => setSheet('asset')}>
-        {asset ? <><CoinIcon asset={asset} size={28} /><b>{asset}</b></> : <b>{t('choose_asset')}</b>}<Icon name="chevronDown" size={18} />
+    <Page title={t('withdraw_title')} bar={<Btn w loading={busy} disabled={!preview || hold || over} onClick={submit}>{t('review_withdrawal')}</Btn>}>
+      {hold && <div className="warn r"><Icon name="lock" size={18} /><span>{t('hold_active', { date: new Date(me.security_hold_until * 1000).toLocaleString() })}</span></div>}
+      <button type="button" className="card row pad12" onClick={() => setSheet('asset')}>
+        {asset ? <CoinIcon asset={asset} size={38} /> : <span className="ic n"><Icon name="coins" size={19} /></span>}
+        <span className="grow"><b style={{ fontSize: 15 }}>{asset || t('choose_asset')}</b>{a && <small className="dim" style={{ display: 'block', fontSize: 12.5 }}>{t('available')} {amt(avail, a.display)}</small>}</span>
+        <span className="chev"><Icon name="dd" size={18} /></span>
       </button>
-      {asset && (
-        <button type="button" className="asset-select" onClick={() => setSheet('net')}>
-          {net ? <><NetIcon network={net.network} size={24} /><b>{net.name}</b><small>{net.short}</small></> : <b>{t('choose_network')}</b>}<Icon name="chevronDown" size={18} />
-        </button>
-      )}
-      <Field label={t('recipient_address')} right={
-        <span className="field-actions">
-          <button type="button" onClick={async () => setAddress((await readClipboard()).trim())}><Icon name="paste" size={16} />{t('paste')}</button>
-          <button type="button" onClick={scan}><Icon name="scan" size={16} />{t('scan')}</button>
-          {book.length > 0 && <button type="button" onClick={() => setSheet('book')}><Icon name="contacts" size={16} /></button>}
-        </span>}>
-        <textarea rows={2} value={address} onChange={(e) => setAddress(e.target.value.trim())} placeholder="0x… / T… / UQ… / bc1…" dir="ltr" className="mono" />
-      </Field>
-      {network === 'ton' && me.ton_wallet && (
-        <button type="button" className="link-btn" onClick={() => setAddress(me.ton_wallet.address)}><Icon name="wallet" size={14} /> {t('to_my_ton_wallet')} · {shortAddr(me.ton_wallet.address)}</button>
-      )}
-      {(network === 'ton' || net?.memo) && (
-        <Field label={`${t('memo')} (${t('optional')})`} hint={t('memo_exchange_hint')}><input value={memo} onChange={(e) => setMemo(e.target.value)} dir="ltr" /></Field>
-      )}
-      {asset && <AmountInput value={amount} onChange={setAmount} asset={asset} max={a?.available} usdPrice={a?.usd} display={a?.display} />}
-      {perr && <p className="field-err">{perr}</p>}
-      {preview && (
-        preview.internal ? <Card className="ok-card"><Icon name="bolt" />{t('internal_detected')}</Card> : (
-          <div className="kv-box">
-            <Row label={t('network_fee')} value={Number(preview.fee) ? `${amt(preview.fee)} ${asset}` : t('free')}>
-              {preview.voucher && <span className="mini-badge ok">{t('fee_free_badge')}</span>}
-            </Row>
-            <Row label={t('you_receive')} value={`${amt(preview.receive)} ${asset}`} strong />
-            <Row label={t('eta')} value={preview.eta} />
+
+      <div className="card col g8">
+        <div className="row between"><span className="dim" style={{ fontSize: 12.5 }}>{t('to_address')}</span>
+          <span className="row g6">
+            <button type="button" className="ic xs n" onClick={async () => setAddress((await readClipboard()).trim())} aria-label={t('paste')}><Icon name="paste" size={15} /></button>
+            <button type="button" className="ic xs n" onClick={scan} aria-label={t('scan')}><Icon name="scan" size={15} /></button>
+            {book.length > 0 && <button type="button" className="ic xs n" onClick={() => setSheet('book')} aria-label={t('address_book')}><Icon name="contacts" size={15} /></button>}
+          </span>
+        </div>
+        {address && fam ? <button type="button" style={{ textAlign: 'start' }} onClick={() => setAddress('')}><Addr value={address} size={14} /></button>
+          : <textarea rows={2} value={address} onChange={(e) => setAddress(e.target.value.trim())} placeholder="0x… · T… · UQ… · bc1…" dir="ltr" className="mono"
+            style={{ background: 'none', border: 0, resize: 'none', color: 'var(--bone)', width: '100%' }} />}
+        {address && (
+          <div className="row g6 wrap">
+            {fam && net && <Pill tone="b" icon="check">{nets.length === 1 ? t('network_detected', { name: net.name }) : t('network_selected', { name: net.name })}</Pill>}
+            {address.length > 10 && !fam && <Pill tone="r" icon="alert">{t('address_unknown')}</Pill>}
+            {preview && !preview.internal && preview.first_time && <Pill tone="y" icon="alert">{t('first_time_address')}</Pill>}
+            {preview?.internal && <Pill tone="g" icon="bolt">{t('internal_detected_short')}</Pill>}
           </div>
-        )
+        )}
+        {fam && nets.length > 1 && (
+          <div className="chips" style={{ margin: 0, padding: 0 }}>
+            {nets.map((n) => <button key={n.network} type="button" className={`chip s2 ${n.network === network ? 'oe' : ''}`} onClick={() => setNetwork(n.network)}>
+              <NetIcon network={n.network} size={16} />{n.short || n.name}</button>)}
+          </div>
+        )}
+      </div>
+      {network === 'ton' && me.ton_wallet && address !== me.ton_wallet.address && (
+        <button type="button" className="note em" onClick={() => setAddress(me.ton_wallet.address)}><Icon name="wallet" size={15} />{t('to_my_ton_wallet')} · {shortAddr(me.ton_wallet.address)}</button>
       )}
-      <p className="hint"><Icon name="alert" size={14} /> {t('check_address_note')}</p>
-      <Btn className="wide" loading={busy} disabled={!preview || hold} onClick={submit}>{t('confirm_withdraw')}</Btn>
+      {(network === 'ton' || net?.memo) && <Input icon="tag" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder={`${t('memo')} · ${t('optional')}`} dir="ltr" />}
+
+      {asset && (
+        <div className="card pad12">
+          <div className="row between"><span className="dim" style={{ fontSize: 13 }}>{t('amount')}</span>
+            <button type="button" className="em b" style={{ fontSize: 13 }} onClick={() => setAmount(String(avail))}>{t('max')}</button></div>
+          <div className="row between" style={{ marginTop: 4 }}>
+            <input className={`mid ${over ? 'bad' : ''}`} style={{ background: 'none', border: 0, fontSize: 32, width: '100%', color: over ? 'var(--bad)' : 'var(--bone)' }}
+              inputMode="decimal" placeholder="0.00" dir="ltr" value={amount} onChange={(e) => setAmount(e.target.value.replace(',', '.').replace(/[^\d.]/g, ''))} />
+            <span className="dim disp" style={{ fontSize: 16 }}>{asset}</span>
+          </div>
+          <span className="dim small" dir="ltr">≈ {fiat(Number(amount || 0) * Number(a?.usd || 0))}{net ? ` · min ${net.min_withdraw}` : ''}</span>
+        </div>
+      )}
+      {perr && <div className="warn r"><Icon name="alert" size={18} /><span>{perr}</span></div>}
+      {preview && !preview.internal && (
+        <div className="card tight">
+          <div className="kv"><span>{t('network_fee')}</span><b>{voucher && <s className="dim">{amt(preview.list_fee)}</s>} {Number(preview.fee)
+            ? `${amt(preview.fee)} ${asset}` : <span className="ok">{t('free')}{voucher ? ` · ${t('voucher')}` : ''}</span>}</b></div>
+          <div className="kv"><span>{t('they_receive')}</span><b dir="ltr">{amt(preview.receive)} {asset}</b></div>
+          <div className="kv"><span>{t('arrives_in')}</span><b>{preview.eta}</b></div>
+        </div>
+      )}
+      <div className="warn"><Icon name="shield" size={18} /><span>{t('scam_checked_note')}</span></div>
+
       <AssetPicker open={sheet === 'asset'} onClose={() => setSheet('')} assets={wallet?.assets?.filter((x) => x.networks.some((n) => n.withdraw))}
         onPick={(x) => { setAsset(x.id); setNetwork(''); }} />
-      <NetworkPicker open={sheet === 'net'} onClose={() => setSheet('')} networks={nets} kind="withdraw" onPick={(n) => setNetwork(n.network)} />
       <Sheet open={sheet === 'book'} onClose={() => setSheet('')} title={t('address_book')}>
         <div className="list">
-          {book.filter((b) => !network || b.network === network).map((b) => (
-            <button key={b.id} type="button" className="net-row" onClick={() => { setAddress(b.address); setNetwork(b.network); if (b.memo) setMemo(b.memo); setSheet(''); }}>
-              <NetIcon network={b.network} size={28} /><span className="ar-main"><b>{b.label || shortAddr(b.address)}</b><small className="mono">{shortAddr(b.address, 10)}</small></span>
-              {b.whitelisted ? <Icon name="shield" size={16} /> : null}
-            </button>
+          {book.map((b) => (
+            <Li key={b.id} lead={<NetIcon network={b.network} size={34} />} title={b.label || shortAddr(b.address)} sub={shortAddr(b.address, 10)}
+              right={b.whitelisted ? <Pill tone="g" icon="shieldok">{t('trusted')}</Pill> : null}
+              onClick={() => { setAddress(b.address); setNetwork(b.network); if (b.memo) setMemo(b.memo); setSheet(''); }} />
           ))}
         </div>
       </Sheet>

@@ -269,7 +269,18 @@ def test_withdrawal_send_error_never_auto_retries(api, monkeypatch):
             raise RuntimeError("timeout after broadcast?")
 
     monkeypatch.setattr(withdrawals, "adapter", lambda nid: Boom())
-    w = a.ok("post", "/api/withdraw", {"asset": "TRX", "network": "tron", "address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", "amount": "100", "pin": "482917"})
+    # a token contract is refused outright (coins sent there are lost)
+    r = a.c.post("/api/withdraw/preview", json={"asset": "TRX", "network": "tron", "address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", "amount": "100"}, headers=a.h)
+    assert r.json()["error"] == "address_is_contract"
+    dest = keys.derive("tron", 777001)[0]
+    from aw import settings as _st
+    _st.put("security", {"blocked_addresses": [dest]})
+    r = a.c.post("/api/withdraw/preview", json={"asset": "TRX", "network": "tron", "address": dest, "amount": "100"}, headers=a.h)
+    assert r.json()["error"] == "address_blocked"
+    _st.put("security", {"blocked_addresses": []})
+    pv = a.ok("post", "/api/withdraw/preview", {"asset": "TRX", "network": "tron", "address": dest, "amount": "100"})
+    assert pv["first_time"] is True and pv["screened"]
+    w = a.ok("post", "/api/withdraw", {"asset": "TRX", "network": "tron", "address": dest, "amount": "100", "pin": "482917"})
     assert w["status"] == "approved"
     withdrawals.process_approved()
     assert db.one("SELECT status FROM withdrawals WHERE id=?", (w["id"],))["status"] == "stuck"

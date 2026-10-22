@@ -36,6 +36,18 @@ def _internal_owner(fam: str, addr: str, memo: str | None) -> int | None:
     return r["user_id"] if r else None
 
 
+def screen(fam: str, addr: str):
+    """Refuse addresses on the blocklist and token contract addresses (coins sent to a contract are usually lost)."""
+    low = addr.lower() if fam == "evm" else addr
+    blocked = {str(x).strip().lower() if fam == "evm" else str(x).strip() for x in settings.get("security").get("blocked_addresses") or []}
+    if low in blocked:
+        raise AppError("address_blocked")
+    contracts = {(r["contract"] or "").lower() if fam == "evm" else r["contract"] for r in
+                 db.q("SELECT an.contract FROM asset_networks an JOIN networks n ON n.id=an.network WHERE n.kind=? AND an.contract IS NOT NULL", (fam,))}
+    if low in contracts:
+        raise AppError("address_is_contract")
+
+
 def preview(user: dict, asset: str, network: str, address: str, amount, memo: str | None = None) -> dict:
     net = catalog.network(network)
     an = catalog.asset_network(asset, network)
@@ -46,6 +58,7 @@ def preview(user: dict, asset: str, network: str, address: str, amount, memo: st
     addr = addresses.normalize(fam, address)
     prec = min(a["precision"], an["decimals"])
     amt = amount_in(amount, prec)
+    screen(fam, addr)
     internal_uid = _internal_owner(fam, addr, memo)
     if internal_uid == user["id"]:
         raise AppError("self_transfer")
@@ -64,7 +77,9 @@ def preview(user: dict, asset: str, network: str, address: str, amount, memo: st
         raise AppError("amount_below_fee", fee=s(fee))
     return {"internal": False, "asset": asset, "network": network, "address": addr, "memo": memo or None, "amount": s(amt),
             "fee": s(fee), "receive": s(receive), "usd": s(prices.to_usd(asset, amt).quantize(Decimal("0.01"))),
-            "eta": net.get("eta"), "free": fq["free"], "voucher": fq["voucher"], "vip": fq["vip"],
+            "eta": net.get("eta"), "free": fq["free"], "voucher": fq["voucher"], "vip": fq["vip"], "list_fee": an.get("withdraw_fee") or "0",
+            "first_time": not db.one("SELECT 1 FROM withdrawals WHERE user_id=? AND address=? AND status='completed' LIMIT 1", (user["id"], addr)),
+            "network_name": net["name"], "screened": True,
             "_amt": amt, "_fee": fee, "_fq": fq, "_addr": addr}
 
 

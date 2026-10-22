@@ -36,38 +36,53 @@ import sonic from '../assets/coins/sonic.svg';
 import unichain from '../assets/coins/unichain.svg';
 
 import {
-  AddressBook, Camera, Car, IdentificationCard, SealCheck, UserFocus, ArrowClockwise, ArrowDown, ArrowRight, ArrowSquareOut, ArrowUp, ArrowsLeftRight, Bank, Bell, BookOpen, Calculator, CalendarBlank,
-  CaretDown, CaretRight, ChartBar, ChartLineUp, ChatCircleText, Check, ClipboardText, ClockCountdown, ClockCounterClockwise, Cloud, Coin, Coins,
-  Copy, CreditCard, Crown, DeviceMobile, Diamond, DotsThree, DownloadSimple, Export, Eye, EyeSlash, Fingerprint, Fire, Flag, Funnel, GearSix, Gift,
-  Globe, Handshake, Headset, Heart, House, Image, Info, Key, Lifebuoy, Lightning, Link, List, LockSimple, MagnifyingGlass, Megaphone, Minus, Moon,
-  Palette, Paperclip, PaperPlaneTilt, PencilSimple, Percent, Plus, Power, QrCode, Question, Receipt, Rocket, Scan, ShieldCheck, SignOut, Sparkle,
-  SpeakerHigh, SpeakerSlash, SquaresFour, Stack, Star, Sun, Target, TelegramLogo, Trash, TrendUp, Trophy, User, UserPlus, Users, Wallet, Warning,
-  WifiSlash, X,
-} from '@phosphor-icons/react';
+  Activity, ArrowDown, ArrowLeftRight, ArrowRight, ArrowUp, BadgeCheck, Banknote, Bell, BookOpen, BookUser, Bot, Calculator, Calendar, Camera, Car,
+  ChartColumn, ChartLine, ChartPie, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, CircleHelp, ClipboardPaste, Clock, Cloud, Coins, Copy,
+  CreditCard, Crown, Delete, DollarSign, Download, Ellipsis, ExternalLink, Eye, EyeOff, Fingerprint, Flag, Flame, Funnel, Gem, Gift, Globe, HandCoins,
+  Handshake, Headset, Heart, History, Hourglass, House, IdCard, Image, Inbox, Info, Key, Landmark, Layers, LayoutGrid, LifeBuoy, Link, List, Lock, LogOut,
+  Megaphone, MessageCircle, Mic, Minus, Moon, Package, Palette, Paperclip, Pencil, Percent, PiggyBank, Plus, Power, QrCode, Receipt, RefreshCw, Repeat,
+  Rocket, ScanFace, ScanLine, Search, Send, Settings, Share, Shield, ShieldAlert, ShieldCheck, SlidersHorizontal, Smartphone, Sparkles, Split, Star,
+  Store, Sun, Tag, Target, Ticket, Trash2, TrendingUp, TriangleAlert, Trophy, User, UserPlus, Users, Volume2, VolumeX, Wallet, WifiOff, Wrench, X, Zap,
+} from 'lucide-react';
 
-// One professional icon family (Phosphor) for every screen: same grid, same optical weight.
-// Lists use "regular", primary actions "bold"; any icon can still be replaced by an admin upload (key ui:<name>).
+// Telegram's paper plane (brand mark — not part of the icon font)
+function TelegramGlyph({ size = 22, className = '', style }) {
+  return (
+    <svg className={className} style={style} width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M21.94 4.3l-3.17 14.96c-.24 1.06-.87 1.32-1.75.82l-4.83-3.56-2.33 2.24c-.26.26-.47.47-.97.47l.35-4.92 8.95-8.09c.39-.35-.08-.54-.6-.19L6.53 13.0 1.77 11.5c-1.03-.32-1.05-1.03.22-1.53L20.6 2.8c.86-.32 1.62.2 1.34 1.5z" />
+    </svg>
+  );
+}
+
+// One icon family for every screen (Lucide: 24px grid, 2px rounded strokes — the line style of the design sheets).
+// Any icon can still be replaced by an admin upload (key ui:<name>).
 const ICONS = {
-  home: House, analytics: ChartBar, referral: UserPlus, rewards: Gift, plans: Diamond, settings: GearSix, star: Star, share: Export, copy: Copy,
-  download: DownloadSimple, bolt: Lightning, zap: Lightning, headset: Headset, bell: Bell, chart: ChartLineUp, shield: ShieldCheck, cloud: Cloud,
-  trophy: Trophy, gift: Gift, wallet: Wallet, globe: Globe, check: Check, close: X, alert: Warning, wifiOff: WifiSlash, refresh: ArrowClockwise,
-  sound: SpeakerHigh, soundOff: SpeakerSlash, image: Image, send: PaperPlaneTilt, sun: Sun, moon: Moon, eye: Eye, eyeOff: EyeSlash, rocket: Rocket,
-  diamond: Diamond, crown: Crown, fire: Fire, heart: Heart, chat: ChatCircleText, calendar: CalendarBlank, clock: ClockCountdown, target: Target,
-  coin: Coin, coins: Coins, percent: Percent, sparkle: Sparkle, info: Info, question: Question, help: Question, book: BookOpen, calc: Calculator,
-  history: ClockCounterClockwise, grid: SquaresFour, layers: Stack, palette: Palette, phone: DeviceMobile, qr: QrCode, telegram: TelegramLogo,
-  key: Key, lifebuoy: Lifebuoy, flag: Flag, list: List, trend: TrendUp, link: Link, power: Power, lock: LockSimple, card: CreditCard, user: User,
-  megaphone: Megaphone, arrowDown: ArrowDown, arrowUp: ArrowUp, arrowRight: ArrowRight, swap: ArrowsLeftRight, plus: Plus, minus: Minus,
-  scan: Scan, idCard: IdentificationCard, camera: Camera, face: UserFocus, car: Car, verified: SealCheck, contacts: AddressBook, users: Users, chevron: CaretRight, chevronDown: CaretDown, search: MagnifyingGlass, filter: Funnel,
-  paste: ClipboardText, external: ArrowSquareOut, receipt: Receipt, handshake: Handshake, bank: Bank, fingerprint: Fingerprint, trash: Trash,
-  edit: PencilSimple, more: DotsThree, logout: SignOut, attach: Paperclip,
+  home: House, analytics: ChartColumn, referral: UserPlus, rewards: Gift, plans: Gem, settings: Settings, star: Star, share: Share, copy: Copy,
+  download: Download, bolt: Zap, zap: Zap, headset: Headset, bell: Bell, chart: ChartLine, shield: Shield, shieldok: ShieldCheck, cloud: Cloud,
+  trophy: Trophy, gift: Gift, wallet: Wallet, globe: Globe, check: Check, checkCircle: CircleCheck, close: X, x: X, alert: TriangleAlert,
+  wifiOff: WifiOff, refresh: RefreshCw, sound: Volume2, soundOff: VolumeX, image: Image, send: Send, sun: Sun, moon: Moon, eye: Eye, eyeOff: EyeOff,
+  rocket: Rocket, diamond: Gem, crown: Crown, fire: Flame, flame: Flame, heart: Heart, chat: MessageCircle, calendar: Calendar, clock: Clock,
+  target: Target, coin: Coins, coins: Coins, percent: Percent, sparkle: Sparkles, info: Info, question: CircleHelp, help: CircleHelp, book: BookOpen,
+  calc: Calculator, history: History, grid: LayoutGrid, apps: LayoutGrid, layers: Layers, palette: Palette, phone: Smartphone, device: Smartphone,
+  qr: QrCode, key: Key, lifebuoy: LifeBuoy, flag: Flag, list: List, trend: TrendingUp, link: Link, power: Power, lock: Lock, card: CreditCard, user: User,
+  megaphone: Megaphone, mega: Megaphone, arrowDown: ArrowDown, down: ArrowDown, arrowUp: ArrowUp, up: ArrowUp, arrowRight: ArrowRight,
+  swap: ArrowLeftRight, p2p: Handshake, plus: Plus, minus: Minus, scan: ScanLine, idCard: IdCard, camera: Camera, face: ScanFace, car: Car,
+  verified: BadgeCheck, contacts: BookUser, users: Users, chevron: ChevronRight, chev: ChevronRight, chevronDown: ChevronDown, dd: ChevronDown,
+  back: ChevronLeft, search: Search, filter: Funnel, paste: ClipboardPaste, external: ExternalLink, receipt: Receipt, handshake: Handshake,
+  bank: Landmark, fingerprint: Fingerprint, finger: Fingerprint, trash: Trash2, edit: Pencil, more: Ellipsis, logout: LogOut, attach: Paperclip,
+  paperclip: Paperclip, split: Split, dollar: DollarSign, tool: Wrench, sliders: SlidersHorizontal, repeat: Repeat, pie: ChartPie, inbox: Inbox, mic: Mic,
+  shieldAlert: ShieldAlert, cash: Banknote, del: Delete, earn: PiggyBank, handCoins: HandCoins, activity: Activity, bot: Bot, ticket: Ticket, tag: Tag,
+  hourglass: Hourglass, package: Package, store: Store, telegram: TelegramGlyph,
 };
 
-export default function Icon({ name, size = 22, className = '', style, weight = 'regular' }) {
+export default function Icon({ name, size = 22, className = '', style, weight, stroke }) {
   const { icons } = useApp();
   const custom = icons?.[`ui:${name}`];
   if (custom) return <img className={`ic ic-img ${className}`} src={custom} width={size} height={size} alt="" style={style} />;
-  const C = ICONS[name] || Coin;
-  return <C className={`ic ${className}`} size={size} weight={weight} style={style} aria-hidden="true" />;
+  const C = ICONS[name] || Coins;
+  // "bold" (primary actions) and "fill" (active tab) map to a slightly heavier stroke in the line family
+  const sw = stroke || (weight === 'bold' || weight === 'fill' ? 2.3 : 2);
+  return <C className={`ic ${className}`} size={size} strokeWidth={sw} style={style} aria-hidden="true" />;
 }
 
 const COINS = { USDT: usdt, USDC: usdc, BTC: btc, ETH: eth, TON: ton, BNB: bnb, SOL: sol, TRX: trx, POL: pol, AVAX: avax, ARB: arb, DAI: dai,
@@ -76,21 +91,18 @@ const COINS = { USDT: usdt, USDC: usdc, BTC: btc, ETH: eth, TON: ton, BNB: bnb, 
 const NETS = { tron: trx, ton, bsc: bnb, eth, sol, polygon: pol, arbitrum: arb, base, btc, avax,
   optimism, linea, scroll, unichain, opbnb: bnb, mantle, gnosis, sonic, cronos };
 
-function Fallback({ label, size, color }) {
-  return (
-    <span className="coin-fallback" style={{ width: size, height: size, background: color || 'var(--surface-3)', fontSize: size * 0.36 }}>
-      {String(label || '?').slice(0, 3)}
-    </span>
-  );
+function Fallback({ label, color }) {
+  return <span className="coin-fb" style={color ? { background: color } : undefined}>{String(label || '?').slice(0, 3)}</span>;
 }
 
-export function CoinIcon({ asset, size = 36, network }) {
+export function CoinIcon({ asset, size = 40, network }) {
   const { icons } = useApp();
   const src = icons?.[`asset:${asset}`] || COINS[asset];
+  const nsrc = network ? icons?.[`net:${network}`] || NETS[network] : null;
   return (
     <span className="coin" style={{ width: size, height: size }}>
-      {src ? <img src={src} width={size} height={size} alt={asset} loading="lazy" /> : <Fallback label={asset} size={size} />}
-      {network && <NetIcon network={network} size={Math.round(size * 0.42)} className="coin-net" />}
+      {src ? <img src={src} alt={asset} loading="lazy" /> : <Fallback label={asset} />}
+      {nsrc && <img className="n" src={nsrc} alt={network} />}
     </span>
   );
 }
@@ -98,7 +110,9 @@ export function CoinIcon({ asset, size = 36, network }) {
 export function NetIcon({ network, size = 22, className = '' }) {
   const { icons } = useApp();
   const src = icons?.[`net:${network}`] || NETS[network];
-  return src
-    ? <img className={`net-ic ${className}`} src={src} width={size} height={size} alt={network} loading="lazy" />
-    : <Fallback label={network} size={size} />;
+  return (
+    <span className={`coin ${className}`} style={{ width: size, height: size }}>
+      {src ? <img src={src} alt={network} loading="lazy" /> : <Fallback label={network} />}
+    </span>
+  );
 }
