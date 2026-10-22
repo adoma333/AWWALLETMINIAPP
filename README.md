@@ -1,6 +1,6 @@
 <p align="center"><img src="brand/logo-wordmark-on-black.png" alt="ZOHRA WALLET" width="420"></p>
 
-<p align="center"><b>A multi-chain crypto wallet inside Telegram</b> — 10 networks · free instant transfers · gifts · swap · P2P with escrow · Zohra AI · full admin panel</p>
+<p align="center"><b>A multi-chain crypto wallet inside Telegram</b> — 19 networks · gifts · swap · P2P with escrow · Zohra AI · full admin panel</p>
 
 ---
 
@@ -50,9 +50,10 @@ A database backup runs every day at 03:17 and is kept for 14 days. **To restore 
 
 **Wallet**
 - One HD master seed (BIP-39/44/84) with a personal deposit address per user.
-- Each user has **one EVM address shared by Ethereum, BNB Chain, Polygon, Arbitrum, Base and Avalanche**, plus TRON, Solana and Bitcoin (SegWit) addresses.
-- TON uses one wallet with a personal memo.
-- 10 networks with native coins and major tokens: USDT, USDC, DAI, FDUSD and more, on every network where they exist.
+- Each user has **one EVM address shared by every EVM chain**: Ethereum, BNB Chain, Polygon, Arbitrum, Base and Avalanche, plus OP Mainnet, Linea, Scroll, Unichain, opBNB, Mantle, Gnosis, Sonic and Cronos.
+- Users also get TRON, Solana, Bitcoin (SegWit) and a **personal TON address** (no memo needed).
+- The 9 newer EVM chains are seeded **switched off**. Run *Admin → Coins & networks → Networks → Verify*, which reads the chain id and each token's symbol and decimals from the chain, then make a small test deposit and switch the chain on.
+- Native coins and major tokens (USDT, USDC, DAI, FDUSD and more) are listed on every network where they exist.
 - Unknown tokens are detected, held, and credited automatically once the admin lists the contract.
 
 **Transfers**

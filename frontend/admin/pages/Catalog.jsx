@@ -100,6 +100,7 @@ function AddAsset({ close, done }) {
 /* ─────────── networks ─────────── */
 function Networks({ data, reload, edit }) {
   const [open, setOpen] = useState(null);
+  const [check, setCheck] = useState(null);
   return (
     <Card title="Networks">
       <p className="dim small"><b>Payout mode</b>: <i>manual</i> = every withdrawal waits for you to pay it and mark it paid; <i>auto</i> = the hot wallet signs and sends automatically
@@ -113,10 +114,46 @@ function Networks({ data, reload, edit }) {
         ['Confirmations', (r) => r.confirmations, 'r'],
         ['ETA', (r) => r.eta || '—'],
         ['Auto sweep', (r) => (jl(r.config).auto_sweep ? 'on' : 'off')],
-        ['', (r) => edit && <Btn small onClick={() => setOpen(r)}>Edit</Btn>],
+        ['', (r) => edit && <div className="row gap">
+          {r.kind === 'evm' && <Btn small onClick={() => setCheck(r)}>Verify</Btn>}
+          <Btn small onClick={() => setOpen(r)}>Edit</Btn>
+        </div>],
       ]} />
       {open && <NetworkModal n={open} close={() => setOpen(null)} done={() => { setOpen(null); reload(); }} />}
+      {check && <VerifyModal n={check} close={() => { setCheck(null); reload(); }} />}
     </Card>
+  );
+}
+
+/** Reads the chain id and every token's symbol() / decimals() straight from the network's RPC. */
+function VerifyModal({ n, close }) {
+  const [res, setRes] = useState(null);
+  const run = (fix) => post(`/networks/${n.id}/verify`, { fix }).then((r) => { setRes(r); return r; });
+  return (
+    <Modal title={`Verify ${n.name} on-chain`} onClose={close} wide>
+      <p className="dim small">Checks that the RPC answers with chain id {n.chain_id} and that each listed contract really is that coin with the
+        decimals you set. Do this, then a small test deposit and withdrawal, before you switch a network on.</p>
+      <div className="row gap">
+        <ActBtn kind="primary" ok="Checked" run={() => run(false)}>Run check</ActBtn>
+        {res && res.tokens?.some((t) => t.chain_decimals != null && t.chain_decimals !== t.decimals) &&
+          <ActBtn ok="Decimals fixed" run={() => run(true)}>Fix decimals from chain</ActBtn>}
+      </div>
+      {res && <>
+        <p className="small" style={{ marginTop: 12 }}>
+          <Badge tone={res.ok ? 'ok' : 'bad'}>{res.ok ? 'all good' : 'needs attention'}</Badge>{' '}
+          RPC <code>{res.rpc}</code> · chain id {res.chain_id ?? '—'}
+          {res.chain_id != null && res.chain_id !== res.expected_chain_id && <b className="bad"> (expected {res.expected_chain_id})</b>}
+          {res.error && <span className="bad"> {res.error}</span>}
+        </p>
+        <Table rows={res.tokens} rowKey={(t) => t.contract} cols={[
+          ['Coin', (t) => <b>{t.asset}</b>],
+          ['Contract', (t) => <Copy text={t.contract}>{t.contract.slice(0, 8)}…{t.contract.slice(-4)}</Copy>],
+          ['On-chain symbol', (t) => t.chain_symbol || <span className="dim">—</span>],
+          ['Decimals (set / chain)', (t) => `${t.decimals} / ${t.chain_decimals ?? '—'}`],
+          ['', (t) => <Badge tone={t.ok ? 'ok' : 'bad'}>{t.ok ? 'ok' : (t.error ? 'error' : 'mismatch')}</Badge>],
+        ]} />
+      </>}
+    </Modal>
   );
 }
 

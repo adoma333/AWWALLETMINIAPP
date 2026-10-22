@@ -1,4 +1,5 @@
-"""EVM adapter — Ethereum, BNB Smart Chain, Polygon, Arbitrum One, Base, Avalanche C-Chain (one address for all).
+"""EVM adapter — Ethereum, BNB Smart Chain, Polygon, Arbitrum, Base, Avalanche, OP Mainnet, Linea, Scroll, Unichain, opBNB,
+Mantle, Gnosis, Sonic and Cronos (one address for all).
 
 Deposits
   • Tokens: eth_getLogs for ERC-20 Transfer events whose `to` is any of our addresses — catches EVERY token (unknown
@@ -17,7 +18,12 @@ from ..money import D
 from .base import ChainError, event, http_post, log, state_get, state_set
 
 TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
-LOG_RANGE = {"eth": 400, "bsc": 1500, "polygon": 1500, "arbitrum": 4000, "base": 1500, "avax": 1500}
+LOG_RANGE = {"eth": 400, "bsc": 1500, "polygon": 1500, "arbitrum": 4000, "base": 1500, "avax": 1500, "optimism": 1500,
+             "linea": 1000, "scroll": 1000, "unichain": 3000, "opbnb": 3000, "mantle": 1500, "gnosis": 1000,
+             "sonic": 2000, "cronos": 1000}
+# OP-stack chains charge an extra L1 data fee on top of gas × price (read from the GasPriceOracle predeploy)
+OP_STACK = {"base", "optimism", "unichain", "opbnb", "mantle"}
+GAS_ORACLE = "0x420000000000000000000000000000000000000F"
 ADDR_CHUNK = 60
 _ids = itertools.count(1)
 
@@ -244,6 +250,7 @@ def status(net: dict, txid: str) -> tuple[str, int, int]:
         tx = rpc(nid, "eth_getTransactionByHash", [txid])
         return ("pending" if tx else "dropped"), 0, 0
     fee = int(rc.get("gasUsed", "0x0"), 16) * int(rc.get("effectiveGasPrice", "0x0"), 16)
+    fee += int(rc.get("l1Fee") or "0x0", 16)
     if rc.get("status") != "0x1":
         return "failed", 0, fee
     conf = head(nid) - int(rc["blockNumber"], 16) + 1
@@ -258,10 +265,23 @@ def balance(net: dict, address: str, an: dict | None) -> int:
     return int(rpc(nid, "eth_getBalance", [address, "latest"]), 16)
 
 
+def l1_fee_wei(nid: str, token: bool) -> int:
+    """Upper estimate of the OP-stack L1 data fee for one of our transfers (0 elsewhere)."""
+    if nid not in OP_STACK:
+        return 0
+    size = 180 if token else 120  # a signed EIP-1559 transfer is ~110 bytes, a token transfer ~180
+    data = ("0x49948e0e" + "20".rjust(64, "0") + hex(size)[2:].rjust(64, "0")
+            + ("ff" * size).ljust(((size + 31) // 32) * 64, "0"))
+    try:
+        return int(rpc(nid, "eth_call", [{"to": GAS_ORACLE, "data": data}, "latest"]) or "0x0", 16) * 3 // 2
+    except (ChainError, ValueError):
+        return 0
+
+
 def gas_cost_wei(net: dict, token: bool) -> int:
     f = _fees(net["id"])
     price = f.get("gasPrice") or f.get("maxFeePerGas")
-    return price * (65000 if token else 21000)
+    return price * (65000 if token else 21000) + l1_fee_wei(net["id"], token)
 
 
 # ───────────────────────── sweeping ─────────────────────────

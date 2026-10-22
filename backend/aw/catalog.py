@@ -1,4 +1,4 @@
-"""Seed catalog: the 10 networks, their assets and token contracts. Everything is editable later in the admin panel.
+"""Seed catalog: networks, their assets and token contracts. Everything is editable later in the admin panel.
 
 Withdrawals default to `manual` (admin pays out) until the owner funds the hot wallet and switches a network to `auto`.
 """
@@ -16,7 +16,20 @@ NETWORKS = [
     ("base", "Base", "BASE", "evm", 8453, "ETH", 20, "https://basescan.org/tx/{tx}", "https://basescan.org/address/{addr}", "~1 min", "#0052FF", "none"),
     ("btc", "Bitcoin", "BTC", "btc", None, "BTC", 2, "https://mempool.space/tx/{tx}", "https://mempool.space/address/{addr}", "~20 min", "#F7931A", "none"),
     ("avax", "Avalanche C-Chain", "AVAX C", "evm", 43114, "AVAX", 3, "https://snowtrace.io/tx/{tx}", "https://snowtrace.io/address/{addr}", "~30 sec", "#E84142", "none"),
+    # More EVM chains: every user's EVM address already works on them. Seeded switched off: the owner checks each
+    # token (Admin → Coins & networks → Verify) and makes a small test deposit before turning one on.
+    ("optimism", "OP Mainnet", "OP", "evm", 10, "ETH", 20, "https://optimistic.etherscan.io/tx/{tx}", "https://optimistic.etherscan.io/address/{addr}", "~1 min", "#FF0420", "none"),
+    ("linea", "Linea", "LINEA", "evm", 59144, "ETH", 20, "https://lineascan.build/tx/{tx}", "https://lineascan.build/address/{addr}", "~1 min", "#61DFFF", "none"),
+    ("scroll", "Scroll", "SCROLL", "evm", 534352, "ETH", 20, "https://scrollscan.com/tx/{tx}", "https://scrollscan.com/address/{addr}", "~1 min", "#FFEEDA", "none"),
+    ("unichain", "Unichain", "UNI", "evm", 130, "ETH", 20, "https://uniscan.xyz/tx/{tx}", "https://uniscan.xyz/address/{addr}", "~1 min", "#F50DB4", "none"),
+    ("opbnb", "opBNB", "opBNB", "evm", 204, "BNB", 20, "https://opbnb.bscscan.com/tx/{tx}", "https://opbnb.bscscan.com/address/{addr}", "~1 min", "#F0B90B", "none"),
+    ("mantle", "Mantle", "MNT", "evm", 5000, "MNT", 20, "https://mantlescan.xyz/tx/{tx}", "https://mantlescan.xyz/address/{addr}", "~1 min", "#000000", "none"),
+    ("gnosis", "Gnosis Chain", "GNO", "evm", 100, "XDAI", 12, "https://gnosisscan.io/tx/{tx}", "https://gnosisscan.io/address/{addr}", "~1 min", "#3E6957", "none"),
+    ("sonic", "Sonic", "S", "evm", 146, "S", 5, "https://sonicscan.org/tx/{tx}", "https://sonicscan.org/address/{addr}", "~30 sec", "#FE9A4D", "none"),
+    ("cronos", "Cronos", "CRO", "evm", 25, "CRO", 12, "https://cronoscan.com/tx/{tx}", "https://cronoscan.com/address/{addr}", "~1 min", "#002D74", "none"),
 ]
+# networks seeded with enabled=0 (see above)
+OFF_BY_DEFAULT = {"optimism", "linea", "scroll", "unichain", "opbnb", "mantle", "gnosis", "sonic", "cronos"}
 
 FAMILY = {n[0]: n[3] for n in NETWORKS}
 EVM_NETWORKS = [n[0] for n in NETWORKS if n[3] == "evm"]
@@ -45,6 +58,11 @@ ASSETS = [
     ("PEPE", "Pepe", 0, 0, 0, "PEPE", "pepe", "#4C9540", 20),
     ("NOT", "Notcoin", 4, 0, 0, "NOT", "notcoin", "#FFFFFF", 21),
     ("DOGS", "DOGS", 4, 0, 0, "DOGS", "dogs-2", "#FFFFFF", 22),
+    ("OP", "Optimism", 8, 3, 0, "OP", "optimism", "#FF0420", 23),
+    ("MNT", "Mantle", 8, 3, 0, "MNT", "mantle", "#000000", 24),
+    ("XDAI", "xDAI", 8, 2, 1, "DAI", "xdai", "#3E6957", 25),
+    ("S", "Sonic", 8, 3, 0, "S", "sonic-3", "#FE9A4D", 26),
+    ("CRO", "Cronos", 8, 3, 0, "CRO", "crypto-com-chain", "#002D74", 27),
 ]
 
 # asset, network, contract (None = native), decimals, min_deposit, min_withdraw, withdraw_fee
@@ -100,6 +118,41 @@ ASSET_NETWORKS = [
     ("AVAX", "avax", None, 18, "0.01", "0.1", "0.01"),
     ("USDT", "avax", "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7", 6, "1", "5", "0.5"),
     ("USDC", "avax", "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", 6, "1", "5", "0.5"),
+    # OP Mainnet
+    ("ETH", "optimism", None, 18, "0.0005", "0.002", "0.0002"),
+    ("USDT", "optimism", "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58", 6, "1", "5", "0.3"),
+    ("USDC", "optimism", "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85", 6, "1", "5", "0.3"),
+    ("DAI", "optimism", "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", 18, "1", "5", "0.3"),
+    ("OP", "optimism", "0x4200000000000000000000000000000000000042", 18, "1", "3", "0.3"),
+    # Linea
+    ("ETH", "linea", None, 18, "0.0005", "0.002", "0.0002"),
+    ("USDT", "linea", "0xA219439258ca9da29E9Cc4cE5596924745e12B93", 6, "1", "5", "0.3"),
+    ("USDC", "linea", "0x176211869cA2b568f2A7D4EE941E073a821EE1ff", 6, "1", "5", "0.3"),
+    # Scroll
+    ("ETH", "scroll", None, 18, "0.0005", "0.002", "0.0002"),
+    ("USDT", "scroll", "0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df", 6, "1", "5", "0.3"),
+    ("USDC", "scroll", "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4", 6, "1", "5", "0.3"),
+    # Unichain
+    ("ETH", "unichain", None, 18, "0.0005", "0.002", "0.0002"),
+    ("USDC", "unichain", "0x078D782b760474a361dDA0AF3839290b0EF57AD6", 6, "1", "5", "0.3"),
+    # opBNB
+    ("BNB", "opbnb", None, 18, "0.001", "0.01", "0.0002"),
+    ("USDT", "opbnb", "0x9e5AAC1Ba1a2e6aEd6b32689DFcF62A509Ca96f3", 18, "1", "5", "0.2"),
+    # Mantle
+    ("MNT", "mantle", None, 18, "1", "5", "0.2"),
+    ("USDT", "mantle", "0x201EBa5CC46D216Ce6DC03F6a759e8E766e956aE", 6, "1", "5", "0.3"),
+    ("USDC", "mantle", "0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9", 6, "1", "5", "0.3"),
+    # Gnosis
+    ("XDAI", "gnosis", None, 18, "1", "2", "0.05"),
+    ("USDT", "gnosis", "0x4ECaBa5870353805a9F068101A40E0f32ed605C6", 6, "1", "5", "0.1"),
+    ("USDC", "gnosis", "0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83", 6, "1", "5", "0.1"),
+    # Sonic
+    ("S", "sonic", None, 18, "1", "5", "0.1"),
+    ("USDC", "sonic", "0x29219dd400f2Bf60E5a23d13Be72B486D4038894", 6, "1", "5", "0.2"),
+    # Cronos
+    ("CRO", "cronos", None, 18, "5", "20", "1"),
+    ("USDT", "cronos", "0x66e428c3f67a68878562e79A0234c1F83c208770", 6, "1", "5", "0.3"),
+    ("USDC", "cronos", "0xc21223249CA28397B4B6541dfFaEcC539BfF0c59", 6, "1", "5", "0.3"),
 ]
 
 P2P_METHODS = [
@@ -152,7 +205,7 @@ def seed(force: bool = False):
             db.insert("networks", {
                 "id": nid, "name": name, "short": short, "kind": kind, "chain_id": chain_id, "native_asset": native,
                 "confirmations": conf, "explorer_tx": etx, "explorer_addr": eaddr, "eta": eta, "color": color,
-                "memo_mode": memo, "sort": i + 1, "withdraw_mode": "manual",
+                "memo_mode": memo, "sort": i + 1, "withdraw_mode": "manual", "enabled": 0 if nid in OFF_BY_DEFAULT else 1,
             }, or_ignore=True)
         for aid, name, prec, disp, stable, psym, cg, color, sort in ASSETS:
             db.insert("assets", {

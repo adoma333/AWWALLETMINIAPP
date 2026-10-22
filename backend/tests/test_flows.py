@@ -3,7 +3,7 @@ from decimal import Decimal
 
 import pytest
 
-from aw import admin_auth, db, deposits, gifts, keys, ledger, p2p, referral, users, withdrawals
+from aw import admin_auth, catalog, db, deposits, gifts, keys, ledger, p2p, referral, users, withdrawals
 from aw.chains import base as chain_base
 from aw.chains import evm
 from conftest import fund, set_prices
@@ -472,3 +472,27 @@ def test_bad_amounts_rejected(api, amount):
     fund(620, "USDT", "10")
     r = a.post("/api/swap/quote", {"from": "USDT", "to": "BTC", "amount": amount})
     assert r.status_code == 400
+
+
+def test_admin_verifies_network_tokens_on_chain(client, monkeypatch):
+    from aw.chains import evm
+
+    h = {"Authorization": "Bearer " + admin_auth.session_for(999)["token"]}
+
+    def abi_str(t):
+        b = t.encode()
+        return "0x" + (32).to_bytes(32, "big").hex() + len(b).to_bytes(32, "big").hex() + b.hex().ljust(64, "0")
+
+    chain = {"0x94b008aA00579c1307B0EF2c499aD98a8ce58e58": ("USDT", 6), "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85": ("USDC", 6),
+             "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1": ("DAI", 18), "0x4200000000000000000000000000000000000042": ("OP", 18)}
+    db.x("UPDATE asset_networks SET decimals=8 WHERE asset='USDC' AND network='optimism'")
+    monkeypatch.setattr(evm, "rpc", lambda nid, m, p: hex(10) if m == "eth_chainId" else None)
+    monkeypatch.setattr(evm, "batch", lambda nid, calls: [abi_str(chain[calls[0][1][0]["to"]][0]), hex(chain[calls[0][1][0]["to"]][1])])
+    r = client.post("/api/admin/networks/optimism/verify", json={}, headers=h).json()
+    assert r["chain_id"] == 10 and not r["ok"]
+    bad = [t for t in r["tokens"] if not t["ok"]]
+    assert [t["asset"] for t in bad] == ["USDC"] and bad[0]["chain_symbol"] == "USDC"
+    r = client.post("/api/admin/networks/optimism/verify", json={"fix": True}, headers=h).json()
+    assert r["fixed"] == 1 and catalog.asset_network("USDC", "optimism")["decimals"] == 6
+    assert client.post("/api/admin/networks/optimism/verify", json={}, headers=h).json()["ok"]
+    assert client.post("/api/admin/networks/tron/verify", json={}, headers=h).status_code == 400

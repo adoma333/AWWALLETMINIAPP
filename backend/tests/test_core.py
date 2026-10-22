@@ -116,7 +116,8 @@ def test_hd_derivation_is_stable_and_standard():
 
 
 def test_catalog_seeded():
-    assert len(db.q("SELECT * FROM networks")) == 10
+    assert len(db.q("SELECT * FROM networks")) == len(catalog.NETWORKS)
+    assert len(db.q("SELECT * FROM networks WHERE enabled=1")) == 10
     assert catalog.by_contract("bsc", "0x55d398326f99059ff775485246999027b3197955")["asset"] == "USDT"
     assert catalog.by_contract("tron", None)["asset"] == "TRX"
     assert catalog.family("arbitrum") == "evm"

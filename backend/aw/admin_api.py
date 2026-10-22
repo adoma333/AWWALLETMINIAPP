@@ -328,6 +328,52 @@ def edit_network(nid: str, request: Request, body: dict = Body(...), authorizati
     return {"ok": True}
 
 
+def _abi_string(hexdata: str) -> str:
+    raw = bytes.fromhex((hexdata or "0x")[2:])
+    if len(raw) >= 64:
+        n = int.from_bytes(raw[32:64], "big")
+        return raw[64:64 + n].decode("utf-8", "replace")
+    return raw.rstrip(b"\0").decode("utf-8", "replace")  # old tokens return bytes32
+
+
+@router.post("/networks/{nid}/verify")
+def verify_network(nid: str, request: Request, body: dict = Body(default={}), authorization: str = Header(default="")):
+    """Check an EVM network against the chain itself: chain id, and each token's symbol() and decimals().
+    With {"fix": true} wrong decimals are corrected from the chain."""
+    from .chains import evm
+    from .chains.base import ChainError
+
+    a = _admin(authorization, "catalog")
+    net = catalog.network(nid)
+    if not net or net["kind"] != "evm":
+        raise AppError("bad_request")
+    try:
+        chain_id = int(evm.rpc(nid, "eth_chainId", []), 16)
+    except (ChainError, TypeError, ValueError) as e:
+        return {"ok": False, "rpc": evm.rpc_url(nid), "error": str(e)[:200], "tokens": []}
+    tokens, fixed = [], 0
+    for an in db.q("SELECT * FROM asset_networks WHERE network=? AND contract IS NOT NULL ORDER BY sort", (nid,)):
+        row = {"asset": an["asset"], "contract": an["contract"], "decimals": an["decimals"]}
+        try:
+            sym, dec = evm.batch(nid, [("eth_call", [{"to": an["contract"], "data": "0x95d89b41"}, "latest"]),
+                                       ("eth_call", [{"to": an["contract"], "data": "0x313ce567"}, "latest"])])
+            row["chain_symbol"] = _abi_string(sym) if sym and sym != "0x" else None
+            row["chain_decimals"] = int(dec, 16) if dec and dec != "0x" else None
+        except (ChainError, ValueError) as e:
+            row["error"] = str(e)[:120]
+        sym_ok = bool(row.get("chain_symbol")) and an["asset"].replace("XDAI", "DAI") in row["chain_symbol"].upper().replace("₮", "T")
+        row["ok"] = sym_ok and row.get("chain_decimals") == an["decimals"]
+        if body.get("fix") and row.get("chain_decimals") is not None and row["chain_decimals"] != an["decimals"]:
+            db.x("UPDATE asset_networks SET decimals=? WHERE asset=? AND network=?", (row["chain_decimals"], an["asset"], nid))
+            row["decimals"] = row["chain_decimals"]
+            fixed += 1
+        tokens.append(row)
+    if fixed:
+        admin_auth.audit(a, "network.verify_fix", nid, {"fixed": fixed}, _ip(request))
+    return {"ok": chain_id == net["chain_id"] and all(t["ok"] for t in tokens), "rpc": evm.rpc_url(nid),
+            "chain_id": chain_id, "expected_chain_id": net["chain_id"], "tokens": tokens, "fixed": fixed}
+
+
 @router.post("/asset-networks")
 def add_asset_network(request: Request, body: dict = Body(...), authorization: str = Header(default="")):
     """List a token on a network (e.g. a new jetton / ERC-20). Waiting deposits of it are credited right away."""

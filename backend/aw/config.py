@@ -48,6 +48,15 @@ RPC = {
     "arbitrum": os.getenv("RPC_ARBITRUM", "https://arbitrum-one-rpc.publicnode.com"),
     "base": os.getenv("RPC_BASE", "https://base-rpc.publicnode.com"),
     "avax": os.getenv("RPC_AVAX", "https://avalanche-c-chain-rpc.publicnode.com"),
+    "optimism": os.getenv("RPC_OPTIMISM", "https://optimism-rpc.publicnode.com"),
+    "linea": os.getenv("RPC_LINEA", "https://linea-rpc.publicnode.com"),
+    "scroll": os.getenv("RPC_SCROLL", "https://scroll-rpc.publicnode.com"),
+    "unichain": os.getenv("RPC_UNICHAIN", "https://unichain-rpc.publicnode.com"),
+    "opbnb": os.getenv("RPC_OPBNB", "https://opbnb-rpc.publicnode.com"),
+    "mantle": os.getenv("RPC_MANTLE", "https://mantle-rpc.publicnode.com"),
+    "gnosis": os.getenv("RPC_GNOSIS", "https://gnosis-rpc.publicnode.com"),
+    "sonic": os.getenv("RPC_SONIC", "https://sonic-rpc.publicnode.com"),
+    "cronos": os.getenv("RPC_CRONOS", "https://cronos-evm-rpc.publicnode.com"),
     "sol": os.getenv("RPC_SOL", "https://solana-rpc.publicnode.com"),
 }
 TRON_API = os.getenv("TRON_API", "https://api.trongrid.io").rstrip("/")

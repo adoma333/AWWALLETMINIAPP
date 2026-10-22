@@ -258,3 +258,32 @@ def test_ton_connect_deposit_payload(monkeypatch):
     monkeypatch.setattr(ton, "jetton_wallet", lambda owner, master: "0:" + "44" * 32)
     j = ton_connect.deposit_message(u, "USDT", "10", keys.derive("ton", 5)[0])
     assert j["messages"][0]["amount"] == str(ton.JETTON_FWD_NANO) and j["messages"][0]["payload"]
+
+def test_new_evm_networks_are_seeded_off_and_share_the_address():
+    for nid in catalog.OFF_BY_DEFAULT:
+        n = catalog.network(nid)
+        assert n and n["kind"] == "evm" and n["chain_id"] and not n["enabled"]
+        assert catalog.by_contract(nid, None), nid  # every network has its native coin listed
+    assert catalog.network("eth")["enabled"]
+
+
+def test_op_stack_l1_fee_is_counted(monkeypatch):
+    def rpc(nid, method, params):
+        if method == "eth_getTransactionReceipt":
+            return {"gasUsed": hex(21000), "effectiveGasPrice": hex(10), "l1Fee": hex(5000), "status": "0x1", "blockNumber": "0x1"}
+        if method == "eth_blockNumber":
+            return hex(100)
+        if method == "eth_getBlockByNumber":
+            return {"baseFeePerGas": hex(10)}
+        if method == "eth_maxPriorityFeePerGas":
+            return hex(1)
+        if method == "eth_call":
+            assert params[0]["to"] == evm.GAS_ORACLE and params[0]["data"].startswith("0x49948e0e")
+            return hex(4000)
+        raise AssertionError(method)
+
+    monkeypatch.setattr(evm, "rpc", rpc)
+    st, _conf, fee = evm.status(catalog.network("optimism"), "0xabc")
+    assert st == "confirmed" and fee == 21000 * 10 + 5000
+    assert evm.gas_cost_wei(catalog.network("optimism"), False) == 21 * 21000 + 6000
+    assert evm.l1_fee_wei("arbitrum", False) == 0
