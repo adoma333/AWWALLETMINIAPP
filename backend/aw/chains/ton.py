@@ -265,12 +265,20 @@ def _scan_legacy(nid: str) -> list[dict]:
     return out
 
 
+def _kept_on_uninit(tx: dict, m: dict, desc: dict) -> bool:
+    """A deposit into a wallet that is not deployed yet (every user's first TON deposit) is 'aborted' because there is
+    no code to run, yet a non-bounceable message's coins stay on the address. Only a bounce sends them back."""
+    cp = desc.get("compute_ph") or {}
+    return bool(cp.get("skipped")) and cp.get("reason") in ("no_state", "bad_state") and not m.get("bounce") \
+        and not tx.get("out_msgs")
+
+
 def parse_native(nid: str, tx: dict, addr: str) -> list[dict]:
     m = tx.get("in_msg") or {}
     if not m.get("source") or m.get("bounced") or _is_internal(m.get("source")):
         return []
     desc = tx.get("description") or {}
-    if desc.get("aborted"):
+    if desc.get("aborted") and not _kept_on_uninit(tx, m, desc):
         return []
     value = int(m.get("value") or 0)
     if value <= 0:

@@ -287,3 +287,19 @@ def test_op_stack_l1_fee_is_counted(monkeypatch):
     assert st == "confirmed" and fee == 21000 * 10 + 5000
     assert evm.gas_cost_wei(catalog.network("optimism"), False) == 21 * 21000 + 6000
     assert evm.l1_fee_wei("arbitrum", False) == 0
+
+
+def test_ton_first_deposit_into_undeployed_wallet_is_credited():
+    """The first deposit to a personal wallet that is not deployed yet is 'aborted' (no code to run) but the coins stay."""
+    tre = keys.treasury("ton")
+    tx = {"hash": "H2", "lt": "111748169000003", "out_msgs": [],
+          "description": {"aborted": True, "compute_ph": {"skipped": True, "reason": "no_state"}, "action": None},
+          "in_msg": {"source": "0:" + "da" * 32, "value": "904152747", "bounce": False, "bounced": False,
+                     "message_content": {"body": "te6cckEBAQEAAgAAAEysuc0=", "decoded": {"@type": "empty_cell"}}}}
+    ev = ton.parse_native("ton", tx, tre)
+    assert len(ev) == 1 and ev[0]["raw_amount"] == 904_152_747
+    # bounceable → the coins went back to the sender: not a deposit
+    assert ton.parse_native("ton", dict(tx, in_msg=dict(tx["in_msg"], bounce=True)), tre) == []
+    # a real failure (code ran and aborted) is still ignored
+    failed = dict(tx, description={"aborted": True, "compute_ph": {"skipped": False, "exit_code": 33}})
+    assert ton.parse_native("ton", failed, tre) == []
