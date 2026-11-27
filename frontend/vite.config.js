@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import legacy from '@vitejs/plugin-legacy';
 import { resolve } from 'node:path';
 
 // a build id baked into the bundle + version.json → open apps detect new releases and reload
@@ -8,6 +9,9 @@ const BUILD_ID = Date.now().toString(36);
 export default defineConfig({
   plugins: [
     react(),
+    // old phones (Android 5–8 WebViews, e.g. Galaxy S6 / S7, old iOS): a transpiled fallback bundle + polyfills,
+    // and polyfills for newer JS APIs inside the modern bundle too
+    legacy({ targets: ['chrome >= 49', 'safari >= 10', 'android >= 5', 'samsung >= 5'], modernPolyfills: true }),
     {
       name: 'aw-version',
       generateBundle() {
