@@ -13,6 +13,31 @@ main() {
   fail() { echo "${R}✗ $*${N}"; echo "${D}Full log: $LOG${N}"; tail -n 40 "$LOG" 2>/dev/null || true; exit 1; }
   : > "$LOG"
 
+  # Download the build GitHub Actions made for exactly this commit into $1. Waits up to 10 min for it to finish.
+  fetch_build() {
+    local dest="$1" url branch sha tmp i got
+    url="$(git -C "$APP_DIR" remote get-url origin | sed -E 's#^git@github.com:#https://github.com/#; s#\.git$##; s#https://[^@/]*@#https://#')"
+    case "$url" in https://github.com/*) ;; *) return 1 ;; esac
+    branch="$(git -C "$APP_DIR" rev-parse --abbrev-ref HEAD)"; sha="$(git -C "$APP_DIR" rev-parse HEAD)"
+    url="$url/releases/download/web-${branch//\//-}"
+    tmp="$(mktemp -d)"
+    step "downloading the app built on GitHub (${sha:0:7})"
+    for i in $(seq 1 40); do
+      if curl -fsSL --retry 2 -o "$tmp/b.tgz" "$url/web-dist.tar.gz" 2>>"$LOG" \
+         && curl -fsSL -o "$tmp/b.sha" "$url/web-dist.sha256" 2>>"$LOG" \
+         && [ "$(sha256sum "$tmp/b.tgz" | cut -d' ' -f1)" = "$(tr -d '[:space:]' < "$tmp/b.sha")" ]; then
+        got="$(tar -xzOf "$tmp/b.tgz" ./commit.txt 2>/dev/null | tr -d '[:space:]')"
+        if [ "$got" = "$sha" ]; then
+          mkdir -p "$dest" && tar -xzf "$tmp/b.tgz" -C "$dest" && rm -rf "$tmp" && return 0
+        fi
+        [ "$i" = 1 ] && echo "  waiting for GitHub to finish building ${sha:0:7} (Actions → Web build)…"
+      fi
+      sleep 15
+    done
+    echo "${D}  GitHub build not found — building here instead${N}"
+    rm -rf "$tmp" "$dest"; return 1
+  }
+
   if [ "${1:-}" != "--pulled" ]; then
     BRANCH="$(git -C "$APP_DIR" rev-parse --abbrev-ref HEAD)"
     BEFORE="$(git -C "$APP_DIR" rev-parse --short HEAD)"
@@ -31,11 +56,21 @@ main() {
   UV_PYTHON_INSTALL_DIR="$APP_DIR/.python" uv pip install -q --python "$APP_DIR/.venv/bin/python" -r "$APP_DIR/backend/requirements.txt" >>"$LOG" 2>&1 \
     || fail "installing Python packages failed"
 
-  step "building the app, admin panel and download page (1–3 min)"
-  sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR/frontend' && (npm ci --no-audit --no-fund --loglevel=error || npm install --no-audit --no-fund --loglevel=error) && npm run build" >>"$LOG" 2>&1 \
-    || fail "the frontend build failed"
-  [ -f "$APP_DIR/frontend/dist/index.html" ] || fail "build produced no index.html"
-  chmod -R o+rX "$APP_DIR/frontend/dist"
+  # The app is built on GitHub Actions (.github/workflows/web.yml) and downloaded here; the server only builds it
+  # itself when that download is not possible (AW_LOCAL_BUILD=1 forces it). The new build goes to dist.new and is
+  # swapped in with two renames, so the live app never disappears while updating.
+  FRONT="$APP_DIR/frontend"; NEW="$FRONT/dist.new"; rm -rf "$NEW" "$FRONT/dist.old"
+  if [ "${AW_LOCAL_BUILD:-0}" != "1" ] && fetch_build "$NEW"; then :
+  else
+    step "building the app on this server (slow — GitHub build not available)"
+    sudo -u "$APP_USER" -H bash -c "cd '$FRONT' && (npm ci --no-audit --no-fund --loglevel=error || npm install --no-audit --no-fund --loglevel=error) && npm run build -- --outDir dist.new --emptyOutDir" >>"$LOG" 2>&1 \
+      || fail "the frontend build failed"
+  fi
+  [ -f "$NEW/index.html" ] || fail "build produced no index.html"
+  chmod -R o+rX "$NEW"
+  [ -d "$FRONT/dist" ] && mv "$FRONT/dist" "$FRONT/dist.old"
+  mv "$NEW" "$FRONT/dist"
+  rm -rf "$FRONT/dist.old"
   mkdir -p "$APP_DIR/releases" && chown "$APP_USER:$APP_USER" "$APP_DIR/releases" && chmod 755 "$APP_DIR/releases"
 
   step "web server"
